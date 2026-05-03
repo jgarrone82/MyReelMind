@@ -44,4 +44,31 @@ export const dictionary: Dictionary = {
     loading: "Cargando...",
     error: "Error",
   },
+  auth: {
+    login: {
+      title: "Iniciar sesión",
+      email: "Email",
+      password: "Contraseña",
+      submit: "Iniciar sesión",
+      loading: "Iniciando...",
+      error: "Error al iniciar sesión",
+      oauth: "O continuá con",
+    },
+    signup: {
+      title: "Crear cuenta",
+      email: "Email",
+      password: "Contraseña",
+      confirmPassword: "Confirmar contraseña",
+      submit: "Crear cuenta",
+      loading: "Creando cuenta...",
+      success: "¡Cuenta creada!",
+    },
+    logout: "Cerrar sesión",
+    errors: {
+      invalidCredentials: "Email o contraseña inválidos",
+      weakPassword: "La contraseña debe tener al menos 8 caracteres",
+      passwordsMismatch: "Las contraseñas no coinciden",
+      emailInUse: "Este email ya está registrado",
+    },
+  },
 };
