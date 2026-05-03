@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { locales, getDictionary, type Locale } from "@/i18n";
+import { DictionaryProvider } from "@/i18n/provider";
+import { AuthProvider } from "@/lib/auth/provider";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -45,12 +47,18 @@ export default async function LocaleLayout({
     notFound();
   }
 
+  const dict = await getDictionary(lang as Locale);
+
   return (
     <html lang={lang}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          <DictionaryProvider dictionary={dict}>
+            {children}
+          </DictionaryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

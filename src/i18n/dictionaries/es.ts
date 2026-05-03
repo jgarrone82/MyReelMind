@@ -28,6 +28,14 @@ export const dictionary: Dictionary = {
       dropped: "Abandonado",
     },
   },
+  dashboard: {
+    title: "Tu actividad",
+    totalWatched: "Completados",
+    totalHours: "Horas vistas",
+    recentActivity: "Actividad reciente",
+    noActivity: "No tenés actividad aún",
+    ctaSearch: "Buscá algo para ver",
+  },
   common: {
     save: "Guardar",
     cancel: "Cancelar",

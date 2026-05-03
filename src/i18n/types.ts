@@ -26,6 +26,14 @@ export interface Dictionary {
       dropped: string;
     };
   };
+  dashboard: {
+    title: string;
+    totalWatched: string;
+    totalHours: string;
+    recentActivity: string;
+    noActivity: string;
+    ctaSearch: string;
+  };
   common: {
     save: string;
     cancel: string;
