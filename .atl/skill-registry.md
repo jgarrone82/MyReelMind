@@ -8,130 +8,192 @@ See `_shared/skill-resolver.md` for the full resolution protocol.
 
 | Trigger | Skill | Path |
 |---------|-------|------|
-| Next.js - routing, Server Actions, data fetching | nextjs-15 | ~/.agents/skills/nextjs-15/SKILL.md |
-| Drizzle schema, migrations, ORM usage | drizzle | ~/.agents/skills/drizzle/SKILL.md |
-| Supabase products, Auth, RLS, CLI, MCP | supabase | ~/.agents/skills/supabase/SKILL.md |
+| Next.js routing, Server Actions, data fetching | nextjs-15 | ~/.agents/skills/nextjs-15/SKILL.md |
+| Drizzle ORM schema, migrations, database operations | drizzle | ~/.agents/skills/drizzle/SKILL.md |
+| Supabase products, Auth, RLS, CLI, MCP server | supabase | ~/.agents/skills/supabase/SKILL.md |
 | React Query data fetching, caching, server state | react-query | ~/.agents/skills/react-query/SKILL.md |
 | Zustand store, actions, state management | zustand | ~/.agents/skills/zustand/SKILL.md |
 | Tailwind + shadcn/ui design system, tokens, theming | tailwind-design-system | ~/.agents/skills/tailwind-design-system/SKILL.md |
-| React UI components, Radix, shadcn/ui, accessibility | ui-design-system | ~/.agents/skills/ui-design-system/SKILL.md |
+| React UI components, Radix, accessibility, shadcn/ui | ui-design-system | ~/.agents/skills/ui-design-system/SKILL.md |
 | Multi-language, i18n, translation, localization | internationalization-i18n | ~/.agents/skills/internationalization-i18n/SKILL.md |
-| Frontend testing: Vitest, RTL, Playwright | nextjs-frontend-testing | ~/.agents/skills/nextjs-frontend-testing/SKILL.md |
-| Alpine.js directives, patterns | alpinejs | ~/.agents/skills/alpinejs/SKILL.md |
-| Find/install new skills | find-skills | ~/.agents/skills/find-skills/SKILL.md |
+| Vitest, RTL, Playwright testing | nextjs-frontend-testing | ~/.agents/skills/nextjs-frontend-testing/SKILL.md |
+| Alpine.js directives and patterns | alpinejs | ~/.agents/skills/alpinejs/SKILL.md |
+| Finding and installing new skills | find-skills | ~/.agents/skills/find-skills/SKILL.md |
+| Split large changes into chained/stacked PRs | gentle-ai-chained-pr | ~/.config/opencode/skills/chained-pr/SKILL.md |
+| Parallel adversarial review protocol | judgment-day | ~/.config/opencode/skills/judgment-day/SKILL.md |
+| Issue creation workflow (bug/feature) | issue-creation | ~/.config/opencode/skills/issue-creation/SKILL.md |
+| PR creation workflow, issue-first enforcement | branch-pr | ~/.config/opencode/skills/branch-pr/SKILL.md |
+| Create new AI agent skills | skill-creator | ~/.config/opencode/skills/skill-creator/SKILL.md |
+| Go tests, Bubbletea TUI testing | go-testing | ~/.config/opencode/skills/go-testing/SKILL.md |
+| Write warm comments for PRs/issues/reviews | comment-writer | ~/.config/opencode/skills/comment-writer/SKILL.md |
+| Design documentation with reduced cognitive load | cognitive-doc-design | ~/.config/opencode/skills/cognitive-doc-design/SKILL.md |
 
 ## Compact Rules
 
+Pre-digested rules per skill. Delegators copy matching blocks into sub-agent prompts as `## Project Standards (auto-resolved)`.
+
 ### nextjs-15
-- Server Components by default (async), add 'use client' only for interactivity/hooks
-- Server Actions: use "use server" directive, revalidatePath/redirect for mutations
-- App Router: app/layout.tsx (required), app/page.tsx (home), route groups (auth)
-- Data fetching: parallel with Promise.all, streaming with Suspense
-- API routes: app/api/*/route.ts with GET/POST handlers
-- Middleware at root level with matcher config
-- Metadata: export metadata object or generateMetadata async function
-- Use server-only package to prevent client imports of server code
+- Server Components by default, add 'use client' only for interactivity/hooks
+- Server Actions for mutations, collocate with components
+- App Router: file-based routing with folders, layout.tsx, page.tsx, loading.tsx, error.tsx
+- Data fetching: async/await in Server Components, no useEffect for data
+- Caching: fetch() options (cache, next), revalidatePath/revalidateTag
+- Streaming: Suspense boundaries with loading.tsx, use() for promises
+- Metadata: export metadata object from page/layout, no <Head> component
 
 ### drizzle
-- Config: drizzle.config.ts, schemas: src/database/schemas/, migrations: src/database/migrations/
-- Tables: plural snake_case (users), columns: snake_case (user_id)
-- Primary keys: text('id').primaryKey().$defaultFn(() => idGenerator('prefix'))
-- Foreign keys: .references(() => table.id, { onDelete: 'cascade' })
-- Timestamps: use ...timestamps spread from _helpers.ts
-- Type inference: createInsertSchema, $inferInsert, $inferSelect
-- Query style: ALWAYS use db.select() builder API, NEVER use db.query.*.findMany relational API
-- JOINs: explicit leftJoin with select object, separate queries for one-to-many
+- Define schemas in `src/database/schemas/*` with drizzle-orm
+- Use pgTable, text, integer, timestamp, boolean, jsonb column types
+- Migrations: `drizzle-kit generate` then `drizzle-kit migrate`
+- Relations: use relations() with one/many for foreign keys
+- Queries: db.select().from(), .where(), .insert(), .update(), .delete()
+- TypeScript: infer types with $inferSelect and $inferInsert
+- RLS: always pair with Supabase RLS policies for security
 
 ### supabase
-- Verify against current docs/changelog before implementing (Supabase changes frequently)
-- RLS: enable on EVERY table in exposed schemas, create policies matching access model
-- Security: NEVER use user_metadata in JWT auth decisions, use raw_app_meta_data instead
-- API keys: NEVER expose service_role key in clients, use publishable/anon keys
-- Views: use WITH (security_invoker = true) in Postgres 15+, views bypass RLS by default
-- Storage: upsert requires INSERT + SELECT + UPDATE permissions
-- CLI: always use --help to discover commands, use supabase migration new for migrations
-- MCP server: check reachability, verify .mcp.json config, authenticate via OAuth flow
+- Use @supabase/ssr for Next.js middleware auth (createBrowserClient, createServerClient)
+- Auth: getSession(), getUser(), signIn(), signOut(), signInWithOAuth()
+- RLS: always enable row-level security, write policies for SELECT/INSERT/UPDATE/DELETE
+- Middleware: call updateSession() in middleware.ts to refresh tokens
+- Server Actions: always call getSession() to verify auth before mutations
+- Profile sync: after OAuth login, upsert user profile in public.profiles table
+- Storage: use storage.from().download()/.upload() with proper bucket policies
 
 ### react-query
-- Use React Query for ALL server state, avoid useState for data fetching
-- Query keys: structured format ['entity', id, filters], use query key factories
-- Setup: QueryClientProvider with staleTime (5min), cacheTime (30min), retry (2)
-- Mutations: useMutation with onSuccess invalidateQueries, onError toast
-- Optimistic updates: onMutate cancel + snapshot, onError rollback, onSettled invalidate
-- Error handling: services throw user-friendly errors, components display error.message
-- Combine with Zustand: React Query for server state, Zustand for client global state
-- DevTools: always include ReactQueryDevtools for debugging
+- Use QueryClientProvider at app root, one client per request in SSR
+- useQuery for data fetching: queryKey, queryFn, staleTime, gcTime
+- useMutation for mutations: onSuccess → invalidateQueries or setQueryData
+- Optimistic updates: use setQueryData in onMutate, rollback in onError
+- SSR: prefetchQuery/dehydrateQuery in Server Components, HydrationBoundary in client
+- Query keys: use arrays [key, id, params] for structured invalidation
 
 ### zustand
-- Action hierarchy: public actions → internal_* actions → internal_dispatch* methods
-- Reducer pattern: use for object lists/maps, optimistic updates, complex transitions
-- Simple set: use for booleans, single values, simple field updates
-- Optimistic updates: update frontend immediately, call backend, refresh for consistency
-- Delete operations: DON'T use optimistic updates (destructive, complex recovery)
-- Naming: ID arrays (topicEditingIds), maps (topicMaps), active (activeTopicId), init flags (topicsInit)
-- Class-based actions: migrating from plain objects to classes with #private set/get
-- flattenActions: use to merge class instances, don't spread class instances directly
+- Create stores with create() and TypeScript interfaces for state
+- Actions are methods in the store: setState((state) => ({ ... }))
+- Selectors: use store((state) => state.property) to avoid re-renders
+- Persist middleware: persist(state, { name: 'store-name', storage: localStorage })
+- Don't use Zustand for server state — use React Query instead
+- For complex state: split into slices, merge with Object.assign
 
 ### tailwind-design-system
-- Three-tier tokens: primitive (gray-50) → semantic (background) → component (button-height)
-- Color format: use oklch for perceptual uniformity (Tailwind v4.1+)
-- Theme config: @theme inline bridges CSS variables to Tailwind utilities
-- Dark mode: define dark values for EVERY token in :root, use class strategy
-- shadcn/ui wrapping: create thin wrapper components that enforce design system constraints
-- Single source of truth: all tokens in globals.css, never hardcode colors in components
-- Foreground pairing: every background token MUST have matching -foreground for contrast
-- Validation: run token check script to ensure all required tokens are defined
+- Define design tokens in CSS variables (--color-primary, --radius-md, etc.)
+- Theme config: extend tailwind.config.js with custom colors, fonts, spacing
+- Dark mode: use class strategy, toggle .dark on html/body
+- shadcn/ui: use CLI to add components, customize in components/ui/*
+- Component variants: use cva() for className variants (size, intent, disabled)
+- Responsive: mobile-first, use sm:, md:, lg:, xl: breakpoints
 
 ### ui-design-system
-- Stack layers: TailwindCSS (styling) → Radix UI (accessibility) → shadcn/ui (components)
-- Use Tailwind for: layouts, spacing, static content, rapid prototyping
-- Use Radix for: custom component libraries, full control, unique interactions
-- Use shadcn/ui for: standard UI components, forms, dashboards, CRUD apps
-- Accessibility: WCAG AA minimum (4.5:1 text, 3:1 UI), keyboard navigation, screen readers
-- Responsive: mobile-first approach, use breakpoints to scale up
-- Form architecture: React Hook Form + Zod for schema-first validation
-- Performance: code splitting, virtualization for long lists, accurate Tailwind content paths
-- Dark mode: ThemeProvider with next-themes, class strategy, CSS variables in .dark
+- Radix primitives: use @radix-ui/react-* for accessible components
+- shadcn/ui: copy components to src/components/ui/, customize as needed
+- Composition: prefer compound components (Card.Header, Card.Content)
+- Accessibility: always include aria-label, role, proper focus management
+- Responsive layouts: use CSS grid/flex with Tailwind responsive utilities
+- Dark mode: use CSS variables, respect .dark class on parent
 
 ### internationalization-i18n
-- Extract ALL user-facing strings to translation files, never hardcode
-- Use ICU message format for complex messages with interpolation
-- Pluralization: support correct rules per language (not just one/many)
-- Date/time/numbers: use locale-aware formatting (Intl API or i18n library)
-- RTL support: implement for Arabic, Hebrew, Farsi (dir="rtl", layout mirroring)
-- Fallback language: always provide fallback (usually English)
-- Namespaces: organize translations by feature/domain
-- Locale detection: querystring → cookie → localStorage → navigator order
-- Language switching: store preference in localStorage/cookie, provide UI toggle
-- Don't concatenate translated strings, don't assume English grammar rules
+- Use next-intl for Next.js: i18n/request.ts with getRequestConfig()
+- Locale routing: /en/*, /es/* with middleware for locale detection
+- Messages: JSON files per locale (en.json, es.json), nested structure
+- Types: generate types from messages with i18n/types.ts
+- Translations: use t() hook in components, useTranslations() in Server Components
+- Pluralization: use {count, plural, =0 {...} one {...} other {...}} syntax
+- RTL: add dir="rtl" to html, use logical properties (margin-inline-start)
 
 ### nextjs-frontend-testing
-- Test behavior not implementation: use getByRole, getByText, avoid DOM nesting selectors
-- Test layers: unit (logic/hooks), component (rendered with props), E2E (critical user flows)
-- Vitest preferred: fast, modern, great TypeScript support for Next.js
-- React Testing Library: @testing-library/react, @testing-library/jest-dom, @testing-library/user-event
-- Playwright E2E: critical flows, stable selectors, auto-waiting with expect
-- Test structure: tests/unit/ (Vitest + RTL), tests/e2e/ (Playwright)
-- Scripts: test:unit, test:e2e, test (runs both)
-- CI: install deps, build if needed, run test:unit, run test:e2e against preview server
-- Avoid flaky tests: no setTimeout, proper waitFor, cleanup after tests
+- Vitest: configure with @vitejs/plugin-react, test files as *.test.tsx
+- React Testing Library: render(), screen.getBy*, fireEvent.*, waitFor()
+- Mocking: vi.mock() for modules, MSW for API mocking
+- Playwright E2E: test.describe, test(), page.goto(), expect()
+- Custom renders: create test-utils.tsx with AllTheProviders wrapper
+- Test IDs: use data-testid for stable selectors, avoid CSS classes
+- Coverage: run with --coverage, aim for 80%+ on critical paths
 
 ### alpinejs
-- Use Alpine.js directives for lightweight interactivity in HTML
-- Avoid long inline JavaScript strings in directives
-- Prefer x-data with object syntax for complex state
-- Use x-bind for dynamic attributes, x-on for event handlers
-- Keep components self-contained with all state in x-data
+- Use x-data, x-bind, x-on, x-model, x-show, x-if, x-for directives
+- Avoid long inline JavaScript — extract to functions in x-data object
+- Components: use Alpine.data() for reusable logic
+- Reactivity: $state(), $derived(), $effect() for Alpine 3.x
+- Events: @click, @submit, @keydown, use .stop, .prevent, .once modifiers
+- Transitions: use x-transition with duration and easing classes
 
-### find-skills
-- Use when user asks "how do I do X", "find a skill for X", or wants to extend capabilities
-- Search for existing skills that match the requested functionality
-- Help user install new skills if needed
+### gentle-ai-chained-pr
+- MUST split when PR exceeds 400 changed lines (additions + deletions)
+- Design each PR for ≤60-minute human review
+- Every PR: state where it starts, ends, what came before, what comes next
+- Include dependency diagram with 📍 marking current PR
+- Autonomy: CI green, one deliverable, reasonable rollback, verification included
+- Feature Branch Chain: all child PRs target feature branch, only tracker merges to main
+- Stacked PRs: each PR merges to main in order, rebase and retarget after each merge
+- Tracker PR: required for chains >2 PRs, includes status table and diagram
+
+### judgment-day
+- Launch TWO blind judge sub-agents in parallel via delegate()
+- Judges work independently with same target, no cross-contamination
+- Synthesize verdict: Confirmed (both), Suspect (one), Contradiction (disagree)
+- WARNING classification: real (normal user can trigger) vs theoretical (contrived scenario)
+- Fix Agent: separate delegation, fixes only confirmed issues
+- Re-judge after fixes: launch both judges again in parallel
+- Convergence: after 2 fix iterations, ask user whether to continue
+- APPROVED: 0 confirmed CRITICALs + 0 confirmed real WARNINGs after Round 1
+
+### issue-creation
+- Blank issues disabled — MUST use template (bug report or feature request)
+- Every issue gets status:needs-review automatically on creation
+- Maintainer MUST add status:approved before any PR can be opened
+- Questions go to Discussions, not issues
+- Bug Report template: pre-flight checks, description, steps, expected/actual behavior
+- Feature Request template: problem description, proposed solution, affected area
+- CLI: gh issue create --template "bug_report.yml" or "feature_request.yml"
+
+### branch-pr
+- Every PR MUST link an approved issue with status:approved label
+- Every PR MUST have exactly one type:* label (type:bug, type:feature, etc.)
+- Branch naming: type/description (feat/login, fix/auth-bug, chore/deps)
+- PR body: Closes #N, type checkbox, summary, changes table, test plan, contributor checklist
+- Conventional commits: type(scope): description, no Co-Authored-By
+- Automated checks: issue reference, status:approved verification, type:* label check
+- Commands: gh pr create --title "feat(scope): desc" --body "Closes #N"
+
+### skill-creator
+- Create skill when: pattern used repeatedly, project-specific conventions, complex workflows
+- Don't create skill when: docs already exist, pattern is trivial, one-off task
+- Structure: skills/{skill-name}/SKILL.md, optional assets/ and references/
+- Frontmatter: name, description (with Trigger), license: Apache-2.0, metadata.author/version
+- Content: When to Use, Critical Patterns, Code Examples, Commands sections
+- Naming: {technology}, {project}-{component}, {project}-test-{component}, {action}-{target}
+- Register: add to AGENTS.md table with description and path
+
+### go-testing
+- Table-driven tests: []struct{name, input, expected, wantErr}, t.Run() for each case
+- Bubbletea Model testing: test Model.Update() directly, assert state transitions
+- Teatest integration: teatest.NewTestModel(), tm.Send(), tm.WaitFinished(), tm.FinalModel()
+- Golden files: compare output with testdata/*.golden, use -update flag to regenerate
+- Test organization: *_test.go beside source, testdata/ for golden files
+- Commands: go test ./..., go test -v, go test -cover, go test -update
+
+### comment-writer
+- Tone: warm, direct, human — avoid robotic or overly formal language
+- PR reviews: start with what's good, then constructive feedback with examples
+- Issues: validate the question makes sense, explain WHY with technical reasoning
+- Async collaboration: be concise but personable, use "dude", "here's the thing"
+- Spanish input → Rioplatense: "buenísimo", "dejame ver", "¿se entiende?", "dale"
+- Criticism: focus on the code, not the person; explain tradeoffs
+- Praise: specific and genuine, call out clever solutions or clean patterns
+
+### cognitive-doc-design
+- Progressive disclosure: start with overview, then details, then deep dives
+- Chunking: break content into sections with clear headings, 5-7 items max per section
+- Signposting: use "In this section", "What you'll learn", "Prerequisites" boxes
+- Tables over paragraphs: comparison tables, decision trees, quick reference
+- Checklists: actionable steps with checkboxes for procedures
+- Recognition over recall: provide examples, templates, copy-paste snippets
+- Visual hierarchy: H1 → H2 → H3, bullet points, bold key terms sparingly
 
 ## Project Conventions
 
 | File | Path | Notes |
 |------|------|-------|
-| AGENTS.md | /home/jgarrone/.config/opencode/AGENTS.md | Index — defines agent personality, rules, Engram protocol |
+| AGENTS.md | ~/.config/opencode/AGENTS.md | Index — personality, rules, engram protocol |
 
 Read the convention files listed above for project-specific patterns and rules. All referenced paths have been extracted — no need to read index files to discover more.

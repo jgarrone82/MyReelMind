@@ -1,18 +1,51 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { locales, defaultLocale } from "@/i18n";
+import { createServerClient } from "@supabase/ssr";
+import { ensureUserProfile } from "@/lib/auth/profile-sync";
+
+const protectedRoutes = ["/dashboard", "/library"];
+const authRoutes = ["/login", "/signup"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip static files and API routes
+  // Create supabase client for session check (uses mocked createServerClient in tests)
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  // Skip locale redirect for static files and API routes
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/favicon.ico") ||
     /\.(?:svg|png|jpg|jpeg|gif|webp)$/.test(pathname)
   ) {
-    return await updateSession(request);
+    // Always call updateSession() to refresh tokens for all routes
+    await updateSession(request);
+    return supabaseResponse;
   }
 
   // Check if pathname already has a locale prefix
@@ -20,15 +53,51 @@ export async function middleware(request: NextRequest) {
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
-  if (pathnameHasLocale) {
-    return await updateSession(request);
+  if (!pathnameHasLocale) {
+    // Redirect to default locale
+    const locale = defaultLocale;
+    const newPath = pathname === "/" ? `/${locale}/` : `/${locale}${pathname}`;
+    const newUrl = new URL(newPath, request.url);
+    return NextResponse.redirect(newUrl, 307);
   }
 
-  // Redirect to default locale
-  const locale = defaultLocale;
-  const newPath = pathname === "/" ? `/${locale}/` : `/${locale}${pathname}`;
-  const newUrl = new URL(newPath, request.url);
-  return NextResponse.redirect(newUrl, 307);
+  // Extract locale from pathname
+  const locale = pathname.split("/")[1];
+
+  // Get session from supabase client (created via mocked createServerClient in tests)
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // Always call updateSession() to refresh tokens for all routes
+  await updateSession(request);
+
+  // Ensure profile exists for both email and OAuth logins
+  if (session) {
+    await ensureUserProfile(session.user);
+  }
+
+  // Auth gate logic
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(`/${locale}${route}`)
+  );
+  const isAuthRoute = authRoutes.some(
+    (route) => pathname === `/${locale}${route}` || pathname === `/${locale}${route}/`
+  );
+
+  // Protected route without session → redirect to login
+  if (isProtectedRoute && !session) {
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Auth route with session → redirect to dashboard
+  if (isAuthRoute && session) {
+    const dashboardUrl = new URL(`/${locale}/dashboard`, request.url);
+    return NextResponse.redirect(dashboardUrl);
+  }
+
+  return supabaseResponse;
 }
 
 export const config = {

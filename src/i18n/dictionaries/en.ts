@@ -44,4 +44,31 @@ export const dictionary: Dictionary = {
     loading: "Loading...",
     error: "Error",
   },
+  auth: {
+    login: {
+      title: "Sign in",
+      email: "Email",
+      password: "Password",
+      submit: "Sign in",
+      loading: "Signing in...",
+      error: "Failed to sign in",
+      oauth: "Or continue with",
+    },
+    signup: {
+      title: "Create account",
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Confirm password",
+      submit: "Create account",
+      loading: "Creating account...",
+      success: "Account created!",
+    },
+    logout: "Sign out",
+    errors: {
+      invalidCredentials: "Invalid email or password",
+      weakPassword: "Password must be at least 8 characters",
+      passwordsMismatch: "Passwords do not match",
+      emailInUse: "This email is already registered",
+    },
+  },
 };

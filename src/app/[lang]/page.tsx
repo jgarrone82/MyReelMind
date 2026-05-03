@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth/server";
@@ -25,18 +24,17 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const { lang } = await params;
   const dict = await getDictionary(lang as Locale);
 
+  // Middleware gates access — we still need userId for stats
   const session = await getSession();
+  const userId = session?.user.id;
 
-  if (!session?.user) {
-    redirect(`/${lang}/login`);
-  }
-
-  const userId = session.user.id;
-  const [totalWatched, totalHours, recentActivity] = await Promise.all([
-    getTotalWatched(userId),
-    getTotalHours(userId),
-    getRecentActivity(userId, 5),
-  ]);
+  const [totalWatched, totalHours, recentActivity] = userId
+    ? await Promise.all([
+        getTotalWatched(userId),
+        getTotalHours(userId),
+        getRecentActivity(userId, 5),
+      ])
+    : [0, 0, []];
 
   return (
     <Suspense fallback={<DashboardSkeleton dict={dict.dashboard} />}>

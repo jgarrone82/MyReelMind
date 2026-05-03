@@ -42,4 +42,31 @@ export interface Dictionary {
     loading: string;
     error: string;
   };
+  auth: {
+    login: {
+      title: string;
+      email: string;
+      password: string;
+      submit: string;
+      loading: string;
+      error: string;
+      oauth: string;
+    };
+    signup: {
+      title: string;
+      email: string;
+      password: string;
+      confirmPassword: string;
+      submit: string;
+      loading: string;
+      success: string;
+    };
+    logout: string;
+    errors: {
+      invalidCredentials: string;
+      weakPassword: string;
+      passwordsMismatch: string;
+      emailInUse: string;
+    };
+  };
 }
