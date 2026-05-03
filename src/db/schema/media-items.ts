@@ -1,5 +1,7 @@
 import { pgTable, uuid, text, timestamp, jsonb, integer, index } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { mediaSourceEnum, mediaTypeEnum } from "./enums";
+import { userMedia } from "./user-media";
 
 export const mediaItems = pgTable(
   "media_items",
@@ -26,3 +28,7 @@ export const mediaItems = pgTable(
     index("media_items_source_type_idx").on(table.source, table.type),
   ]
 );
+
+export const mediaItemsRelations = relations(mediaItems, ({ many }) => ({
+  userMedia: many(userMedia),
+}));

@@ -20,6 +20,14 @@ const mockDict: Dictionary = {
     },
   },
   common: { save: "Save", cancel: "Cancel", delete: "Delete", edit: "Edit", loading: "Loading", error: "Error" },
+  dashboard: {
+    title: "Dashboard",
+    totalWatched: "Total Watched",
+    totalHours: "Total Hours",
+    recentActivity: "Recent Activity",
+    noActivity: "No tenés actividad aún",
+    ctaSearch: "Buscá algo para ver",
+  },
 };
 
 function TestConsumer() {

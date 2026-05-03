@@ -1,4 +1,5 @@
 import { pgTable, uuid, integer, text, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { users } from "./users";
 import { mediaItems } from "./media-items";
 import { watchStatusEnum } from "./enums";
@@ -26,3 +27,14 @@ export const userMedia = pgTable(
     index("user_media_user_id_media_item_id_idx").on(table.userId, table.mediaItemId),
   ]
 );
+
+export const userMediaRelations = relations(userMedia, ({ one }) => ({
+  mediaItem: one(mediaItems, {
+    fields: [userMedia.mediaItemId],
+    references: [mediaItems.id],
+  }),
+  user: one(users, {
+    fields: [userMedia.userId],
+    references: [users.id],
+  }),
+}));

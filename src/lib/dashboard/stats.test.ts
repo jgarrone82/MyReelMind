@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getTotalWatched, getTotalHours, getRecentActivity } from "./stats";
 import { db } from "@/db";
@@ -36,7 +37,7 @@ describe("getTotalWatched", () => {
       { id: "um-1", status: "completed" },
       { id: "um-2", status: "completed" },
       { id: "um-3", status: "watching" },
-    ]);
+    ] as any);
 
     const result = await getTotalWatched("user-123");
 
@@ -64,7 +65,7 @@ describe("getTotalHours", () => {
       { id: "um-1", status: "completed", mediaItem: { runtime: 120 } },
       { id: "um-2", status: "completed", mediaItem: { runtime: 90 } },
       { id: "um-3", status: "watching", mediaItem: { runtime: 60 } },
-    ]);
+    ] as any);
 
     const result = await getTotalHours("user-123");
 
@@ -77,7 +78,7 @@ describe("getTotalHours", () => {
     mockFindMany.mockResolvedValue([
       { id: "um-1", status: "completed", mediaItem: { runtime: null } },
       { id: "um-2", status: "completed", mediaItem: { runtime: 60 } },
-    ]);
+    ] as any);
 
     const result = await getTotalHours("user-123");
 
@@ -115,7 +116,7 @@ describe("getRecentActivity", () => {
         updatedAt: new Date(now.getTime() - 2000),
         mediaItem: { id: "media-2", title: "Attack on Titan", type: "anime" as const, posterPath: null },
       },
-    ]);
+    ] as any);
 
     const result = await getRecentActivity("user-123", 5);
 
