@@ -51,6 +51,7 @@ export interface Dictionary {
       loading: string;
       error: string;
       oauth: string;
+      forgotPassword: string;
     };
     signup: {
       title: string;
@@ -67,6 +68,23 @@ export interface Dictionary {
       weakPassword: string;
       passwordsMismatch: string;
       emailInUse: string;
+    };
+    passwordReset: {
+      title: string;
+      description: string;
+      email: string;
+      submit: string;
+      loading: string;
+      success: string;
+      successDescription: string;
+      backToLogin: string;
+      newPassword: string;
+      confirmPassword: string;
+      updatePassword: string;
+      updatingPassword: string;
+      passwordUpdated: string;
+      noSession: string;
+      requestNewReset: string;
     };
   };
 }
