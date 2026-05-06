@@ -168,6 +168,41 @@ export async function updateRating(
   }
 }
 
+export async function removeFromLibrary(
+  mediaId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const mediaItemId = await getMediaItemUuid(mediaId);
+    if (!mediaItemId) {
+      return { success: false, error: "Media not found" };
+    }
+
+    const userId = session.user.id;
+
+    const existing = await db.query.userMedia.findFirst({
+      where: and(eq(userMedia.userId, userId), eq(userMedia.mediaItemId, mediaItemId)),
+    });
+
+    if (!existing) {
+      return { success: false, error: "Item not in library" };
+    }
+
+    await db.delete(userMedia).where(eq(userMedia.id, existing.id));
+
+    revalidatePath("/library");
+    revalidatePath("/media/[id]");
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to remove from library" };
+  }
+}
+
 export async function updateProgress(
   mediaId: string,
   progress: number,
@@ -198,10 +233,14 @@ export async function updateProgress(
       return { success: false, error: "Item not in library" };
     }
 
+    // Auto-complete: if progress >= totalEpisodes and total is valid, set status to completed
+    const shouldAutoComplete = _totalEpisodes != null && _totalEpisodes > 0 && progress >= _totalEpisodes;
+
     await db
       .update(userMedia)
       .set({
         progress,
+        ...(shouldAutoComplete ? { status: "completed" as const } : {}),
         updatedAt: new Date(),
       })
       .where(eq(userMedia.id, existing.id));

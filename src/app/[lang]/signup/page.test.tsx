@@ -14,7 +14,8 @@ vi.mock("@/components/auth/OAuthButtons", () => ({
 const mockDict = {
   app: { title: "MyReelMind", description: "Track your movies and anime" },
   nav: { home: "Home", search: "Search", library: "My Library", dashboard: "Dashboard" },
-  search: { placeholder: "Search...", noResults: "No results", loading: "Loading..." },
+  search: { placeholder: "Search...", noResults: "No results", loading: "Loading...", title: "", all: "", movies: "", tv: "", anime: "" },
+  library: { title: "", empty: "", added: "", removed: "", statusUpdated: "", ratingUpdated: "", progressUpdated: "", markedCompleted: "", remove: "", filterAll: "", filterWatching: "", filterCompleted: "", filterDropped: "", filterPlanned: "", addToLibrary: "", collection: "", noEpisodes: "", removeConfirm: "" },
   media: {
     movie: "Movie", tv: "TV Show", anime: "Anime",
     status: {

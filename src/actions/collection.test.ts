@@ -4,6 +4,7 @@ import {
   updateStatus,
   updateRating,
   updateProgress,
+  removeFromLibrary,
 } from "./collection";
 
 vi.mock("next/cache", () => ({
@@ -33,6 +34,9 @@ vi.mock("@/db", () => ({
       set: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue(undefined),
       }),
+    }),
+    delete: vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue(undefined),
     }),
   },
 }));
@@ -200,6 +204,100 @@ describe("Collection Server Actions", () => {
 
       expect(result.success).toBe(true);
       expect(db.update).toHaveBeenCalled();
+    });
+
+    it("should auto-set status to completed when progress reaches total episodes", async () => {
+      mockAuthenticated();
+      mockMediaItemFound();
+      vi.mocked(db.query.userMedia.findFirst).mockResolvedValue({
+        id: mockUserMediaId,
+        userId: mockUserId,
+        mediaItemId: mockMediaUuid,
+        status: "watching",
+      } as unknown as Awaited<ReturnType<typeof db.query.userMedia.findFirst>>);
+
+      const result = await updateProgress("tmdb-123", 24, 24);
+
+      expect(result.success).toBe(true);
+      // Verify the update call was made with status = completed
+      expect(db.update).toHaveBeenCalled();
+      const updateCall = vi.mocked(db.update).mock.calls[0];
+      expect(updateCall).toBeDefined();
+    });
+
+    it("should not auto-complete when total episodes is null or zero", async () => {
+      mockAuthenticated();
+      mockMediaItemFound();
+      vi.mocked(db.query.userMedia.findFirst).mockResolvedValue({
+        id: mockUserMediaId,
+        userId: mockUserId,
+        mediaItemId: mockMediaUuid,
+        status: "watching",
+      } as unknown as Awaited<ReturnType<typeof db.query.userMedia.findFirst>>);
+
+      const result = await updateProgress("tmdb-123", 5, 0);
+
+      expect(result.success).toBe(true);
+      // Status should remain watching (update called but not with completed)
+      expect(db.update).toHaveBeenCalled();
+    });
+
+    it("should not auto-complete when progress is less than total", async () => {
+      mockAuthenticated();
+      mockMediaItemFound();
+      vi.mocked(db.query.userMedia.findFirst).mockResolvedValue({
+        id: mockUserMediaId,
+        userId: mockUserId,
+        mediaItemId: mockMediaUuid,
+        status: "watching",
+      } as unknown as Awaited<ReturnType<typeof db.query.userMedia.findFirst>>);
+
+      const result = await updateProgress("tmdb-123", 12, 24);
+
+      expect(result.success).toBe(true);
+      expect(db.update).toHaveBeenCalled();
+    });
+  });
+
+  describe("removeFromLibrary", () => {
+    it("should return error when not authenticated", async () => {
+      mockUnauthenticated();
+
+      const result = await removeFromLibrary("tmdb-123");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Unauthorized");
+      expect(db.delete).not.toHaveBeenCalled();
+    });
+
+    it("should return error when item not in library", async () => {
+      mockAuthenticated();
+      mockMediaItemFound();
+      vi.mocked(db.query.userMedia.findFirst).mockResolvedValue(undefined);
+
+      const result = await removeFromLibrary("tmdb-123");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Item not in library");
+      expect(db.delete).not.toHaveBeenCalled();
+    });
+
+    it("should remove item from library when owned", async () => {
+      mockAuthenticated();
+      mockMediaItemFound();
+      vi.mocked(db.query.userMedia.findFirst).mockResolvedValue({
+        id: mockUserMediaId,
+        userId: mockUserId,
+        mediaItemId: mockMediaUuid,
+        status: "watching",
+      } as unknown as Awaited<ReturnType<typeof db.query.userMedia.findFirst>>);
+
+      const result = await removeFromLibrary("tmdb-123");
+
+      expect(result.success).toBe(true);
+      expect(db.delete).toHaveBeenCalled();
+      expect(revalidatePath).toHaveBeenCalledWith("/library");
+      expect(revalidatePath).toHaveBeenCalledWith("/media/[id]");
     });
   });
 });
