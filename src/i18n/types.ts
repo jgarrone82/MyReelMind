@@ -13,6 +13,31 @@ export interface Dictionary {
     placeholder: string;
     noResults: string;
     loading: string;
+    title: string;
+    all: string;
+    movies: string;
+    tv: string;
+    anime: string;
+  };
+  library: {
+    title: string;
+    empty: string;
+    added: string;
+    removed: string;
+    statusUpdated: string;
+    ratingUpdated: string;
+    progressUpdated: string;
+    markedCompleted: string;
+    remove: string;
+    filterAll: string;
+    filterWatching: string;
+    filterCompleted: string;
+    filterDropped: string;
+    filterPlanned: string;
+    addToLibrary: string;
+    collection: string;
+    noEpisodes: string;
+    removeConfirm: string;
   };
   media: {
     movie: string;

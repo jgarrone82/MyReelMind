@@ -9,7 +9,8 @@ vi.mock("@/actions/auth", () => ({
 const mockDict = {
   app: { title: "MyReelMind", description: "" },
   nav: { home: "", search: "", library: "", dashboard: "" },
-  search: { placeholder: "", noResults: "", loading: "" },
+  search: { placeholder: "", noResults: "", loading: "", title: "", all: "", movies: "", tv: "", anime: "" },
+  library: { title: "", empty: "", added: "", removed: "", statusUpdated: "", ratingUpdated: "", progressUpdated: "", markedCompleted: "", remove: "", filterAll: "", filterWatching: "", filterCompleted: "", filterDropped: "", filterPlanned: "", addToLibrary: "", collection: "", noEpisodes: "", removeConfirm: "" },
   media: { movie: "", tv: "", anime: "", status: { want_to_watch: "", watching: "", completed: "", paused: "", dropped: "" } },
   dashboard: { title: "", totalWatched: "", totalHours: "", recentActivity: "", noActivity: "", ctaSearch: "" },
   common: { save: "", cancel: "", delete: "", edit: "", loading: "", error: "" },
