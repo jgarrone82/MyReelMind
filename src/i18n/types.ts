@@ -86,5 +86,21 @@ export interface Dictionary {
       noSession: string;
       requestNewReset: string;
     };
+    emailVerification: {
+      title: string;
+      description: string;
+      checkInbox: string;
+      resendButton: string;
+      resendLoading: string;
+      resendSuccess: string;
+      resendError: string;
+      backToLogin: string;
+      goToDashboard: string;
+      verifyTitle: string;
+      verifyDescription: string;
+      verifyEmail: string;
+      notYourEmail: string;
+      emailConfirmed: string;
+    };
   };
 }
