@@ -4,8 +4,9 @@ import { locales, defaultLocale } from "@/i18n";
 import { createServerClient } from "@supabase/ssr";
 import { ensureUserProfile } from "@/lib/auth/profile-sync";
 
-const protectedRoutes = ["/dashboard", "/library"];
+const protectedRoutes = ["/dashboard", "/library", "/verify-email"];
 const authRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
+const publicRoutes = ["/verification-sent"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

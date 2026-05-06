@@ -26,7 +26,7 @@ export default async function LoginPage({ params, searchParams, dictionary }: Lo
         )}
         {verified && (
           <div className="rounded-md bg-green-50 p-4">
-            <p className="text-sm text-green-700">Email verified! You can now sign in.</p>
+            <p className="text-sm text-green-700">{dictionary.auth.emailVerification.emailConfirmed}</p>
           </div>
         )}
         <LoginForm lang={lang} dict={dictionary} />
