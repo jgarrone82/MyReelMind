@@ -69,7 +69,7 @@ export default async function LocaleLayout({
                   {dict.nav.library}
                 </a>
               </nav>
-              <UserMenu dict={dict} />
+              <UserMenu dict={dict} lang={lang} />
             </div>
           </div>
         </header>
