@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { signIn, signUp, signOut, signInWithOAuth } from "./auth";
+import { signIn, signUp, signOut, signInWithOAuth, forgotPassword, updatePassword } from "./auth";
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
@@ -29,6 +29,9 @@ const mockSupabase = {
     signUp: vi.fn(),
     signInWithOAuth: vi.fn(),
     signOut: vi.fn(),
+    resetPasswordForEmail: vi.fn(),
+    updateUser: vi.fn(),
+    getSession: vi.fn(),
   },
 };
 
@@ -218,5 +221,132 @@ describe("signInWithOAuth Server Action", () => {
         redirectTo: expect.any(String),
       }),
     });
+  });
+});
+
+describe("forgotPassword Server Action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
+  });
+
+  it("should return error when email is missing", async () => {
+    const formData = new FormData();
+
+    const result = await forgotPassword({}, formData);
+
+    expect(result.error).toBe("Email is required");
+  });
+
+  it("should return error when email format is invalid", async () => {
+    const formData = new FormData();
+    formData.append("email", "not-an-email");
+
+    const result = await forgotPassword({}, formData);
+
+    expect(result.error).toBe("Invalid email format");
+  });
+
+  it("should call resetPasswordForEmail with correct email and redirect URL", async () => {
+    vi.mocked(mockSupabase.auth.resetPasswordForEmail).mockResolvedValue({
+      data: null,
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+
+    const result = await forgotPassword({}, formData);
+
+    expect(mockSupabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
+      "test@example.com",
+      expect.objectContaining({
+        redirectTo: expect.stringContaining("/auth/callback"),
+      })
+    );
+    expect(result.success).toBe(true);
+  });
+
+  it("should return error when resetPasswordForEmail fails", async () => {
+    vi.mocked(mockSupabase.auth.resetPasswordForEmail).mockResolvedValue({
+      data: null,
+      error: { message: "Email not found" },
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+
+    const result = await forgotPassword({}, formData);
+
+    expect(result.error).toBe("Email not found");
+  });
+});
+
+describe("updatePassword Server Action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
+  });
+
+  it("should return error when password is missing", async () => {
+    const formData = new FormData();
+    formData.append("confirmPassword", "password123");
+
+    const result = await updatePassword({}, formData);
+
+    expect(result.error).toBe("Password is required");
+  });
+
+  it("should return error when password is less than 8 characters", async () => {
+    const formData = new FormData();
+    formData.append("password", "short");
+    formData.append("confirmPassword", "short");
+
+    const result = await updatePassword({}, formData);
+
+    expect(result.error).toBe("Password must be at least 8 characters");
+  });
+
+  it("should return error when passwords do not match", async () => {
+    const formData = new FormData();
+    formData.append("password", "password123");
+    formData.append("confirmPassword", "different123");
+
+    const result = await updatePassword({}, formData);
+
+    expect(result.error).toBe("Passwords do not match");
+  });
+
+  it("should call updateUser with new password on success", async () => {
+    vi.mocked(mockSupabase.auth.updateUser).mockResolvedValue({
+      data: { user: { id: "user-123" } },
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("password", "newpassword123");
+    formData.append("confirmPassword", "newpassword123");
+
+    await expect(updatePassword({}, formData)).rejects.toThrow();
+
+    expect(mockSupabase.auth.updateUser).toHaveBeenCalledWith({
+      password: "newpassword123",
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/");
+  });
+
+  it("should return error when updateUser fails", async () => {
+    vi.mocked(mockSupabase.auth.updateUser).mockResolvedValue({
+      data: { user: null },
+      error: { message: "Session expired" },
+    });
+
+    const formData = new FormData();
+    formData.append("password", "newpassword123");
+    formData.append("confirmPassword", "newpassword123");
+
+    const result = await updatePassword({}, formData);
+
+    expect(result.error).toBe("Session expired");
   });
 });
