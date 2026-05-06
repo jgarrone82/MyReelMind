@@ -85,7 +85,15 @@ export async function signUp(
   await ensureUserProfile(data.user);
 
   revalidatePath("/");
-  redirect("/dashboard");
+
+  // If email is already confirmed (OAuth or auto-confirm config), go to dashboard
+  if (data.user.email_confirmed_at) {
+    redirect("/dashboard");
+  }
+
+  // Otherwise redirect to verification-sent page
+  const encodedEmail = encodeURIComponent(email);
+  redirect(`/verification-sent?email=${encodedEmail}`);
 }
 
 /**
@@ -192,4 +200,65 @@ export async function updatePassword(
 
   revalidatePath("/");
   redirect("/login?password_updated=true");
+}
+
+/**
+ * Send a verification email to the given address (used during signup).
+ */
+export async function sendVerificationEmail(
+  prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const email = formData.get("email") as string | null;
+
+  if (!email) {
+    return { error: "Email is required" };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { error: "Invalid email format" };
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Re-send verification email to the current logged-in user.
+ */
+export async function resendVerificationEmail(): Promise<AuthState> {
+  const supabase = await createClient();
+
+  const { data, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError || !data.session) {
+    return { error: "Not authenticated" };
+  }
+
+  const email = data.session.user.email;
+  if (!email) {
+    return { error: "User has no email" };
+  }
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true };
 }

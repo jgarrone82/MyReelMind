@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { signIn, signUp, signOut, signInWithOAuth, forgotPassword, updatePassword } from "./auth";
+import { signIn, signUp, signOut, signInWithOAuth, forgotPassword, updatePassword, sendVerificationEmail, resendVerificationEmail } from "./auth";
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
@@ -32,6 +32,7 @@ const mockSupabase = {
     resetPasswordForEmail: vi.fn(),
     updateUser: vi.fn(),
     getSession: vi.fn(),
+    resend: vi.fn(),
   },
 };
 
@@ -148,6 +149,34 @@ describe("signUp Server Action", () => {
 
     expect(ensureUserProfile).toHaveBeenCalledWith(mockUser);
     expect(revalidatePath).toHaveBeenCalledWith("/");
+  });
+
+  it("should redirect to verification-sent when email is not confirmed", async () => {
+    const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
+    vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
+      data: { user: mockUser, session: {} },
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+    formData.append("password", "password123");
+
+    await expect(signUp({}, formData)).rejects.toThrow("Redirect to: /verification-sent?email=test%40example.com");
+  });
+
+  it("should redirect to dashboard when email is already confirmed", async () => {
+    const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: "2024-01-01T00:00:00Z" };
+    vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
+      data: { user: mockUser, session: {} },
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+    formData.append("password", "password123");
+
+    await expect(signUp({}, formData)).rejects.toThrow("Redirect to: /dashboard");
   });
 });
 
@@ -348,5 +377,124 @@ describe("updatePassword Server Action", () => {
     const result = await updatePassword({}, formData);
 
     expect(result.error).toBe("Session expired");
+  });
+});
+
+describe("sendVerificationEmail Server Action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
+  });
+
+  it("should return error when email is missing", async () => {
+    const formData = new FormData();
+
+    const result = await sendVerificationEmail({}, formData);
+
+    expect(result.error).toBe("Email is required");
+  });
+
+  it("should return error when email format is invalid", async () => {
+    const formData = new FormData();
+    formData.append("email", "not-an-email");
+
+    const result = await sendVerificationEmail({}, formData);
+
+    expect(result.error).toBe("Invalid email format");
+  });
+
+  it("should call resend with type signup and correct email", async () => {
+    vi.mocked(mockSupabase.auth.resend).mockResolvedValue({
+      data: null,
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+
+    const result = await sendVerificationEmail({}, formData);
+
+    expect(mockSupabase.auth.resend).toHaveBeenCalledWith({
+      type: "signup",
+      email: "test@example.com",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should return error when resend fails", async () => {
+    vi.mocked(mockSupabase.auth.resend).mockResolvedValue({
+      data: null,
+      error: { message: "Email already confirmed" },
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+
+    const result = await sendVerificationEmail({}, formData);
+
+    expect(result.error).toBe("Email already confirmed");
+  });
+});
+
+describe("resendVerificationEmail Server Action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
+  });
+
+  it("should return error when no session exists", async () => {
+    vi.mocked(mockSupabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
+      error: null,
+    });
+
+    const result = await resendVerificationEmail();
+
+    expect(result.error).toBe("Not authenticated");
+  });
+
+  it("should return error when user has no email", async () => {
+    vi.mocked(mockSupabase.auth.getSession).mockResolvedValue({
+      data: { session: { user: { id: "user-123", email: null } } },
+      error: null,
+    });
+
+    const result = await resendVerificationEmail();
+
+    expect(result.error).toBe("User has no email");
+  });
+
+  it("should call resend with session user's email", async () => {
+    vi.mocked(mockSupabase.auth.getSession).mockResolvedValue({
+      data: { session: { user: { id: "user-123", email: "test@example.com" } } },
+      error: null,
+    });
+    vi.mocked(mockSupabase.auth.resend).mockResolvedValue({
+      data: null,
+      error: null,
+    });
+
+    const result = await resendVerificationEmail();
+
+    expect(mockSupabase.auth.resend).toHaveBeenCalledWith({
+      type: "signup",
+      email: "test@example.com",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should return error when resend fails", async () => {
+    vi.mocked(mockSupabase.auth.getSession).mockResolvedValue({
+      data: { session: { user: { id: "user-123", email: "test@example.com" } } },
+      error: null,
+    });
+    vi.mocked(mockSupabase.auth.resend).mockResolvedValue({
+      data: null,
+      error: { message: "Rate limit exceeded" },
+    });
+
+    const result = await resendVerificationEmail();
+
+    expect(result.error).toBe("Rate limit exceeded");
   });
 });
