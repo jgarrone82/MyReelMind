@@ -36,6 +36,7 @@ const mockDict = {
       loading: "Signing in...",
       error: "Failed to sign in",
       oauth: "Or continue with",
+      forgotPassword: "Forgot password?",
     },
     signup: {
       title: "Create account",
@@ -53,6 +54,13 @@ const mockDict = {
       passwordsMismatch: "Passwords do not match",
       emailInUse: "This email is already registered",
     },
+    passwordReset: {
+      title: "", description: "", email: "", submit: "", loading: "",
+      success: "", successDescription: "", backToLogin: "",
+      newPassword: "", confirmPassword: "", updatePassword: "",
+      updatingPassword: "", passwordUpdated: "Password updated successfully!",
+      noSession: "", requestNewReset: "",
+    },
   },
 };
 
@@ -66,6 +74,7 @@ describe("LoginPage", () => {
   it("should render login heading", async () => {
     const page = await LoginPage({
       params: Promise.resolve({ lang: "en" }),
+      searchParams: Promise.resolve({}),
       dictionary: mockDict as any,
     });
 
@@ -77,6 +86,7 @@ describe("LoginPage", () => {
   it("should render LoginForm component", async () => {
     const page = await LoginPage({
       params: Promise.resolve({ lang: "en" }),
+      searchParams: Promise.resolve({}),
       dictionary: mockDict as any,
     });
 
@@ -88,6 +98,7 @@ describe("LoginPage", () => {
   it("should render OAuthButtons component", async () => {
     const page = await LoginPage({
       params: Promise.resolve({ lang: "en" }),
+      searchParams: Promise.resolve({}),
       dictionary: mockDict as any,
     });
 

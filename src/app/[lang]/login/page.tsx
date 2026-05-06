@@ -4,11 +4,13 @@ import type { Dictionary } from "@/i18n/types";
 
 interface LoginPageProps {
   params: Promise<{ lang: string }>;
+  searchParams: Promise<{ password_updated?: string; verified?: string }>;
   dictionary: Dictionary;
 }
 
-export default async function LoginPage({ params, dictionary }: LoginPageProps) {
+export default async function LoginPage({ params, searchParams, dictionary }: LoginPageProps) {
   const { lang } = await params;
+  const { password_updated, verified } = await searchParams;
 
   return (
     <main className="mx-auto max-w-md px-4 py-8">
@@ -17,6 +19,16 @@ export default async function LoginPage({ params, dictionary }: LoginPageProps) 
       </h1>
 
       <div className="space-y-6">
+        {password_updated && (
+          <div className="rounded-md bg-green-50 p-4">
+            <p className="text-sm text-green-700">{dictionary.auth.passwordReset.passwordUpdated}</p>
+          </div>
+        )}
+        {verified && (
+          <div className="rounded-md bg-green-50 p-4">
+            <p className="text-sm text-green-700">Email verified! You can now sign in.</p>
+          </div>
+        )}
         <LoginForm lang={lang} dict={dictionary} />
 
         <div className="relative">
