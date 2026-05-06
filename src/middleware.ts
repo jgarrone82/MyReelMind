@@ -5,7 +5,7 @@ import { createServerClient } from "@supabase/ssr";
 import { ensureUserProfile } from "@/lib/auth/profile-sync";
 
 const protectedRoutes = ["/dashboard", "/library"];
-const authRoutes = ["/login", "/signup"];
+const authRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
