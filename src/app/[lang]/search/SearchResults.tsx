@@ -4,12 +4,16 @@ import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 import { MediaGrid } from "@/components/media/MediaGrid";
 
-export function SearchResults() {
+interface SearchResultsProps {
+  lang?: string;
+}
+
+export function SearchResults({ lang }: SearchResultsProps) {
   const { debouncedQuery, type, year } = useSearchFilters();
   const { data, isLoading } = useSearch(debouncedQuery, type, year);
 
   if (!debouncedQuery.trim()) {
-    return <MediaGrid items={[]} />;
+    return <MediaGrid items={[]} lang={lang} />;
   }
 
   if (isLoading) {
@@ -25,5 +29,5 @@ export function SearchResults() {
     );
   }
 
-  return <MediaGrid items={data ?? []} />;
+  return <MediaGrid items={data ?? []} lang={lang} />;
 }

@@ -54,7 +54,7 @@ describe("SearchResults", () => {
     });
     vi.mocked(useSearch).mockReturnValue({ data: [], isLoading: false } as ReturnType<typeof useSearch>);
 
-    render(<SearchResults />, { wrapper: createWrapper() });
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
     expect(screen.getByText(/no results/i)).toBeInTheDocument();
   });
@@ -71,7 +71,7 @@ describe("SearchResults", () => {
     });
     vi.mocked(useSearch).mockReturnValue({ data: mockResults, isLoading: false } as ReturnType<typeof useSearch>);
 
-    render(<SearchResults />, { wrapper: createWrapper() });
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(screen.getByText("Test Movie")).toBeInTheDocument();

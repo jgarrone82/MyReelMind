@@ -28,7 +28,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
             </div>
           }
         >
-          <SearchResults />
+          <SearchResults lang={lang} />
         </Suspense>
       </div>
     </main>
