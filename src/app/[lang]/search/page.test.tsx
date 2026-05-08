@@ -1,11 +1,25 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
 import SearchPage from "./page";
 import { server } from "../../../../tests/mocks/server";
-import { useSearchFilters } from "@/stores/search-filters";
+
+const mockSetState = vi.fn();
+vi.mock("@/stores/search-filters", () => ({
+  useSearchFilters: vi.fn(() => ({
+    query: "",
+    debouncedQuery: "",
+    type: "all",
+    year: null,
+    setQuery: vi.fn(),
+    setDebouncedQuery: vi.fn(),
+    setType: vi.fn(),
+  })),
+}));
+
+const { useSearchFilters } = require("@/stores/search-filters");
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -37,12 +51,8 @@ const mockResults = [
 
 describe("SearchPage", () => {
   beforeEach(() => {
-    useSearchFilters.setState({
-      query: "",
-      debouncedQuery: "",
-      type: "all",
-      year: null,
-    });
+    vi.clearAllMocks();
+    mockSetState.mockClear();
   });
 
   it("should render search bar", () => {
@@ -69,13 +79,6 @@ describe("SearchPage", () => {
         return HttpResponse.json({ results: mockResults });
       })
     );
-
-    useSearchFilters.setState({
-      query: "test",
-      debouncedQuery: "test",
-      type: "all",
-      year: null,
-    });
 
     render(<SearchPage params={Promise.resolve({ lang: "es" })} />, {
       wrapper: createWrapper(),

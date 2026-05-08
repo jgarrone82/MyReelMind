@@ -1,4 +1,7 @@
+"use client";
+
 import { Suspense } from "react";
+import { use } from "react";
 import { SearchBar } from "@/components/media/SearchBar";
 import { MediaGrid } from "@/components/media/MediaGrid";
 import { SearchResults } from "./SearchResults";
@@ -7,8 +10,8 @@ interface SearchPageProps {
   params: Promise<{ lang: string }>;
 }
 
-export default async function SearchPage({ params }: SearchPageProps) {
-  const { lang } = await params;
+export default function SearchPage({ params }: SearchPageProps) {
+  const { lang } = use(params);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
