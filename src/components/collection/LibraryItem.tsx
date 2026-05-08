@@ -31,6 +31,22 @@ interface LibraryItemProps {
     progressUpdated: string;
     removed: string;
     error: string;
+    status: {
+      want_to_watch: string;
+      watching: string;
+      completed: string;
+      paused: string;
+      dropped: string;
+    };
+    statusLabel: string;
+    rating: string;
+    yourRating: string;
+    notRated: string;
+    clear: string;
+    progress: string;
+    episode: string;
+    chapter: string;
+    of: string;
   };
 }
 
@@ -140,6 +156,7 @@ export function LibraryItem({
               status={initialStatus}
               onChange={handleStatusChange}
               disabled={isStatusPending}
+              dict={dict.status}
             />
           </form>
 
@@ -148,6 +165,7 @@ export function LibraryItem({
             rating={initialRating}
             onChange={handleRatingChange}
             disabled={isRatingPending}
+            dict={{ rated: dict.yourRating, notRated: dict.notRated, clear: dict.clear }}
           />
 
           {/* Progress */}
@@ -157,6 +175,7 @@ export function LibraryItem({
               total={runtime}
               onChange={handleProgressChange}
               disabled={isProgressPending}
+              dict={{ progress: dict.progress, episode: dict.episode, chapter: dict.chapter, of: dict.of }}
             />
           )}
         </div>
