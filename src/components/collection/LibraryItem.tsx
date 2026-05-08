@@ -95,6 +95,12 @@ export function LibraryItem({
   const ratingFormRef = useRef<HTMLFormElement>(null);
   const progressFormRef = useRef<HTMLFormElement>(null);
 
+  const handleStatusChange = (newStatus: WatchStatus) => {
+    const formData = new FormData();
+    formData.set("status", newStatus);
+    updateStatusAction(formData);
+  };
+
   const handleRatingChange = (rating: number | null) => {
     if (rating === null) return;
     const formData = new FormData();
@@ -131,7 +137,7 @@ export function LibraryItem({
             <input type="hidden" name="mediaId" value={mediaId} />
             <StatusSelector
               status={initialStatus}
-              onChange={() => {}}
+              onChange={handleStatusChange}
               disabled={isStatusPending}
             />
           </form>
