@@ -1,17 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
 import { SearchResults } from "./SearchResults";
-import { server } from "../../../../tests/mocks/server";
 import { useSearchFilters } from "@/stores/search-filters";
+import { useSearch } from "@/hooks/queries/useSearch";
 
 vi.mock("@/stores/search-filters");
 vi.mock("@/hooks/queries/useSearch");
-
-const mockUseSearchFilters = useSearchFilters as ReturnType<typeof vi.fn>;
-const mockUseSearch = require("@/hooks/queries/useSearch").useSearch as ReturnType<typeof vi.fn>;
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -44,35 +40,36 @@ const mockResults = [
 describe("SearchResults", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseSearchFilters.mockReturnValue({
+  });
+
+  it("should render empty state when no query", () => {
+    vi.mocked(useSearchFilters).mockReturnValue({
       query: "",
       debouncedQuery: "",
-      type: "all",
+      type: "all" as const,
       year: null,
       setQuery: vi.fn(),
       setDebouncedQuery: vi.fn(),
       setType: vi.fn(),
     });
-    mockUseSearch.mockReturnValue({ data: [], isLoading: false });
-  });
+    vi.mocked(useSearch).mockReturnValue({ data: [], isLoading: false } as ReturnType<typeof useSearch>);
 
-  it("should render empty state when no query", () => {
     render(<SearchResults />, { wrapper: createWrapper() });
 
     expect(screen.getByText(/no results/i)).toBeInTheDocument();
   });
 
   it("should render search results when query exists", async () => {
-    mockUseSearchFilters.mockReturnValue({
+    vi.mocked(useSearchFilters).mockReturnValue({
       query: "test",
       debouncedQuery: "test",
-      type: "all",
+      type: "all" as const,
       year: null,
       setQuery: vi.fn(),
       setDebouncedQuery: vi.fn(),
       setType: vi.fn(),
     });
-    mockUseSearch.mockReturnValue({ data: mockResults, isLoading: false });
+    vi.mocked(useSearch).mockReturnValue({ data: mockResults, isLoading: false } as ReturnType<typeof useSearch>);
 
     render(<SearchResults />, { wrapper: createWrapper() });
 
