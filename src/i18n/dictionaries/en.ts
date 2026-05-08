@@ -50,6 +50,9 @@ export const dictionary: Dictionary = {
     movie: "Movie",
     tv: "TV Show",
     anime: "Anime",
+    episode: "Episode",
+    chapter: "Chapter",
+    of: "of",
     status: {
       want_to_watch: "Want to Watch",
       watching: "Watching",

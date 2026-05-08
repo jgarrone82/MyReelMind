@@ -10,6 +10,7 @@ interface RemoveButtonProps {
   dict: {
     remove: string;
     removeConfirm: string;
+    cancel?: string;
     error?: string;
   };
 }
@@ -50,7 +51,7 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
           onClick={() => setShowConfirm(false)}
           className="rounded bg-gray-200 px-3 py-1 text-sm text-gray-700 hover:bg-gray-300"
         >
-          Cancel
+          {dict.cancel ?? "Cancel"}
         </button>
       </div>
     );

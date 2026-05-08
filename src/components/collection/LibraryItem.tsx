@@ -24,6 +24,7 @@ interface LibraryItemProps {
   dict: {
     remove: string;
     removeConfirm: string;
+    cancel?: string;
     noEpisodes: string;
     statusUpdated: string;
     ratingUpdated: string;
@@ -165,7 +166,7 @@ export function LibraryItem({
       <div className="flex-shrink-0">
         <RemoveButton
           mediaId={mediaId}
-          dict={{ remove: dict.remove, removeConfirm: dict.removeConfirm }}
+          dict={{ remove: dict.remove, removeConfirm: dict.removeConfirm, cancel: dict.cancel }}
           onSuccess={() => toast.success(dict.removed)}
         />
       </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth/server";
@@ -9,6 +10,7 @@ import { eq, and } from "drizzle-orm";
 import { getDictionary, type Locale } from "@/i18n";
 import { MediaDetailClient } from "@/components/collection/MediaDetailClient";
 import type { WatchStatus } from "@/components/collection/StatusSelector";
+import { addToLibrary } from "@/actions/collection";
 
 interface MediaDetailPageProps {
   params: Promise<{ lang: string; id: string }>;
@@ -65,8 +67,8 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
 
   const dict = await getDictionary(lang as Locale);
 
-  const sourceLabel = media.source === "tmdb" ? "TMDB" : "AniList";
-  const typeLabel = media.type === "movie" ? "Movie" : media.type === "tv" ? "TV Show" : "Anime";
+  const sourceLabel = media.source.toUpperCase();
+  const typeLabel = media.type === "movie" ? dict.media.movie : media.type === "tv" ? dict.media.tv : dict.media.anime;
 
   // Determine media type for component
   const componentType = media.type === "movie" ? "movie" : media.type === "tv" ? "tv" : "anime";
@@ -169,32 +171,59 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
           )}
 
           {/* Collection Controls - Client Component */}
-          {session && (
-            <MediaDetailClient
-              mediaId={mediaId}
-              initialStatus={(userEntry?.status as WatchStatus) ?? "want_to_watch"}
-              initialProgress={userEntry?.progress ?? 0}
-              initialRating={userEntry?.rating ?? null}
-              episodes={media.episodes ?? null}
-              type={componentType}
-              dict={{
-                collection: dict.library.collection,
-                status: dict.media.status,
-                statusLabel: dict.library.status,
-                progress: dict.library.progress,
-                episode: "Episode",
-                chapter: "Chapter",
-                of: "of",
-                rating: dict.library.rating,
-                yourRating: dict.library.yourRating,
-                notRated: dict.library.notRated,
-                clear: dict.common.delete,
-                markedCompleted: dict.library.markedCompleted,
-                statusUpdated: dict.library.statusUpdated,
-                ratingUpdated: dict.library.ratingUpdated,
-                progressUpdated: dict.library.progressUpdated,
-              }}
-            />
+          {session ? (
+            userEntry ? (
+              <MediaDetailClient
+                mediaId={mediaId}
+                initialStatus={(userEntry?.status as WatchStatus) ?? "want_to_watch"}
+                initialProgress={userEntry?.progress ?? 0}
+                initialRating={userEntry?.rating ?? null}
+                episodes={media.episodes ?? null}
+                type={componentType}
+                dict={{
+                  collection: dict.library.collection,
+                  status: dict.media.status,
+                  statusLabel: dict.library.status,
+                  progress: dict.library.progress,
+                  episode: dict.media.episode,
+                  chapter: dict.media.chapter,
+                  of: dict.media.of,
+                  rating: dict.library.rating,
+                  yourRating: dict.library.yourRating,
+                  notRated: dict.library.notRated,
+                  clear: dict.common.delete,
+                  markedCompleted: dict.library.markedCompleted,
+                  statusUpdated: dict.library.statusUpdated,
+                  ratingUpdated: dict.library.ratingUpdated,
+                  progressUpdated: dict.library.progressUpdated,
+                }}
+              />
+            ) : (
+              <div className="mt-8 rounded-lg border border-gray-200 p-4">
+                <p className="mb-4 text-gray-700">{dict.library.addToLibrary}</p>
+                <form action={async () => {
+                  "use server";
+                  await addToLibrary(mediaId, "want_to_watch");
+                }}>
+                  <button
+                    type="submit"
+                    className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  >
+                    {dict.library.addToLibrary}
+                  </button>
+                </form>
+              </div>
+            )
+          ) : (
+            <div className="mt-8 rounded-lg border border-gray-200 p-4">
+              <p className="mb-4 text-gray-700">{dict.library.addToLibrary}</p>
+              <Link
+                href={`/${lang}/login`}
+                className="inline-block rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              >
+                {dict.auth.login.title}
+              </Link>
+            </div>
           )}
         </div>
       </div>

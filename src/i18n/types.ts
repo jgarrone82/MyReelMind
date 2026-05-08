@@ -48,6 +48,9 @@ export interface Dictionary {
     movie: string;
     tv: string;
     anime: string;
+    episode: string;
+    chapter: string;
+    of: string;
     status: {
       want_to_watch: string;
       watching: string;

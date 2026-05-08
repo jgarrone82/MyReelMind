@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/server";
@@ -103,7 +104,7 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
         {/* Status filter tabs */}
         <nav className="mb-6 flex gap-2 border-b border-gray-200">
           {statusFilters.map((filter) => (
-            <a
+            <Link
               key={filter.key}
               href={
                 filter.key === "all"
@@ -117,7 +118,7 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
               }`}
             >
               {filter.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -129,6 +130,7 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
             dict={{
               remove: dict.library.remove,
               removeConfirm: dict.library.removeConfirm,
+              cancel: dict.common.cancel,
               noEpisodes: dict.library.noEpisodes,
               statusUpdated: dict.library.statusUpdated,
               ratingUpdated: dict.library.ratingUpdated,
@@ -140,12 +142,12 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-lg text-gray-500">{dict.library.empty}</p>
-            <a
+            <Link
               href={`/${lang}/search`}
               className="mt-4 text-blue-600 hover:text-blue-800"
             >
               {dict.dashboard.ctaSearch}
-            </a>
+            </Link>
           </div>
         )}
       </main>
