@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
@@ -52,7 +52,7 @@ describe("SearchResults", () => {
       setDebouncedQuery: vi.fn(),
       setType: vi.fn(),
     });
-    vi.mocked(useSearch).mockReturnValue({ data: [], isLoading: false } as ReturnType<typeof useSearch>);
+    vi.mocked(useSearch).mockReturnValue({ data: [] as any, isLoading: false } as any);
 
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
@@ -69,7 +69,7 @@ describe("SearchResults", () => {
       setDebouncedQuery: vi.fn(),
       setType: vi.fn(),
     });
-    vi.mocked(useSearch).mockReturnValue({ data: mockResults, isLoading: false } as ReturnType<typeof useSearch>);
+    vi.mocked(useSearch).mockReturnValue({ data: mockResults as any, isLoading: false } as any);
 
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 

@@ -25,6 +25,7 @@ interface LibraryGridProps {
   dict: {
     remove: string;
     removeConfirm: string;
+    cancel?: string;
     noEpisodes: string;
     statusUpdated: string;
     ratingUpdated: string;
