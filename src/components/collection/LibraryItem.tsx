@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef } from "react";
+import { toast } from "sonner";
 import { StatusSelector } from "./StatusSelector";
 import { RatingInput } from "./RatingInput";
 import { ProgressTracker } from "./ProgressTracker";
@@ -24,6 +25,11 @@ interface LibraryItemProps {
     remove: string;
     removeConfirm: string;
     noEpisodes: string;
+    statusUpdated: string;
+    ratingUpdated: string;
+    progressUpdated: string;
+    removed: string;
+    error: string;
   };
 }
 
@@ -45,7 +51,13 @@ export function LibraryItem({
   const [statusState, updateStatusAction, isStatusPending] = useActionState(
     async (prevState: unknown, formData: FormData) => {
       const newStatus = formData.get("status") as WatchStatus;
-      return updateStatus(mediaId, newStatus);
+      const result = await updateStatus(mediaId, newStatus);
+      if (result.success) {
+        toast.success(dict.statusUpdated);
+      } else {
+        toast.error(result.error ?? dict.error);
+      }
+      return result;
     },
     null
   );
@@ -54,7 +66,13 @@ export function LibraryItem({
   const [ratingState, updateRatingAction, isRatingPending] = useActionState(
     async (prevState: unknown, formData: FormData) => {
       const rating = parseInt(formData.get("rating") as string, 10);
-      return updateRating(mediaId, rating);
+      const result = await updateRating(mediaId, rating);
+      if (result.success) {
+        toast.success(dict.ratingUpdated);
+      } else {
+        toast.error(result.error ?? dict.error);
+      }
+      return result;
     },
     null
   );
@@ -63,7 +81,13 @@ export function LibraryItem({
   const [progressState, updateProgressAction, isProgressPending] = useActionState(
     async (prevState: unknown, formData: FormData) => {
       const progress = parseInt(formData.get("progress") as string, 10);
-      return updateProgress(mediaId, progress, runtime ?? undefined);
+      const result = await updateProgress(mediaId, progress, runtime ?? undefined);
+      if (result.success) {
+        toast.success(dict.progressUpdated);
+      } else {
+        toast.error(result.error ?? dict.error);
+      }
+      return result;
     },
     null
   );
@@ -136,6 +160,7 @@ export function LibraryItem({
         <RemoveButton
           mediaId={mediaId}
           dict={{ remove: dict.remove, removeConfirm: dict.removeConfirm }}
+          onSuccess={() => toast.success(dict.removed)}
         />
       </div>
     </div>

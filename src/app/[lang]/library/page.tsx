@@ -130,6 +130,11 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
               remove: dict.library.remove,
               removeConfirm: dict.library.removeConfirm,
               noEpisodes: dict.library.noEpisodes,
+              statusUpdated: dict.library.statusUpdated,
+              ratingUpdated: dict.library.ratingUpdated,
+              progressUpdated: dict.library.progressUpdated,
+              removed: dict.library.removed,
+              error: dict.common.error,
             }}
           />
         ) : (

@@ -38,6 +38,11 @@ export interface Dictionary {
     collection: string;
     noEpisodes: string;
     removeConfirm: string;
+    progress: string;
+    rating: string;
+    yourRating: string;
+    notRated: string;
+    status: string;
   };
   media: {
     movie: string;

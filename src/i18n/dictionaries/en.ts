@@ -40,6 +40,11 @@ export const dictionary: Dictionary = {
     collection: "Collection",
     noEpisodes: "No episodes",
     removeConfirm: "Remove this item from your library?",
+    progress: "Progress",
+    rating: "Rating",
+    yourRating: "Your Rating",
+    notRated: "Not rated",
+    status: "Status",
   },
   media: {
     movie: "Movie",

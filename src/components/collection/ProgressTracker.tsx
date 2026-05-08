@@ -6,6 +6,13 @@ interface ProgressTrackerProps {
   onChange: (progress: number) => void;
   disabled?: boolean;
   mediaType?: "movie" | "tv" | "anime" | "manga";
+  dict?: {
+    progress: string;
+    episode?: string;
+    chapter?: string;
+    of: string;
+  };
+  onAutoComplete?: () => void;
 }
 
 export function ProgressTracker({
@@ -14,9 +21,18 @@ export function ProgressTracker({
   onChange,
   disabled,
   mediaType = "anime",
+  dict,
+  onAutoComplete,
 }: ProgressTrackerProps) {
   const isManga = mediaType === "manga";
-  const unit = isManga ? "Chapter" : "Episode";
+  const unit = dict
+    ? isManga
+      ? dict.chapter ?? "Chapter"
+      : dict.episode ?? "Episode"
+    : isManga
+      ? "Chapter"
+      : "Episode";
+  const ofLabel = dict?.of ?? "of";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
@@ -28,7 +44,7 @@ export function ProgressTracker({
   return (
     <div className="space-y-1">
       <label htmlFor="progress-input" className="block text-sm font-medium text-gray-700">
-        Progress
+        {dict?.progress ?? "Progress"}
       </label>
       <div className="flex items-center gap-3">
         <input
@@ -44,7 +60,7 @@ export function ProgressTracker({
         />
         <span className="text-sm text-gray-600">
           {total !== null
-            ? `${unit} ${progress} of ${total}`
+            ? `${unit} ${progress} ${ofLabel} ${total}`
             : `${unit} ${progress}`}
         </span>
       </div>

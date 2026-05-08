@@ -26,6 +26,11 @@ interface LibraryGridProps {
     remove: string;
     removeConfirm: string;
     noEpisodes: string;
+    statusUpdated: string;
+    ratingUpdated: string;
+    progressUpdated: string;
+    removed: string;
+    error: string;
   };
 }
 

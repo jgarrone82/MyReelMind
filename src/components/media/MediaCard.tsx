@@ -1,15 +1,18 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { MediaItem } from "@/lib/api/merge";
 
 interface MediaCardProps {
   media: MediaItem;
+  lang?: string;
 }
 
-export function MediaCard({ media }: MediaCardProps) {
+export function MediaCard({ media, lang }: MediaCardProps) {
   const sourceLabel = media.source === "tmdb" ? "TMDB" : "AniList";
+  const href = lang ? `/${lang}/media/${media.id}` : null;
 
-  return (
-    <article className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+  const cardContent = (
+    <>
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-100">
         {media.coverImage ? (
           <Image
@@ -46,6 +49,18 @@ export function MediaCard({ media }: MediaCardProps) {
           </p>
         )}
       </div>
+    </>
+  );
+
+  return (
+    <article className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      {href ? (
+        <Link href={href} className="flex flex-1 flex-col">
+          {cardContent}
+        </Link>
+      ) : (
+        cardContent
+      )}
     </article>
   );
 }

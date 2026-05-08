@@ -18,18 +18,20 @@ function formatRelativeTime(date: Date): string {
 interface ActivityItemProps {
   activity: UserMediaWithMedia;
   dict: Dictionary["media"];
+  lang: string;
 }
 
-export function ActivityItem({ activity, dict }: ActivityItemProps) {
+export function ActivityItem({ activity, dict, lang }: ActivityItemProps) {
   const mediaTitle = activity.mediaItem?.title ?? dict.status.want_to_watch;
   const mediaId = activity.mediaItem?.id;
+  const mediaHref = mediaId ? `/${lang}/media/${mediaId}` : null;
 
   return (
     <div className="flex items-center gap-3 py-3 min-h-[44px]">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 truncate">
-          {mediaId ? (
-            <Link href={`/media/${mediaId}`} className="hover:underline">
+          {mediaHref ? (
+            <Link href={mediaHref} className="hover:underline">
               {mediaTitle}
             </Link>
           ) : (
