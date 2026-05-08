@@ -32,6 +32,22 @@ interface LibraryGridProps {
     progressUpdated: string;
     removed: string;
     error: string;
+    status: {
+      want_to_watch: string;
+      watching: string;
+      completed: string;
+      paused: string;
+      dropped: string;
+    };
+    statusLabel: string;
+    rating: string;
+    yourRating: string;
+    notRated: string;
+    clear: string;
+    progress: string;
+    episode: string;
+    chapter: string;
+    of: string;
   };
 }
 

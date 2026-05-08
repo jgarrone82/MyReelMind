@@ -137,6 +137,16 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
               progressUpdated: dict.library.progressUpdated,
               removed: dict.library.removed,
               error: dict.common.error,
+              status: dict.media.status,
+              statusLabel: dict.library.status,
+              rating: dict.library.rating,
+              yourRating: dict.library.yourRating,
+              notRated: dict.library.notRated,
+              clear: dict.common.cancel,
+              progress: dict.library.progress,
+              episode: dict.media.episode,
+              chapter: dict.media.chapter,
+              of: dict.media.of,
             }}
           />
         ) : (
