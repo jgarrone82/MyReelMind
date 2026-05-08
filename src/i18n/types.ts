@@ -38,11 +38,19 @@ export interface Dictionary {
     collection: string;
     noEpisodes: string;
     removeConfirm: string;
+    progress: string;
+    rating: string;
+    yourRating: string;
+    notRated: string;
+    status: string;
   };
   media: {
     movie: string;
     tv: string;
     anime: string;
+    episode: string;
+    chapter: string;
+    of: string;
     status: {
       want_to_watch: string;
       watching: string;

@@ -60,7 +60,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
         {/* Activity Feed */}
         <section aria-label={dict.dashboard.recentActivity}>
-          <ActivityFeed activities={recentActivity} dict={dict.dashboard} mediaDict={dict.media} />
+          <ActivityFeed activities={recentActivity} dict={dict.dashboard} mediaDict={dict.media} lang={lang} />
         </section>
       </main>
     </Suspense>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { toast } from "sonner";
 import { removeFromLibrary } from "@/actions/collection";
 
 interface RemoveButtonProps {
@@ -9,6 +10,8 @@ interface RemoveButtonProps {
   dict: {
     remove: string;
     removeConfirm: string;
+    cancel?: string;
+    error?: string;
   };
 }
 
@@ -17,8 +20,12 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
   const [state, formAction, isPending] = useActionState(
     async (prevState: unknown, formData: FormData) => {
       const result = await removeFromLibrary(mediaId);
-      if (result.success && onSuccess) {
-        onSuccess();
+      if (result.success) {
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else {
+        toast.error(result.error ?? dict.error ?? "Failed to remove");
       }
       return result;
     },
@@ -44,7 +51,7 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
           onClick={() => setShowConfirm(false)}
           className="rounded bg-gray-200 px-3 py-1 text-sm text-gray-700 hover:bg-gray-300"
         >
-          Cancel
+          {dict.cancel ?? "Cancel"}
         </button>
       </div>
     );

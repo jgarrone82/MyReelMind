@@ -12,32 +12,43 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-import { notFound } from "next/navigation";
-
-vi.mock("@/components/collection/StatusSelector", () => ({
-  StatusSelector: ({ status }: { status: string }) => (
-    <div data-testid="status-selector">Status: {status}</div>
-  ),
+vi.mock("@/lib/auth/server", () => ({
+  getSession: vi.fn(),
 }));
 
-vi.mock("@/components/collection/RatingInput", () => ({
-  RatingInput: ({ rating }: { rating: number | null }) => (
-    <div data-testid="rating-input">Rating: {rating ?? "none"}</div>
-  ),
+vi.mock("@/db", () => ({
+  db: {
+    query: {
+      mediaItems: {
+        findFirst: vi.fn(),
+      },
+      userMedia: {
+        findFirst: vi.fn(),
+      },
+    },
+  },
 }));
 
-vi.mock("@/components/collection/ProgressTracker", () => ({
-  ProgressTracker: ({ progress }: { progress: number }) => (
-    <div data-testid="progress-tracker">Progress: {progress}</div>
+vi.mock("@/components/collection/MediaDetailClient", () => ({
+  MediaDetailClient: ({ initialStatus, initialProgress, initialRating }: {
+    initialStatus: string;
+    initialProgress: number;
+    initialRating: number | null;
+  }) => (
+    <div data-testid="media-detail-client">
+      Status: {initialStatus}, Progress: {initialProgress}, Rating: {initialRating ?? "none"}
+    </div>
   ),
 }));
 
 import { fetchMediaDetail } from "@/lib/media/detail";
+import { getSession } from "@/lib/auth/server";
+import { db } from "@/db";
 
 const mockMedia = {
   id: "tmdb-123",
-  source: "tmdb",
-  type: "movie",
+  source: "tmdb" as const,
+  type: "movie" as const,
   title: "Inception",
   originalTitle: "Inception",
   year: 2010,
@@ -50,8 +61,38 @@ const mockMedia = {
 };
 
 describe("MediaDetailPage", () => {
-  it("should render media details when found", async () => {
+  it("should render media details when found with user session", async () => {
     vi.mocked(fetchMediaDetail).mockResolvedValue(mockMedia);
+    vi.mocked(getSession).mockResolvedValue({
+      user: { id: "user-1", email: "test@example.com" },
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+    });
+    vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue({
+      id: "media-uuid-1",
+      source: "tmdb",
+      sourceId: "123",
+      type: "movie",
+      title: "Inception",
+      originalTitle: null,
+      overview: null,
+      releaseDate: "2010",
+      posterPath: null,
+      backdropPath: null,
+      genres: [],
+      rawData: null,
+      fetchedAt: new Date(),
+      runtime: null,
+    });
+    vi.mocked(db.query.userMedia.findFirst).mockResolvedValue({
+      id: "user-media-1",
+      userId: "user-1",
+      mediaItemId: "media-uuid-1",
+      status: "watching",
+      progress: 5,
+      rating: 8,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
     const page = await MediaDetailPage({
       params: Promise.resolve({ lang: "en", id: "tmdb-123" }),
@@ -65,13 +106,26 @@ describe("MediaDetailPage", () => {
     expect(screen.getByText("TMDB")).toBeInTheDocument();
     expect(screen.getByText("Sci-Fi")).toBeInTheDocument();
     expect(screen.getByText("Action")).toBeInTheDocument();
-    expect(screen.getByTestId("status-selector")).toBeInTheDocument();
-    expect(screen.getByTestId("rating-input")).toBeInTheDocument();
-    expect(screen.getByTestId("progress-tracker")).toBeInTheDocument();
+    expect(screen.getByTestId("media-detail-client")).toBeInTheDocument();
+  });
+
+  it("should render without collection controls when not authenticated", async () => {
+    vi.mocked(fetchMediaDetail).mockResolvedValue(mockMedia);
+    vi.mocked(getSession).mockResolvedValue(null);
+
+    const page = await MediaDetailPage({
+      params: Promise.resolve({ lang: "en", id: "tmdb-123" }),
+    });
+
+    render(page);
+
+    expect(screen.getByText("Inception")).toBeInTheDocument();
+    expect(screen.queryByTestId("media-detail-client")).not.toBeInTheDocument();
   });
 
   it("should call notFound when media is missing", async () => {
     vi.mocked(fetchMediaDetail).mockResolvedValue(null);
+    vi.mocked(getSession).mockResolvedValue(null);
 
     await expect(
       MediaDetailPage({
@@ -79,6 +133,6 @@ describe("MediaDetailPage", () => {
       })
     ).rejects.toThrow("NEXT_NOT_FOUND");
 
-    expect(notFound).toHaveBeenCalled();
+    expect(vi.mocked(fetchMediaDetail)).toHaveBeenCalledWith("tmdb-999");
   });
 });

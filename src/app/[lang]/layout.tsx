@@ -5,6 +5,7 @@ import { locales, getDictionary, type Locale } from "@/i18n";
 import { DictionaryProvider } from "@/i18n/provider";
 import { AuthProvider } from "@/lib/auth/provider";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { Toaster } from "sonner";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -73,6 +74,7 @@ export default async function LocaleLayout({
             </div>
           </div>
         </header>
+        <Toaster position="top-right" />
         <AuthProvider>
           <DictionaryProvider dictionary={dict}>
             {children}

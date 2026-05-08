@@ -50,7 +50,7 @@ describe("ActivityItem", () => {
       },
     } satisfies UserMediaWithMedia;
 
-    render(<ActivityItem activity={mockActivity} dict={mockDict} />);
+    render(<ActivityItem activity={mockActivity} dict={mockDict} lang="es" />);
 
     expect(screen.getByText("Inception")).toBeInTheDocument();
   });
@@ -87,7 +87,7 @@ describe("ActivityItem", () => {
       },
     } satisfies UserMediaWithMedia;
 
-    render(<ActivityItem activity={mockActivity} dict={mockDict} />);
+    render(<ActivityItem activity={mockActivity} dict={mockDict} lang="es" />);
 
     expect(screen.getByText("Completado")).toBeInTheDocument();
   });
@@ -124,7 +124,7 @@ describe("ActivityItem", () => {
       },
     } satisfies UserMediaWithMedia;
 
-    render(<ActivityItem activity={mockActivity} dict={mockDict} />);
+    render(<ActivityItem activity={mockActivity} dict={mockDict} lang="es" />);
 
     expect(screen.getByText("5")).toBeInTheDocument();
   });
@@ -161,7 +161,7 @@ describe("ActivityItem", () => {
       },
     } satisfies UserMediaWithMedia;
 
-    render(<ActivityItem activity={mockActivity} dict={mockDict} />);
+    render(<ActivityItem activity={mockActivity} dict={mockDict} lang="es" />);
 
     expect(screen.getByText(/hace/i)).toBeInTheDocument();
   });

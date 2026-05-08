@@ -4,14 +4,25 @@ interface RatingInputProps {
   rating: number | null;
   onChange: (rating: number | null) => void;
   disabled?: boolean;
+  dict?: {
+    rated: string;
+    notRated: string;
+    clear: string;
+  };
 }
 
-export function RatingInput({ rating, onChange, disabled }: RatingInputProps) {
+export function RatingInput({ rating, onChange, disabled, dict }: RatingInputProps) {
+  const labels = dict ?? {
+    rated: "Rated",
+    notRated: "Not rated",
+    clear: "Clear",
+  };
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-gray-700">
-          {rating !== null ? `Rated ${rating} / 10` : "Not rated"}
+          {rating !== null ? `${labels.rated} ${rating} / 10` : labels.notRated}
         </span>
         {rating !== null && (
           <button
@@ -21,7 +32,7 @@ export function RatingInput({ rating, onChange, disabled }: RatingInputProps) {
             aria-label="Clear rating"
             className="text-sm text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:text-gray-400"
           >
-            Clear
+            {labels.clear}
           </button>
         )}
       </div>
