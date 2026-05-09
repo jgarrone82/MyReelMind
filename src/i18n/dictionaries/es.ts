@@ -10,6 +10,7 @@ export const dictionary: Dictionary = {
     search: "Buscar",
     library: "Mi biblioteca",
     dashboard: "Panel",
+    settings: "Ajustes",
   },
   search: {
     placeholder: "Buscar películas o anime...",
@@ -76,6 +77,30 @@ export const dictionary: Dictionary = {
     edit: "Editar",
     loading: "Cargando...",
     error: "Error",
+  },
+  settings: {
+    title: "Ajustes",
+    displayName: "Nombre visible",
+    avatarUrl: "URL del avatar",
+    privacy: "Privacidad",
+    publicProfile: "Hacer mi perfil público",
+    save: "Guardar cambios",
+    saved: "Ajustes guardados",
+    errorNameRequired: "El nombre es requerido",
+    errorNameLength: "El nombre debe tener 50 caracteres o menos",
+    errorInvalidUrl: "URL de avatar inválida",
+    errorUnauthorized: "Debés iniciar sesión",
+  },
+  profile: {
+    title: "Perfil",
+    privateTitle: "Perfil privado",
+    privateMessage: "Este perfil es privado.",
+    items: "Elementos",
+    completed: "Completados",
+    watching: "Viendo",
+    editSettings: "Editar ajustes",
+    emptyLibrary: "No hay elementos en tu biblioteca",
+    recentActivity: "Actividad reciente",
   },
   auth: {
     login: {

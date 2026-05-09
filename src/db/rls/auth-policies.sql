@@ -55,3 +55,14 @@ CREATE POLICY "user_media_update_own" ON public.user_media
 CREATE POLICY "user_media_delete_own" ON public.user_media
   FOR DELETE
   USING (auth.uid() = user_id);
+
+-- ============================================
+-- PUBLIC PROFILE POLICIES
+-- ============================================
+
+-- Allow reading library entries of public users (for public profile pages)
+CREATE POLICY "user_media_select_public" ON public.user_media
+  FOR SELECT
+  USING (
+    EXISTS (SELECT 1 FROM public.users WHERE users.id = user_media.user_id AND users.is_public = true)
+  );

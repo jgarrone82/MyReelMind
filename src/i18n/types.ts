@@ -8,6 +8,7 @@ export interface Dictionary {
     search: string;
     library: string;
     dashboard: string;
+    settings: string;
   };
   search: {
     placeholder: string;
@@ -74,6 +75,30 @@ export interface Dictionary {
     edit: string;
     loading: string;
     error: string;
+  };
+  settings: {
+    title: string;
+    displayName: string;
+    avatarUrl: string;
+    privacy: string;
+    publicProfile: string;
+    save: string;
+    saved: string;
+    errorNameRequired: string;
+    errorNameLength: string;
+    errorInvalidUrl: string;
+    errorUnauthorized: string;
+  };
+  profile: {
+    title: string;
+    privateTitle: string;
+    privateMessage: string;
+    items: string;
+    completed: string;
+    watching: string;
+    editSettings: string;
+    emptyLibrary: string;
+    recentActivity: string;
   };
   auth: {
     login: {
