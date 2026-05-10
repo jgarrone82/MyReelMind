@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 import { MediaGrid } from "@/components/media/MediaGrid";
+import { useDictionary } from "@/i18n/provider";
 
 interface SearchResultsProps {
   lang?: string;
 }
 
 export function SearchResults({ lang }: SearchResultsProps) {
+  const dict = useDictionary();
   const { debouncedQuery, type, year, page, setPage } = useSearchFilters();
   const { data, isLoading } = useSearch(debouncedQuery, type, year, page);
   const [allResults, setAllResults] = useState<typeof data>([]);
@@ -71,7 +73,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
             disabled={isLoading}
             className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-blue-400"
           >
-            {isLoading ? "Loading..." : "Load More"}
+            {isLoading ? dict.search.loadingMore : dict.search.loadMore}
           </button>
         </div>
       )}
