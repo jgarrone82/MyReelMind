@@ -61,7 +61,7 @@ describe("SearchResults", () => {
       setPage: vi.fn(),
       reset: vi.fn(),
     });
-    vi.mocked(useSearch).mockReturnValue({ data: [] as any, isLoading: false } as any);
+    vi.mocked(useSearch).mockReturnValue({ data: { results: [], totalPages: 0 }, isLoading: false } as any);
 
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
@@ -82,7 +82,7 @@ describe("SearchResults", () => {
       setPage: vi.fn(),
       reset: vi.fn(),
     });
-    vi.mocked(useSearch).mockReturnValue({ data: mockResults as any, isLoading: false } as any);
+    vi.mocked(useSearch).mockReturnValue({ data: { results: mockResults, totalPages: 5 }, isLoading: false } as any);
 
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
@@ -91,7 +91,7 @@ describe("SearchResults", () => {
     });
   });
 
-  it("should show Load More button when there are results and more pages available", async () => {
+  it("should show Load More button when page < totalPages", async () => {
     vi.mocked(useSearchFilters).mockReturnValue({
       query: "test",
       debouncedQuery: "test",
@@ -105,14 +105,62 @@ describe("SearchResults", () => {
       setPage: vi.fn(),
       reset: vi.fn(),
     });
-    vi.mocked(useSearch)
-      .mockReturnValueOnce({ data: mockResults as any, isLoading: false } as any)
-      .mockReturnValueOnce({ data: mockResults as any, isLoading: false } as any);
+    vi.mocked(useSearch).mockReturnValue({ data: { results: mockResults, totalPages: 5 }, isLoading: false } as any);
 
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByText("Test Movie")).toBeInTheDocument();
+      expect(screen.getByText("Load More")).toBeInTheDocument();
+    });
+  });
+
+  it("should call setPage when Load More button is clicked", async () => {
+    const mockSetPage = vi.fn();
+    vi.mocked(useSearchFilters).mockReturnValue({
+      query: "test",
+      debouncedQuery: "test",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: mockSetPage,
+      reset: vi.fn(),
+    });
+    vi.mocked(useSearch).mockReturnValue({ data: { results: mockResults, totalPages: 5 }, isLoading: false } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.getByText("Load More")).toBeInTheDocument();
+    });
+
+    screen.getByText("Load More").click();
+    expect(mockSetPage).toHaveBeenCalledWith(2);
+  });
+
+  it("should hide Load More button when on last page", async () => {
+    vi.mocked(useSearchFilters).mockReturnValue({
+      query: "test",
+      debouncedQuery: "test",
+      type: "all" as const,
+      year: null,
+      page: 5,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    });
+    vi.mocked(useSearch).mockReturnValue({ data: { results: mockResults, totalPages: 5 }, isLoading: false } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.queryByText("Load More")).not.toBeInTheDocument();
     });
   });
 });

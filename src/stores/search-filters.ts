@@ -31,7 +31,7 @@ export const useSearchFilters = create<SearchFiltersState>((set) => ({
   setQuery: (query) => set({ query }),
   setDebouncedQuery: (debouncedQuery) => set({ debouncedQuery, page: 1 }),
   setType: (type) => set({ type, page: 1 }),
-  setYear: (year) => set({ year }),
+  setYear: (year) => set({ year, page: 1 }),
   setPage: (page) => set({ page }),
   reset: () => set(initialState),
 }));

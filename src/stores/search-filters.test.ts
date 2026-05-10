@@ -71,4 +71,10 @@ describe("useSearchFilters", () => {
     useSearchFilters.getState().setType("anime");
     expect(useSearchFilters.getState().page).toBe(1);
   });
+
+  it("should reset page to 1 when year changes", () => {
+    useSearchFilters.getState().setPage(2);
+    useSearchFilters.getState().setYear(2020);
+    expect(useSearchFilters.getState().page).toBe(1);
+  });
 });

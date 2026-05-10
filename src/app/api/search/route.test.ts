@@ -3,23 +3,26 @@ import { GET } from "./route";
 
 vi.mock("@/lib/search/service", () => ({
   searchMedia: vi.fn(async (query: string, options: { type?: string; page?: number }) => {
-    if (query === "empty") return [];
-    return [
-      {
-        id: "tmdb-1",
-        source: "tmdb",
-        type: options.type === "anime" ? "anime" : "movie",
-        title: "Test Movie",
-        originalTitle: null,
-        year: 2020,
-        description: "A test movie",
-        score: 80,
-        popularity: 100,
-        coverImage: "https://image.tmdb.org/t/p/w500/poster.jpg",
-        bannerImage: null,
-        genres: ["Action"],
-      },
-    ];
+    if (query === "empty") return { results: [], totalPages: 0 };
+    return {
+      results: [
+        {
+          id: "tmdb-1",
+          source: "tmdb",
+          type: options.type === "anime" ? "anime" : "movie",
+          title: "Test Movie",
+          originalTitle: null,
+          year: 2020,
+          description: "A test movie",
+          score: 80,
+          popularity: 100,
+          coverImage: "https://image.tmdb.org/t/p/w500/poster.jpg",
+          bannerImage: null,
+          genres: ["Action"],
+        },
+      ],
+      totalPages: 5,
+    };
   }),
 }));
 
@@ -32,7 +35,7 @@ describe("GET /api/search", () => {
     expect(json.results).toHaveLength(1);
     expect(json.results[0].title).toBe("Test Movie");
     expect(json.page).toBe(1);
-    expect(json.totalPages).toBe(1);
+    expect(json.totalPages).toBe(5);
   });
 
   it("should return empty array for no query", async () => {
@@ -57,6 +60,13 @@ describe("GET /api/search", () => {
     const res = await GET(req);
     const json = await res.json();
     expect(json.page).toBe(2);
-    expect(json.totalPages).toBe(1);
+    expect(json.totalPages).toBe(5);
+  });
+
+  it("should return totalPages from search service", async () => {
+    const req = new Request("http://localhost:3000/api/search?q=naruto");
+    const res = await GET(req);
+    const json = await res.json();
+    expect(json.totalPages).toBe(5);
   });
 });

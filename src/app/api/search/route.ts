@@ -11,16 +11,11 @@ export async function GET(request: Request) {
     return Response.json({ results: [], page: 1, totalPages: 0 });
   }
 
-  const results = await searchMedia(query, {
+  const { results, totalPages } = await searchMedia(query, {
     page,
     type: type as "all" | "movie" | "tv" | "anime",
     year: year ? parseInt(year, 10) : undefined,
   });
-
-  // For simplicity, derive totalPages from results length.
-  // When page returns fewer items than a full page, we've reached the last page.
-  const RESULTS_PER_PAGE = 20;
-  const totalPages = Math.max(1, Math.ceil(results.length / RESULTS_PER_PAGE));
 
   return Response.json({ results, page, totalPages });
 }

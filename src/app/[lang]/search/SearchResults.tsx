@@ -14,7 +14,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
   const dict = useDictionary();
   const { debouncedQuery, type, year, page, setPage } = useSearchFilters();
   const { data, isLoading } = useSearch(debouncedQuery, type, year, page);
-  const [allResults, setAllResults] = useState<typeof data>([]);
+  const [allResults, setAllResults] = useState<typeof data["results"]>([]);
   const prevQueryRef = useRef(debouncedQuery);
 
   // When query changes, reset accumulated results
@@ -27,13 +27,13 @@ export function SearchResults({ lang }: SearchResultsProps) {
 
   // When new data comes in, append to accumulated results
   useEffect(() => {
-    if (data && data.length > 0) {
+    if (data && data.results.length > 0) {
       setAllResults((prev) => {
         // If page is 1, replace; otherwise append
-        if (page === 1) return data;
+        if (page === 1) return data.results;
         // Avoid duplicates by checking if we already have these results
         const existingIds = new Set(prev.map((item) => item.id));
-        const newItems = data.filter((item) => !existingIds.has(item.id));
+        const newItems = data.results.filter((item) => !existingIds.has(item.id));
         return [...prev, ...newItems];
       });
     }
@@ -58,10 +58,8 @@ export function SearchResults({ lang }: SearchResultsProps) {
     );
   }
 
-  // Simple heuristic: show Load More if we got a full page of results (20 items)
-  // This is approximate - a real implementation would need totalPages from the API
-  const resultsPerPage = 20;
-  const showLoadMore = hasResults && data && data.length >= resultsPerPage;
+  // Show Load More when there are more pages available
+  const showLoadMore = hasResults && data && page < data.totalPages;
 
   return (
     <div className="space-y-4">
