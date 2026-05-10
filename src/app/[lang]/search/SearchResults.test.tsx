@@ -8,6 +8,11 @@ import { useSearch } from "@/hooks/queries/useSearch";
 
 vi.mock("@/stores/search-filters");
 vi.mock("@/hooks/queries/useSearch");
+vi.mock("@/i18n/provider", () => ({
+  useDictionary: () => ({
+    search: { loadMore: "Load More", loadingMore: "Loading..." },
+  }),
+}));
 
 function createWrapper() {
   const queryClient = new QueryClient({
