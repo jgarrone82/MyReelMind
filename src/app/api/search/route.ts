@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get("page") ?? "1", 10);
 
   if (!query.trim()) {
-    return Response.json({ results: [] });
+    return Response.json({ results: [], page: 1, totalPages: 0 });
   }
 
   const results = await searchMedia(query, {
@@ -17,5 +17,10 @@ export async function GET(request: Request) {
     year: year ? parseInt(year, 10) : undefined,
   });
 
-  return Response.json({ results });
+  // For simplicity, derive totalPages from results length.
+  // When page returns fewer items than a full page, we've reached the last page.
+  const RESULTS_PER_PAGE = 20;
+  const totalPages = Math.max(1, Math.ceil(results.length / RESULTS_PER_PAGE));
+
+  return Response.json({ results, page, totalPages });
 }

@@ -8,6 +8,7 @@ describe("useSearchFilters", () => {
     expect(state.type).toBe("all");
     expect(state.year).toBeNull();
     expect(state.debouncedQuery).toBe("");
+    expect(state.page).toBe(1);
   });
 
   it("should set query", () => {
@@ -37,11 +38,13 @@ describe("useSearchFilters", () => {
   });
 
   it("should reset filters", () => {
-    const { setQuery, setType, setYear, setDebouncedQuery, reset } = useSearchFilters.getState();
+    const { setQuery, setType, setYear, setDebouncedQuery, setPage, reset } =
+      useSearchFilters.getState();
     setQuery("test");
     setType("movie");
     setYear(2020);
     setDebouncedQuery("test");
+    setPage(3);
     reset();
 
     const state = useSearchFilters.getState();
@@ -49,5 +52,23 @@ describe("useSearchFilters", () => {
     expect(state.type).toBe("all");
     expect(state.year).toBeNull();
     expect(state.debouncedQuery).toBe("");
+    expect(state.page).toBe(1);
+  });
+
+  it("should set page", () => {
+    useSearchFilters.getState().setPage(2);
+    expect(useSearchFilters.getState().page).toBe(2);
+  });
+
+  it("should reset page to 1 when debounced query changes", () => {
+    useSearchFilters.getState().setPage(3);
+    useSearchFilters.getState().setDebouncedQuery("new query");
+    expect(useSearchFilters.getState().page).toBe(1);
+  });
+
+  it("should reset page to 1 when type changes", () => {
+    useSearchFilters.getState().setPage(2);
+    useSearchFilters.getState().setType("anime");
+    expect(useSearchFilters.getState().page).toBe(1);
   });
 });

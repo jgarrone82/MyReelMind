@@ -8,7 +8,7 @@ export function SearchBar() {
   const { query, debouncedQuery, type, setQuery, setDebouncedQuery, setType } =
     useSearchFilters();
 
-  const { isFetching } = useSearch(debouncedQuery, type);
+  const { isFetching } = useSearch(debouncedQuery, type, undefined, 1);
 
   useEffect(() => {
     const timer = setTimeout(() => {

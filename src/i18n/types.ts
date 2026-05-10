@@ -19,6 +19,8 @@ export interface Dictionary {
     movies: string;
     tv: string;
     anime: string;
+    loadMore: string;
+    loadingMore: string;
   };
   library: {
     title: string;

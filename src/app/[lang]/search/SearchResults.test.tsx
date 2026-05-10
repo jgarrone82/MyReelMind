@@ -48,9 +48,13 @@ describe("SearchResults", () => {
       debouncedQuery: "",
       type: "all" as const,
       year: null,
+      page: 1,
       setQuery: vi.fn(),
       setDebouncedQuery: vi.fn(),
       setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
     });
     vi.mocked(useSearch).mockReturnValue({ data: [] as any, isLoading: false } as any);
 
@@ -65,11 +69,40 @@ describe("SearchResults", () => {
       debouncedQuery: "test",
       type: "all" as const,
       year: null,
+      page: 1,
       setQuery: vi.fn(),
       setDebouncedQuery: vi.fn(),
       setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
     });
     vi.mocked(useSearch).mockReturnValue({ data: mockResults as any, isLoading: false } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.getByText("Test Movie")).toBeInTheDocument();
+    });
+  });
+
+  it("should show Load More button when there are results and more pages available", async () => {
+    vi.mocked(useSearchFilters).mockReturnValue({
+      query: "test",
+      debouncedQuery: "test",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    });
+    vi.mocked(useSearch)
+      .mockReturnValueOnce({ data: mockResults as any, isLoading: false } as any)
+      .mockReturnValueOnce({ data: mockResults as any, isLoading: false } as any);
 
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 

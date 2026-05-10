@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { GET } from "./route";
 
 vi.mock("@/lib/search/service", () => ({
-  searchMedia: vi.fn(async (query: string, options: { type?: string }) => {
+  searchMedia: vi.fn(async (query: string, options: { type?: string; page?: number }) => {
     if (query === "empty") return [];
     return [
       {
@@ -31,6 +31,8 @@ describe("GET /api/search", () => {
     const json = await res.json();
     expect(json.results).toHaveLength(1);
     expect(json.results[0].title).toBe("Test Movie");
+    expect(json.page).toBe(1);
+    expect(json.totalPages).toBe(1);
   });
 
   it("should return empty array for no query", async () => {
@@ -39,6 +41,8 @@ describe("GET /api/search", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.results).toEqual([]);
+    expect(json.page).toBe(1);
+    expect(json.totalPages).toBe(0);
   });
 
   it("should pass type filter", async () => {
@@ -46,5 +50,13 @@ describe("GET /api/search", () => {
     const res = await GET(req);
     const json = await res.json();
     expect(json.results[0].type).toBe("anime");
+  });
+
+  it("should return page 2 results when page param is 2", async () => {
+    const req = new Request("http://localhost:3000/api/search?q=naruto&page=2");
+    const res = await GET(req);
+    const json = await res.json();
+    expect(json.page).toBe(2);
+    expect(json.totalPages).toBe(1);
   });
 });
