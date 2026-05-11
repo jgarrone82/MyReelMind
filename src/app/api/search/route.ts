@@ -8,14 +8,14 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get("page") ?? "1", 10);
 
   if (!query.trim()) {
-    return Response.json({ results: [] });
+    return Response.json({ results: [], page: 1, totalPages: 0 });
   }
 
-  const results = await searchMedia(query, {
+  const { results, totalPages } = await searchMedia(query, {
     page,
     type: type as "all" | "movie" | "tv" | "anime",
     year: year ? parseInt(year, 10) : undefined,
   });
 
-  return Response.json({ results });
+  return Response.json({ results, page, totalPages });
 }

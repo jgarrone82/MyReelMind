@@ -21,6 +21,6 @@ describe("useSearch", () => {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual([]);
+    expect(result.current.data).toEqual({ results: [], totalPages: 0 });
   });
 });
