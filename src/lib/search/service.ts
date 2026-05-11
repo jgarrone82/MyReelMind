@@ -20,7 +20,12 @@ export interface SearchOptions {
   year?: number;
 }
 
-export async function searchMedia(query: string, options: SearchOptions = {}): Promise<MediaItem[]> {
+export interface SearchResults {
+  results: MediaItem[];
+  totalPages: number;
+}
+
+export async function searchMedia(query: string, options: SearchOptions = {}): Promise<SearchResults> {
   const { page = 1, type = "all" } = options;
 
   const promises: Promise<unknown>[] = [];
@@ -51,10 +56,16 @@ export async function searchMedia(query: string, options: SearchOptions = {}): P
 
   const merged = [...tmdbResults, ...aniListResults];
 
+  // Get totalPages from TMDB response (authoritative source for pagination)
+  let totalPages = 1;
+  if (tmdbResponse && typeof tmdbResponse === "object" && "total_pages" in tmdbResponse) {
+    totalPages = (tmdbResponse as { total_pages: number }).total_pages;
+  }
+
   // Cache results in DB
   await cacheSearchResults(merged);
 
-  return merged;
+  return { results: merged, totalPages };
 }
 
 async function cacheSearchResults(results: MediaItem[]) {

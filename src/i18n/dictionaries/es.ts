@@ -21,6 +21,8 @@ export const dictionary: Dictionary = {
     movies: "Películas",
     tv: "Series",
     anime: "Anime",
+    loadMore: "Cargar más",
+    loadingMore: "Cargando...",
   },
   library: {
     title: "Mi biblioteca",
