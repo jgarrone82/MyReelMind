@@ -69,6 +69,12 @@ export interface Dictionary {
     recentActivity: string;
     noActivity: string;
     ctaSearch: string;
+    statsByType: string;
+    statsByGenre: string;
+    statsByStatus: string;
+    byType: string;
+    byGenre: string;
+    byStatus: string;
   };
   common: {
     save: string;

@@ -2,8 +2,16 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth/server";
 import { getDictionary, type Locale } from "@/i18n";
-import { getTotalWatched, getTotalHours, getRecentActivity } from "@/lib/dashboard/stats";
+import {
+  getTotalWatched,
+  getTotalHours,
+  getRecentActivity,
+  getStatsByType,
+  getStatsByGenre,
+  getStatsByStatus,
+} from "@/lib/dashboard/stats";
 import { StatsCard } from "@/components/dashboard/StatsCard";
+import { StatsBreakdown } from "@/components/dashboard/StatsBreakdown";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 
@@ -28,13 +36,16 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const session = await getSession();
   const userId = session?.user.id;
 
-  const [totalWatched, totalHours, recentActivity] = userId
+  const [totalWatched, totalHours, recentActivity, statsByType, statsByGenre, statsByStatus] = userId
     ? await Promise.all([
         getTotalWatched(userId),
         getTotalHours(userId),
         getRecentActivity(userId, 5),
+        getStatsByType(userId),
+        getStatsByGenre(userId),
+        getStatsByStatus(userId),
       ])
-    : [0, 0, []];
+    : [0, 0, [], [], [], []];
 
   return (
     <Suspense fallback={<DashboardSkeleton dict={dict.dashboard} />}>
@@ -55,6 +66,18 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           <StatsCard
             label={dict.dashboard.totalHours}
             value={totalHours.toFixed(1)}
+          />
+        </section>
+
+        {/* Stats Breakdown */}
+        <section aria-label={dict.dashboard.statsByType} className="mb-8">
+          <StatsBreakdown
+            statsByType={statsByType}
+            statsByGenre={statsByGenre}
+            statsByStatus={statsByStatus}
+            dict={dict.dashboard}
+            mediaDict={dict.media}
+            statusDict={dict.media.status}
           />
         </section>
 

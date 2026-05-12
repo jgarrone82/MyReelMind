@@ -71,6 +71,12 @@ export const dictionary: Dictionary = {
     recentActivity: "Actividad reciente",
     noActivity: "No tenés actividad aún",
     ctaSearch: "Buscá algo para ver",
+    statsByType: "Por tipo",
+    statsByGenre: "Géneros principales",
+    statsByStatus: "Por estado",
+    byType: "tipo",
+    byGenre: "género",
+    byStatus: "estado",
   },
   common: {
     save: "Guardar",
