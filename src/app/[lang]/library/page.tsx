@@ -6,15 +6,17 @@ import { getSession } from "@/lib/auth/server";
 import { getDictionary, type Locale } from "@/i18n";
 import { db } from "@/db";
 import { userMedia, mediaItems } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, count, sql } from "drizzle-orm";
 import { LibraryGrid } from "@/components/collection/LibraryGrid";
+
+const VALID_STATUSES = ["want_to_watch", "watching", "completed", "paused", "dropped"] as const;
+const VALID_TYPES = ["movie", "tv", "anime"] as const;
+const LIMIT = 20;
 
 interface LibraryPageProps {
   params: Promise<{ lang: string }>;
   searchParams: Promise<{ status?: string; page?: string; type?: string; rating?: string }>;
 }
-
-const VALID_STATUSES = ["want_to_watch", "watching", "completed", "paused", "dropped"] as const;
 
 export async function generateMetadata({ params }: LibraryPageProps): Promise<Metadata> {
   const { lang } = await params;
@@ -27,7 +29,7 @@ export async function generateMetadata({ params }: LibraryPageProps): Promise<Me
 
 export default async function LibraryPage({ params, searchParams }: LibraryPageProps) {
   const { lang } = await params;
-  const { status: statusParam, page: pageParam } = await searchParams;
+  const { status: statusParam, page: pageParam, type: typeParam } = await searchParams;
 
   const session = await getSession();
   if (!session) {
@@ -37,19 +39,39 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
   const userId = session.user.id;
   const dict = await getDictionary(lang as Locale);
 
+  // Parse pagination params
+  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10));
+  const offset = (currentPage - 1) * LIMIT;
+
   // Build query conditions
   const conditions = [eq(userMedia.userId, userId)];
   if (statusParam && VALID_STATUSES.includes(statusParam as (typeof VALID_STATUSES)[number])) {
     conditions.push(eq(userMedia.status, statusParam as (typeof VALID_STATUSES)[number]));
   }
 
-  // Fetch user's library
+  // Type filter condition (join with mediaItems table)
+  if (typeParam && VALID_TYPES.includes(typeParam as (typeof VALID_TYPES)[number])) {
+    conditions.push(eq(mediaItems.type, typeParam as (typeof VALID_TYPES)[number]));
+  }
+
+  // Get total count for pagination
+  const countResult = await db
+    .select({ count: count() })
+    .from(userMedia)
+    .innerJoin(mediaItems, eq(userMedia.mediaItemId, mediaItems.id))
+    .where(and(...conditions));
+  const totalItems = countResult[0]?.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalItems / LIMIT));
+
+  // Fetch paginated items
   const items = await db.query.userMedia.findMany({
     where: and(...conditions),
     with: {
       mediaItem: true,
     },
     orderBy: [desc(userMedia.updatedAt)],
+    limit: LIMIT,
+    offset,
   });
 
   // Format for LibraryGrid
@@ -91,13 +113,18 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
     { key: "want_to_watch", label: dict.library.filterPlanned },
   ];
 
+  const resolvedTypeParam =
+    typeParam && VALID_TYPES.includes(typeParam as (typeof VALID_TYPES)[number])
+      ? (typeParam as (typeof VALID_TYPES)[number])
+      : null;
+
   return (
     <Suspense fallback={<div className="p-8">{dict.common.loading}</div>}>
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">{dict.library.title}</h1>
           <span className="text-sm text-gray-500">
-            {items.length} {dict.library.collection}
+            {totalItems} {dict.library.collection}
           </span>
         </div>
 
@@ -127,6 +154,11 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
           <LibraryGrid
             items={formattedItems}
             lang={lang}
+            totalItems={totalItems}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            statusParam={statusParam}
+            typeParam={resolvedTypeParam}
             dict={{
               remove: dict.library.remove,
               removeConfirm: dict.library.removeConfirm,
@@ -147,6 +179,14 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
               episode: dict.media.episode,
               chapter: dict.media.chapter,
               of: dict.media.of,
+              previous: dict.library.previous,
+              next: dict.library.next,
+              page: dict.library.page,
+              totalItems: dict.library.totalItems,
+              allTypes: dict.library.allTypes,
+              filterMovie: dict.library.filterMovie,
+              filterTv: dict.library.filterTv,
+              filterAnime: dict.library.filterAnime,
             }}
           />
         ) : (
