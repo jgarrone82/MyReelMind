@@ -27,13 +27,14 @@ describe("SearchBar", () => {
     });
   });
 
-  it("should render search input and type filter", () => {
+  it("should render search input only (type filter moved to chips)", () => {
     render(<SearchBar />, { wrapper: createWrapper() });
 
     expect(
       screen.getByRole("searchbox", { name: /search/i })
     ).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: /type/i })).toBeInTheDocument();
+    // Type filter is now a separate TypeFilterChips component
+    expect(screen.queryByRole("combobox", { name: /type/i })).not.toBeInTheDocument();
   });
 
   it("should update query in store when user types", async () => {
@@ -60,16 +61,6 @@ describe("SearchBar", () => {
     await waitFor(() =>
       expect(useSearchFilters.getState().debouncedQuery).toBe("naruto")
     );
-  });
-
-  it("should update type filter in store when changed", async () => {
-    const user = userEvent.setup();
-    render(<SearchBar />, { wrapper: createWrapper() });
-
-    const select = screen.getByRole("combobox", { name: /type/i });
-    await user.selectOptions(select, "anime");
-
-    expect(useSearchFilters.getState().type).toBe("anime");
   });
 
   it("should show loading state when search is fetching", () => {
