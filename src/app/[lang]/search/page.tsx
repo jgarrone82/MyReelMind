@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { SearchBar } from "@/components/media/SearchBar";
+import { TypeFilterChips } from "@/components/search/TypeFilterChips";
 import { SearchResults } from "./SearchResults";
 import { getDictionary, type Locale } from "@/i18n";
 
@@ -15,6 +16,16 @@ export default async function SearchPage({ params }: SearchPageProps) {
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">{dict.search.title}</h1>
       <SearchBar />
+      <div className="mt-4">
+        <TypeFilterChips
+          dict={{
+            all: dict.search.all,
+            movies: dict.search.movies,
+            tv: dict.search.tv,
+            anime: dict.search.anime,
+          }}
+        />
+      </div>
       <div className="mt-8">
         <Suspense
           fallback={
