@@ -46,6 +46,14 @@ export interface Dictionary {
     yourRating: string;
     notRated: string;
     status: string;
+    previous: string;
+    next: string;
+    page: string;
+    totalItems: string;
+    allTypes: string;
+    filterMovie: string;
+    filterTv: string;
+    filterAnime: string;
   };
   media: {
     movie: string;
