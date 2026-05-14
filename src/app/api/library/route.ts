@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/server";
 import { db } from "@/db";
-import { userMedia, mediaItems } from "@/db/schema";
+import { userMedia } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 
 const VALID_STATUSES = ["want_to_watch", "watching", "completed", "paused", "dropped"] as const;
@@ -20,7 +20,6 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const statusParam = searchParams.get("status");
   const typeParam = searchParams.get("type");
-  const ratingParam = searchParams.get("rating");
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
 

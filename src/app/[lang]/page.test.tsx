@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getSession } from "@/lib/auth/server";
 import { getTotalWatched, getTotalHours, getRecentActivity } from "@/lib/dashboard/stats";

@@ -17,12 +17,10 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type');
   const tokenHash = searchParams.get('token_hash');
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
   const error = searchParams.get('error');
 
   // Build redirect URL with locale
   const locale = request.nextUrl.pathname.split('/')[1] ?? 'en';
-  const redirectUrl = new URL(`/${locale}${next}`, request.url);
 
   // Handle OAuth error
   if (error) {

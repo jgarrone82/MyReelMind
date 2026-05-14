@@ -3,7 +3,6 @@ import { db } from "@/db";
 import { userMedia, mediaItems } from "@/db/schema";
 import type { UserMediaWithMedia, TypeStat, GenreStat, StatusStat } from "./types";
 import type { watchStatusEnum } from "@/db/schema";
-import type { InferSelectModel } from "drizzle-orm";
 
 export async function getTotalWatched(userId: string): Promise<number> {
   const [result] = await db

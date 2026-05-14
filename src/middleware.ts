@@ -6,7 +6,6 @@ import { ensureUserProfile } from "@/lib/auth/profile-sync";
 
 const protectedRoutes = ["/dashboard", "/library", "/verify-email", "/settings"];
 const authRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
-const publicRoutes = ["/verification-sent"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

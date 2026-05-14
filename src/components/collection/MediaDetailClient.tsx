@@ -7,7 +7,6 @@ import { RatingInput } from "@/components/collection/RatingInput";
 import { ProgressTracker } from "@/components/collection/ProgressTracker";
 import { updateStatus, updateRating, updateProgress } from "@/actions/collection";
 import type { WatchStatus } from "@/components/collection/StatusSelector";
-import type { Dictionary } from "@/i18n/types";
 
 interface MediaDetailClientProps {
   mediaId: string;
@@ -50,7 +49,7 @@ export function MediaDetailClient({
   type,
   dict,
 }: MediaDetailClientProps) {
-  const [statusState, updateStatusAction, isStatusPending] = useActionState(
+  const [, updateStatusAction] = useActionState(
     async (_prevState: unknown, formData: FormData) => {
       const newStatus = formData.get("status") as WatchStatus;
       const result = await updateStatus(mediaId, newStatus);
@@ -64,7 +63,7 @@ export function MediaDetailClient({
     null
   );
 
-  const [ratingState, updateRatingAction, isRatingPending] = useActionState(
+  const [, updateRatingAction] = useActionState(
     async (_prevState: unknown, formData: FormData) => {
       const rating = parseInt(formData.get("rating") as string, 10);
       const result = await updateRating(mediaId, rating);
@@ -78,7 +77,7 @@ export function MediaDetailClient({
     null
   );
 
-  const [progressState, updateProgressAction, isProgressPending] = useActionState(
+  const [, updateProgressAction] = useActionState(
     async (_prevState: unknown, formData: FormData) => {
       const progress = parseInt(formData.get("progress") as string, 10);
       const result = await updateProgress(mediaId, progress, episodes ?? undefined);

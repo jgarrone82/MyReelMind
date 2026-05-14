@@ -1,6 +1,5 @@
 "use client";
 
-import type { Dictionary } from "@/i18n/types";
 
 export type WatchStatus = "want_to_watch" | "watching" | "completed" | "paused" | "dropped";
 

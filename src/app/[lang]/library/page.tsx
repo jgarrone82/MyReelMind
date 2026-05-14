@@ -6,7 +6,7 @@ import { getSession } from "@/lib/auth/server";
 import { getDictionary, type Locale } from "@/i18n";
 import { db } from "@/db";
 import { userMedia, mediaItems } from "@/db/schema";
-import { eq, and, desc, count, sql } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 import { LibraryGrid } from "@/components/collection/LibraryGrid";
 
 const VALID_STATUSES = ["want_to_watch", "watching", "completed", "paused", "dropped"] as const;

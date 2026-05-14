@@ -71,7 +71,7 @@ export class AniListQueue {
   ): Promise<T> {
     try {
       return await fn();
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (attempt < this.maxRetries) {
         let delayMs: number;
 

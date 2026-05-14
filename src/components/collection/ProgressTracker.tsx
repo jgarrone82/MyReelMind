@@ -12,7 +12,6 @@ interface ProgressTrackerProps {
     chapter?: string;
     of: string;
   };
-  onAutoComplete?: () => void;
 }
 
 export function ProgressTracker({
@@ -22,7 +21,6 @@ export function ProgressTracker({
   disabled,
   mediaType = "anime",
   dict,
-  onAutoComplete,
 }: ProgressTrackerProps) {
   const isManga = mediaType === "manga";
   const unit = dict

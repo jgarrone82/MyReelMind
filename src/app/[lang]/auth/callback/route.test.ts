@@ -49,7 +49,7 @@ describe('Auth Callback Route', () => {
 
       const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?type=code&code=abc123'));
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('/en/login?error=oauth_exchange_failed')
@@ -65,7 +65,7 @@ describe('Auth Callback Route', () => {
         new URL('http://localhost:3000/en/auth/callback?type=recovery&token_hash=xyz789')
       );
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(mockSupabase.auth.verifyOtp).toHaveBeenCalledWith({
         type: 'recovery',
@@ -81,7 +81,7 @@ describe('Auth Callback Route', () => {
         new URL('http://localhost:3000/en/auth/callback?type=recovery&token_hash=xyz789')
       );
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('/en/login?error=token_verification_failed')
@@ -97,7 +97,7 @@ describe('Auth Callback Route', () => {
         new URL('http://localhost:3000/en/auth/callback?type=signup&token_hash=verify123')
       );
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(mockSupabase.auth.verifyOtp).toHaveBeenCalledWith({
         type: 'signup',
@@ -113,7 +113,7 @@ describe('Auth Callback Route', () => {
         new URL('http://localhost:3000/en/auth/callback?error=access_denied')
       );
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('/en/login?error=access_denied')
@@ -125,7 +125,7 @@ describe('Auth Callback Route', () => {
         new URL('http://localhost:3000/en/auth/callback?type=unknown&token_hash=abc')
       );
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('/en/login?error=unknown_callback_type')
@@ -139,7 +139,7 @@ describe('Auth Callback Route', () => {
 
       const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?type=code&code=abc123'));
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         expect.stringContaining('/en/login?error=internal_server_error')
@@ -153,7 +153,7 @@ describe('Auth Callback Route', () => {
 
       const request = new NextRequest(new URL('http://localhost:3000/es/auth/callback?type=code&code=abc123'));
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('/es/dashboard'));
     });
@@ -165,7 +165,7 @@ describe('Auth Callback Route', () => {
         new URL('http://localhost:3000/auth/callback?type=signup&token_hash=abc')
       );
       const { GET } = await import('./route');
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('/en/login?verified=true'));
     });

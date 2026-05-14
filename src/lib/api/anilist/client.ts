@@ -14,7 +14,7 @@ export interface AniListClientOptions {
 }
 
 function buildSearchQuery(params: AniListSearchParams): string {
-  const { query = "", type = "ANIME", page = 1, perPage = 10 } = params;
+  const { query: _query, type: _type, page: _page, perPage: _perPage } = params;
 
   return `
     query ($search: String, $type: MediaType, $page: Int, $perPage: Int) {
@@ -119,8 +119,17 @@ export function createAniListClient(options: AniListClientOptions = {}) {
 
         if (!response.ok) {
           const error = new Error(`AniList API error: ${response.status} ${response.statusText}`);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (error as any).status = response.status;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (error as any).response = response;
+          throw error;
+        }
+
+        if (data.errors) {
+          const error = new Error(`GraphQL error: ${data.errors[0].message}`);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (error as any).status = 400;
           throw error;
         }
 
@@ -128,6 +137,7 @@ export function createAniListClient(options: AniListClientOptions = {}) {
         
         if (data.errors) {
           const error = new Error(`GraphQL error: ${data.errors[0].message}`);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (error as any).status = 400;
           throw error;
         }

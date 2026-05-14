@@ -17,8 +17,8 @@ interface RemoveButtonProps {
 
 export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [state, formAction, isPending] = useActionState(
-    async (prevState: unknown, formData: FormData) => {
+  const [, formAction, isPending] = useActionState(
+    async (_prevState: unknown, _formData: FormData) => {
       const result = await removeFromLibrary(mediaId);
       if (result.success) {
         if (onSuccess) {

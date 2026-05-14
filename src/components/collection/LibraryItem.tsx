@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState } from "react";
+import Image from "next/image";
 import { toast } from "sonner";
 import { StatusSelector } from "./StatusSelector";
 import { RatingInput } from "./RatingInput";
@@ -51,9 +52,7 @@ interface LibraryItemProps {
 }
 
 export function LibraryItem({
-  id,
   mediaId,
-  publicId,
   title,
   posterPath,
   status: initialStatus,
@@ -61,12 +60,11 @@ export function LibraryItem({
   rating: initialRating,
   type,
   runtime,
-  lang,
   dict,
-}: LibraryItemProps) {
+}: Omit<LibraryItemProps, 'id' | 'publicId' | 'lang'>) {
   // Status update
-  const [statusState, updateStatusAction, isStatusPending] = useActionState(
-    async (prevState: unknown, formData: FormData) => {
+  const [, updateStatusAction] = useActionState(
+    async (_prevState: unknown, formData: FormData) => {
       const newStatus = formData.get("status") as WatchStatus;
       const result = await updateStatus(mediaId, newStatus);
       if (result.success) {
@@ -80,8 +78,8 @@ export function LibraryItem({
   );
 
   // Rating update
-  const [ratingState, updateRatingAction, isRatingPending] = useActionState(
-    async (prevState: unknown, formData: FormData) => {
+  const [, updateRatingAction] = useActionState(
+    async (_prevState: unknown, formData: FormData) => {
       const rating = parseInt(formData.get("rating") as string, 10);
       const result = await updateRating(mediaId, rating);
       if (result.success) {
@@ -95,8 +93,8 @@ export function LibraryItem({
   );
 
   // Progress update
-  const [progressState, updateProgressAction, isProgressPending] = useActionState(
-    async (prevState: unknown, formData: FormData) => {
+  const [, updateProgressAction] = useActionState(
+    async (_prevState: unknown, formData: FormData) => {
       const progress = parseInt(formData.get("progress") as string, 10);
       const result = await updateProgress(mediaId, progress, runtime ?? undefined);
       if (result.success) {
@@ -108,9 +106,6 @@ export function LibraryItem({
     },
     null
   );
-
-  const ratingFormRef = useRef<HTMLFormElement>(null);
-  const progressFormRef = useRef<HTMLFormElement>(null);
 
   const handleStatusChange = (newStatus: WatchStatus) => {
     const formData = new FormData();
@@ -131,15 +126,15 @@ export function LibraryItem({
     updateProgressAction(formData);
   };
 
-  const isPending = isStatusPending || isRatingPending || isProgressPending;
-
   return (
     <div className="flex gap-4 rounded-lg border p-4">
       {/* Poster */}
       {posterPath && (
-        <img
+        <Image
           src={posterPath}
           alt={title ?? "Media poster"}
+          width={96}
+          height={144}
           className="h-24 w-16 flex-shrink-0 rounded object-cover"
         />
       )}
