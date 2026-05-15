@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useRef } from "react";
 import { updateProfile } from "@/actions/settings";
+import { uploadAvatar } from "@/lib/supabase/storage";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import type { Dictionary } from "@/i18n/types";
 import { useEffect } from "react";
 import Image from "next/image";
+import { AvatarCropper } from "@/components/avatar/AvatarCropper";
 
 interface SettingsFormProps {
   dict: Dictionary;
@@ -17,9 +19,17 @@ interface SettingsFormProps {
   };
 }
 
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
   const [state, action] = useActionState(updateProfile, undefined);
   const [previewUrl, setPreviewUrl] = useState(initialValues.avatarUrl);
+  const [isCropping, setIsCropping] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const s = dict.settings;
 
   // Show toast on success
@@ -29,79 +39,167 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
     }
   }, [state, s.saved]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setUploadError(s.avatarFileType);
+      return;
+    }
+
+    // Validate size
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadError(s.avatarFileSize);
+      return;
+    }
+
+    setUploadError(null);
+    setSelectedFile(file);
+
+    // Create object URL for crop preview
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setIsCropping(true);
+  };
+
+  const handleCropComplete = async (blob: Blob) => {
+    if (!selectedFile) return;
+
+    setIsCropping(false);
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      // In a real app, we'd get the userId from session
+      // For now, we'll use a placeholder that the upload function handles
+      const result = await uploadAvatar("user", blob);
+
+      if (result.error) {
+        setUploadError(s.avatarUploadError);
+        setIsUploading(false);
+        return;
+      }
+
+      // Update preview with uploaded URL
+      setPreviewUrl(result.url);
+    } catch {
+      setUploadError(s.avatarUploadError);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    if (previewUrl && previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(initialValues.avatarUrl);
+    setSelectedFile(null);
+    setIsCropping(false);
+  };
+
   return (
-    <form action={action} className="space-y-6 max-w-md mx-auto">
-      {/* Display Name */}
-      <div>
-        <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
-          {s.displayName}
-        </label>
-        <input
-          id="displayName"
-          name="displayName"
-          type="text"
-          required
-          minLength={1}
-          maxLength={50}
-          defaultValue={initialValues.displayName}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    <>
+      {isCropping && selectedFile && (
+        <AvatarCropper
+          imageSrc={URL.createObjectURL(selectedFile)}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          dict={{
+            cropAvatar: s.avatarCrop || s.avatarUpload,
+            cancel: s.avatarCancel || dict.common.cancel,
+            confirm: s.avatarConfirm || dict.common.save,
+          }}
         />
-      </div>
-
-      {/* Avatar URL */}
-      <div>
-        <label htmlFor="avatarUrl" className="block text-sm font-medium text-gray-700">
-          {s.avatarUrl}
-        </label>
-        <input
-          id="avatarUrl"
-          name="avatarUrl"
-          type="url"
-          defaultValue={initialValues.avatarUrl ?? ""}
-          onChange={(e) => setPreviewUrl(e.target.value || null)}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-        {/* Avatar preview */}
-        <div className="mt-2">
-          {previewUrl && (
-            <Image
-              src={previewUrl}
-              alt="Avatar preview"
-              width={64}
-              height={64}
-              className="h-16 w-16 rounded-full object-cover"
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Public profile toggle */}
-      <div>
-        <p className="text-sm font-medium text-gray-700 mb-2">{s.privacy}</p>
-        <div className="flex items-center gap-2">
-          <input
-            id="isPublic"
-            name="isPublic"
-            type="checkbox"
-            value="true"
-            defaultChecked={initialValues.isPublic}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <label htmlFor="isPublic" className="text-sm text-gray-700">
-            {s.publicProfile}
-          </label>
-        </div>
-      </div>
-
-      {/* Error message */}
-      {state?.error && (
-        <p role="alert" className="text-sm text-red-600">
-          {errorMessage(state.error, dict)}
-        </p>
       )}
 
-      <SubmitButton dict={dict} />
-    </form>
+      <form action={action} className="space-y-6 max-w-md mx-auto">
+        {/* Display Name */}
+        <div>
+          <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
+            {s.displayName}
+          </label>
+          <input
+            id="displayName"
+            name="displayName"
+            type="text"
+            required
+            minLength={1}
+            maxLength={50}
+            defaultValue={initialValues.displayName}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Avatar Upload */}
+        <div>
+          <label htmlFor="avatarUrl" className="block text-sm font-medium text-gray-700">
+            {s.avatarUrl}
+          </label>
+          <input
+            ref={fileInputRef}
+            id="avatarUrl"
+            name="avatarUrl"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleFileChange}
+            disabled={isUploading}
+            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+          {/* Avatar preview */}
+          <div className="mt-2">
+            {previewUrl && (
+              <Image
+                src={previewUrl}
+                alt="Avatar preview"
+                width={64}
+                height={64}
+                className="h-16 w-16 rounded-full object-cover"
+              />
+            )}
+          </div>
+          {/* Upload error */}
+          {uploadError && (
+            <p role="alert" className="mt-1 text-sm text-red-600">
+              {uploadError}
+            </p>
+          )}
+          {/* Hidden input to submit avatar URL via form */}
+          {previewUrl && !previewUrl.startsWith("blob:") && (
+            <input type="hidden" name="avatarUrl" value={previewUrl} />
+          )}
+        </div>
+
+        {/* Public profile toggle */}
+        <div>
+          <p className="text-sm font-medium text-gray-700 mb-2">{s.privacy}</p>
+          <div className="flex items-center gap-2">
+            <input
+              id="isPublic"
+              name="isPublic"
+              type="checkbox"
+              value="true"
+              defaultChecked={initialValues.isPublic}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="isPublic" className="text-sm text-gray-700">
+              {s.publicProfile}
+            </label>
+          </div>
+        </div>
+
+        {/* Error message */}
+        {state?.error && (
+          <p role="alert" className="text-sm text-red-600">
+            {errorMessage(state.error, dict)}
+          </p>
+        )}
+
+        <SubmitButton dict={dict} />
+      </form>
+    </>
   );
 }
 
@@ -111,6 +209,7 @@ function errorMessage(error: string, dict: Dictionary): string {
     name_too_long: dict.settings.errorNameLength,
     invalid_url: dict.settings.errorInvalidUrl,
     unauthorized: dict.settings.errorUnauthorized,
+    avatarUploadError: dict.settings.avatarUploadError || dict.common.error,
   };
   return map[error] ?? dict.common.error;
 }
