@@ -104,6 +104,9 @@ export interface Dictionary {
     errorNameLength: string;
     errorInvalidUrl: string;
     errorUnauthorized: string;
+    themeSystem: string;
+    themeLight: string;
+    themeDark: string;
   };
   profile: {
     title: string;

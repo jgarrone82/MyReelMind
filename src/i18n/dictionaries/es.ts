@@ -106,6 +106,9 @@ export const dictionary: Dictionary = {
     errorNameLength: "El nombre debe tener 50 caracteres o menos",
     errorInvalidUrl: "URL de avatar inválida",
     errorUnauthorized: "Debés iniciar sesión",
+    themeSystem: "Tema del sistema",
+    themeLight: "Tema claro",
+    themeDark: "Tema oscuro",
   },
   profile: {
     title: "Perfil",
