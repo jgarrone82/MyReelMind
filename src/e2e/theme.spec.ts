@@ -7,7 +7,6 @@ test.describe('Theme Toggle', () => {
 
     // Initially should not have dark class on html
     const htmlElement = page.locator('html');
-    const initialDarkClass = await htmlElement.getAttribute('class');
 
     // Click the theme toggle to switch to dark mode
     const themeToggle = page.getByRole('button', { name: /system theme/i });

@@ -1,7 +1,6 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useDict } from "@/i18n/provider";
 
 interface ThemeToggleProps {
   dict: {
