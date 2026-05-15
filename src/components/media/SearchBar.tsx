@@ -31,7 +31,7 @@ export function SearchBar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search movies or anime..."
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="w-full rounded-lg border border-primary px-4 py-3 text-base focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
         {isFetching && (
           <span
@@ -39,7 +39,7 @@ export function SearchBar() {
             aria-label="Loading"
             className="absolute right-3 top-1/2 -translate-y-1/2"
           >
-            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-accent" />
           </span>
         )}
       </div>

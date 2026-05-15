@@ -18,7 +18,7 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
   return (
     <form action={action} className="space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="email" className="block text-sm font-medium text-primary">
           {t.email}
         </label>
         <input
@@ -27,12 +27,12 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
           type="email"
           required
           autoComplete="email"
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md border border-primary px-3 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="password" className="block text-sm font-medium text-primary">
           {t.password}
         </label>
         <input
@@ -41,10 +41,10 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
           type="password"
           required
           autoComplete="current-password"
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md border border-primary px-3 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         />
         <div className="mt-1 text-right">
-          <Link href={`/${lang}/forgot-password`} className="text-xs text-blue-600 hover:text-blue-800">
+          <Link href={`/${lang}/forgot-password`} className="text-xs text-accent hover:text-accent/80">
             {t.forgotPassword}
           </Link>
         </div>
@@ -53,14 +53,14 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
       <SubmitButton t={t} />
 
       {error && typeof error === 'object' && 'error' in error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-error">
           {String(error.error)}
         </p>
       )}
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-secondary">
         {dict.auth.signup.title}{" "}
-        <Link href={`/${lang}/signup`} className="text-blue-600 hover:text-blue-800">
+        <Link href={`/${lang}/signup`} className="text-accent hover:text-accent/80">
           {dict.auth.signup.submit}
         </Link>
       </p>
@@ -74,7 +74,7 @@ function SubmitButton({ t }: { t: Pick<Dictionary["auth"]["login"], "submit" | "
     <button
       type="submit"
       disabled={pending}
-      className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+      className="w-full rounded-md bg-accent px-4 py-2 text-white hover:bg-accent-hover disabled:bg-muted"
     >
       {pending ? t.loading : t.submit}
     </button>

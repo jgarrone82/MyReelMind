@@ -24,16 +24,16 @@ export function TypeBar({ stats, mediaDict }: TypeBarProps) {
         const percentage = total > 0 ? (stat.count / total) * 100 : 0;
         return (
           <div key={stat.type} className="flex items-center gap-3">
-            <span className="w-20 text-sm text-gray-600 capitalize">
+            <span className="w-20 text-sm text-secondary capitalize">
               {typeLabels[stat.type]}
             </span>
-            <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                className="h-full bg-accent rounded-full transition-all duration-300"
                 style={{ width: `${percentage}%` }}
               />
             </div>
-            <span className="w-10 text-sm text-gray-900 text-right">
+            <span className="w-10 text-sm text-primary text-right">
               {stat.count}
             </span>
           </div>

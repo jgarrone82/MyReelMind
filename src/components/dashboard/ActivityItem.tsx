@@ -33,7 +33,7 @@ export function ActivityItem({ activity, dict, lang }: ActivityItemProps) {
   return (
     <div className="flex items-center gap-3 py-3 min-h-[44px]">
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">
+        <p className="text-sm font-medium text-primary truncate">
           {mediaHref ? (
             <Link href={mediaHref} className="hover:underline">
               {mediaTitle}
@@ -43,19 +43,19 @@ export function ActivityItem({ activity, dict, lang }: ActivityItemProps) {
           )}
         </p>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-secondary">
             {dict.status[activity.status]}
           </span>
           {activity.progress > 0 && (
             <>
-              <span className="text-gray-300">•</span>
-              <span className="text-xs text-gray-500">
+              <span className="text-muted">•</span>
+              <span className="text-xs text-secondary">
                 {activity.progress}
               </span>
             </>
           )}
-          <span className="text-gray-300">•</span>
-          <span className="text-xs text-gray-400">
+          <span className="text-muted">•</span>
+          <span className="text-xs text-muted">
             {formatRelativeTime(new Date(activity.updatedAt), lang)}
           </span>
         </div>

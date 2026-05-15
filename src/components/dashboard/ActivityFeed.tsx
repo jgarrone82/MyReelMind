@@ -13,11 +13,11 @@ interface ActivityFeedProps {
 export function ActivityFeed({ activities, dict, mediaDict, lang }: ActivityFeedProps) {
   if (activities.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-        <p className="text-gray-500">{dict.noActivity}</p>
+      <div className="rounded-lg border border-primary bg-primary p-8 text-center">
+        <p className="text-secondary">{dict.noActivity}</p>
         <Link
           href={`/${lang}/search`}
-          className="mt-2 inline-block text-sm text-blue-600 hover:underline min-h-[44px]"
+          className="mt-2 inline-block text-sm text-accent hover:underline min-h-[44px]"
         >
           {dict.ctaSearch}
         </Link>
@@ -26,13 +26,13 @@ export function ActivityFeed({ activities, dict, mediaDict, lang }: ActivityFeed
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
-      <div className="border-b border-gray-200 px-4 py-3">
-        <h2 className="text-lg font-semibold text-gray-900">
+    <div className="rounded-lg border border-primary bg-primary">
+      <div className="border-b border-primary px-4 py-3">
+        <h2 className="text-lg font-semibold text-primary">
           {dict.recentActivity}
         </h2>
       </div>
-      <div className="divide-y divide-gray-100 px-4">
+      <div className="divide-y divide-primary px-4">
         {activities.map((activity) => (
           <ActivityItem key={activity.id} activity={activity} dict={mediaDict} lang={lang} />
         ))}
