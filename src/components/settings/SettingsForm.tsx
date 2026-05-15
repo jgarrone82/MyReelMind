@@ -118,7 +118,7 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
       <form action={action} className="space-y-6 max-w-md mx-auto">
         {/* Display Name */}
         <div>
-          <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="displayName" className="block text-sm font-medium text-secondary">
             {s.displayName}
           </label>
           <input
@@ -129,13 +129,13 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
             minLength={1}
             maxLength={50}
             defaultValue={initialValues.displayName}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-input bg-primary px-3 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
 
         {/* Avatar Upload */}
         <div>
-          <label htmlFor="avatarUrl" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="avatarUrl" className="block text-sm font-medium text-secondary">
             {s.avatarUrl}
           </label>
           <input
@@ -146,7 +146,7 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
             accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
             disabled={isUploading}
-            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="mt-1 block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20"
           />
           {/* Avatar preview */}
           <div className="mt-2">
@@ -162,7 +162,7 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
           </div>
           {/* Upload error */}
           {uploadError && (
-            <p role="alert" className="mt-1 text-sm text-red-600">
+            <p role="alert" className="mt-1 text-sm text-danger">
               {uploadError}
             </p>
           )}
@@ -174,7 +174,7 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
 
         {/* Public profile toggle */}
         <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">{s.privacy}</p>
+          <p className="text-sm font-medium text-secondary mb-2">{s.privacy}</p>
           <div className="flex items-center gap-2">
             <input
               id="isPublic"
@@ -182,9 +182,9 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
               type="checkbox"
               value="true"
               defaultChecked={initialValues.isPublic}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-input text-accent focus:ring-accent"
             />
-            <label htmlFor="isPublic" className="text-sm text-gray-700">
+            <label htmlFor="isPublic" className="text-sm text-secondary">
               {s.publicProfile}
             </label>
           </div>
@@ -192,7 +192,7 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
 
         {/* Error message */}
         {state?.error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-danger">
             {errorMessage(state.error, dict)}
           </p>
         )}
@@ -220,7 +220,7 @@ function SubmitButton({ dict }: { dict: Dictionary }) {
     <button
       type="submit"
       disabled={pending}
-      className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+      className="w-full rounded-md bg-accent px-4 py-2 text-white hover:bg-accent/90 disabled:bg-muted disabled:text-muted-foreground"
     >
       {pending ? dict.common.loading : dict.settings.save}
     </button>

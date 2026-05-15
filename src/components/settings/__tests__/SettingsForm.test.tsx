@@ -42,12 +42,17 @@ vi.mock("@/components/avatar/AvatarCropper", () => ({
   },
 }));
 
-// Mock URL
+// Mock URL - extend native URL to preserve next/image compatibility
 const mockRevokeObjectURL = vi.fn();
-vi.stubGlobal("URL", {
-  createObjectURL: vi.fn(() => "blob:mock-preview"),
-  revokeObjectURL: mockRevokeObjectURL,
-});
+const mockCreateObjectURL = vi.fn(() => "blob:mock-preview");
+
+// Preserve native URL constructor for next/image and other internals
+class MockURL extends URL {
+  static createObjectURL = mockCreateObjectURL;
+  static revokeObjectURL = mockRevokeObjectURL;
+}
+
+vi.stubGlobal("URL", MockURL);
 
 // Mock Image
 class MockImage {
