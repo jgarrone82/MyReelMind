@@ -43,6 +43,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
       <h1 className="mb-8 text-2xl font-bold text-gray-900">{dict.settings.title}</h1>
 
       <SettingsForm
+        userId={session.user.id}
         dict={dict}
         initialValues={{
           displayName: userRow.displayName ?? "",

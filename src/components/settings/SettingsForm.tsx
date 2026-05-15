@@ -11,6 +11,7 @@ import Image from "next/image";
 import { AvatarCropper } from "@/components/avatar/AvatarCropper";
 
 interface SettingsFormProps {
+  userId: string;
   dict: Dictionary;
   initialValues: {
     displayName: string;
@@ -22,7 +23,7 @@ interface SettingsFormProps {
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
+export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps) {
   const [state, action] = useActionState(updateProfile, undefined);
   const [previewUrl, setPreviewUrl] = useState(initialValues.avatarUrl);
   const [isCropping, setIsCropping] = useState(false);
@@ -72,9 +73,7 @@ export function SettingsForm({ dict, initialValues }: SettingsFormProps) {
     setUploadError(null);
 
     try {
-      // In a real app, we'd get the userId from session
-      // For now, we'll use a placeholder that the upload function handles
-      const result = await uploadAvatar("user", blob);
+      const result = await uploadAvatar(userId, blob);
 
       if (result.error) {
         setUploadError(s.avatarUploadError);

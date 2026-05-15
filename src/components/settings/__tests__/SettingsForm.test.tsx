@@ -124,6 +124,8 @@ describe("SettingsForm - Avatar Upload", () => {
   it("should render avatar file input field", () => {
     render(
       <SettingsForm
+        userId="test-user-123"
+        userId="test-user-123"
         dict={mockDict as any}
         initialValues={{
           displayName: "John",
@@ -140,6 +142,7 @@ describe("SettingsForm - Avatar Upload", () => {
   it("should show error for invalid file type", async () => {
     render(
       <SettingsForm
+        userId="test-user-123"
         dict={mockDict as any}
         initialValues={{
           displayName: "John",
@@ -162,6 +165,7 @@ describe("SettingsForm - Avatar Upload", () => {
   it("should show error for file exceeding 2MB", async () => {
     render(
       <SettingsForm
+        userId="test-user-123"
         dict={mockDict as any}
         initialValues={{
           displayName: "John",
@@ -186,6 +190,7 @@ describe("SettingsForm - Avatar Upload", () => {
   it("should open AvatarCropper when valid file is selected", async () => {
     render(
       <SettingsForm
+        userId="test-user-123"
         dict={mockDict as any}
         initialValues={{
           displayName: "John",
@@ -215,6 +220,7 @@ describe("SettingsForm - Avatar Upload", () => {
 
     render(
       <SettingsForm
+        userId="test-user-123"
         dict={mockDict as any}
         initialValues={{
           displayName: "John",
@@ -254,6 +260,7 @@ describe("SettingsForm - Avatar Upload", () => {
 
     render(
       <SettingsForm
+        userId="test-user-123"
         dict={mockDict as any}
         initialValues={{
           displayName: "John",
@@ -288,6 +295,7 @@ describe("SettingsForm - Avatar Upload", () => {
   it("should cancel crop and revoke URL", async () => {
     render(
       <SettingsForm
+        userId="test-user-123"
         dict={mockDict as any}
         initialValues={{
           displayName: "John",
