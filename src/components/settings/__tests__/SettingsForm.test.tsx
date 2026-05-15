@@ -42,17 +42,22 @@ vi.mock("@/components/avatar/AvatarCropper", () => ({
   },
 }));
 
-// Mock URL - extend native URL to preserve next/image compatibility
+// Mock URL - preserve native URL for next/image compatibility
 const mockRevokeObjectURL = vi.fn();
 const mockCreateObjectURL = vi.fn(() => "blob:mock-preview");
 
-// Preserve native URL constructor for next/image and other internals
-class MockURL extends URL {
-  static createObjectURL = mockCreateObjectURL;
-  static revokeObjectURL = mockRevokeObjectURL;
-}
+// Store native URL before stubbing
+const NativeURL = URL;
 
-vi.stubGlobal("URL", MockURL);
+// Override only the static methods we need, keep the constructor
+Object.defineProperty(global, "URL", {
+  value: class extends NativeURL {
+    static createObjectURL = mockCreateObjectURL;
+    static revokeObjectURL = mockRevokeObjectURL;
+  },
+  writable: true,
+  configurable: true,
+});
 
 // Mock Image
 class MockImage {
