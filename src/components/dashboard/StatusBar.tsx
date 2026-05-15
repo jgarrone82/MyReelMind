@@ -32,14 +32,14 @@ export function StatusBar({ stats, dict }: StatusBarProps) {
 
         return (
           <div key={stat.status} className="flex items-center gap-3">
-            <span className="w-24 text-sm text-gray-600 truncate">{config.label}</span>
-            <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <span className="w-24 text-sm text-secondary truncate">{config.label}</span>
+            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
               <div
                 className={`h-full ${config.color} rounded-full transition-all duration-300`}
                 style={{ width: `${percentage}%` }}
               />
             </div>
-            <span className="w-10 text-sm text-gray-900 text-right">
+            <span className="w-10 text-sm text-primary text-right">
               {stat.count}
             </span>
           </div>

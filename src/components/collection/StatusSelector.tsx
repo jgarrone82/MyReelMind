@@ -29,7 +29,7 @@ export function StatusSelector({ status, onChange, disabled, dict }: StatusSelec
 
   return (
     <div className="space-y-1">
-      <label htmlFor="watch-status" className="block text-sm font-medium text-gray-700">
+      <label htmlFor="watch-status" className="block text-sm font-medium text-primary">
         {labels.label ?? "Status"}
       </label>
       <select
@@ -38,7 +38,7 @@ export function StatusSelector({ status, onChange, disabled, dict }: StatusSelec
         onChange={(e) => onChange(e.target.value as WatchStatus)}
         disabled={disabled}
         aria-label="Watch status"
-        className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+        className="block w-full rounded-md border border-primary bg-primary px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:bg-muted disabled:text-secondary"
       >
         {(Object.keys(labels).filter(k => k !== 'label') as WatchStatus[]).map((key) => (
           <option key={key} value={key}>

@@ -16,11 +16,11 @@ export function GenreCloud({ stats }: GenreCloudProps) {
         return (
           <span
             key={stat.genre}
-            className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+            className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm text-primary"
             style={{ fontSize: `${fontSize}rem` }}
           >
             {stat.genre}
-            <span className="text-xs text-gray-500">({stat.count})</span>
+            <span className="text-xs text-secondary">({stat.count})</span>
           </span>
         );
       })}
