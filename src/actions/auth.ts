@@ -14,7 +14,7 @@ export type AuthState = {
  * Sign in with email and password.
  */
 export async function signIn(
-  prevState: AuthState,
+  prevState: AuthState | null,
   formData: FormData
 ): Promise<AuthState> {
   const email = formData.get("email") as string | null;
@@ -51,7 +51,7 @@ export async function signIn(
  * Sign up with email and password.
  */
 export async function signUp(
-  prevState: AuthState,
+  prevState: AuthState | null,
   formData: FormData
 ): Promise<AuthState> {
   const email = formData.get("email") as string | null;
@@ -138,7 +138,7 @@ export async function signInWithOAuth(
  * Request a password reset email.
  */
 export async function forgotPassword(
-  prevState: AuthState,
+  prevState: AuthState | null,
   formData: FormData
 ): Promise<AuthState> {
   const email = formData.get("email") as string | null;
@@ -170,7 +170,7 @@ export async function forgotPassword(
  * Update the password for the current session (after recovery token verified).
  */
 export async function updatePassword(
-  prevState: AuthState,
+  prevState: AuthState | null,
   formData: FormData
 ): Promise<AuthState> {
   const password = formData.get("password") as string | null;
@@ -206,7 +206,7 @@ export async function updatePassword(
  * Send a verification email to the given address (used during signup).
  */
 export async function sendVerificationEmail(
-  prevState: AuthState,
+  prevState: AuthState | null,
   formData: FormData
 ): Promise<AuthState> {
   const email = formData.get("email") as string | null;

@@ -103,9 +103,7 @@ export function LibraryGrid({
         {items.map((item) => (
           <LibraryItem
             key={item.id}
-            id={item.id}
             mediaId={item.publicId}
-            publicId={item.publicId}
             title={item.mediaItem.title ?? "Unknown"}
             posterPath={item.mediaItem.posterPath}
             status={item.status}
@@ -113,7 +111,6 @@ export function LibraryGrid({
             rating={item.rating}
             type={item.mediaItem.type}
             runtime={item.mediaItem.runtime}
-            lang={lang}
             dict={dict}
           />
         ))}

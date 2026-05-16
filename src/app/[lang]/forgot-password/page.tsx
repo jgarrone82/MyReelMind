@@ -1,16 +1,15 @@
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
-import type { Dictionary } from "@/i18n/types";
+import { getDictionary, type Locale } from "@/i18n";
 
 interface ForgotPasswordPageProps {
   params: Promise<{ lang: string }>;
-  dictionary: Dictionary;
 }
 
 export default async function ForgotPasswordPage({
   params,
-  dictionary,
 }: ForgotPasswordPageProps) {
   const { lang } = await params;
+  const dictionary = await getDictionary(lang as Locale);
   const t = dictionary.auth.passwordReset;
 
   return (

@@ -1,18 +1,17 @@
 import { VerificationSentView } from "@/components/auth/VerificationSentView";
-import type { Dictionary } from "@/i18n/types";
+import { getDictionary, type Locale } from "@/i18n";
 
 interface VerificationSentPageProps {
   params: Promise<{ lang: string }>;
   searchParams: Promise<{ email?: string }>;
-  dictionary: Dictionary;
 }
 
 export default async function VerificationSentPage({
   params,
   searchParams,
-  dictionary,
 }: VerificationSentPageProps) {
   const { lang } = await params;
+  const dictionary = await getDictionary(lang as Locale);
   const { email } = await searchParams;
 
   if (!email) {

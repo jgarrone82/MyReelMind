@@ -141,21 +141,18 @@ export function MediaDetailClient({
         <StatusSelector
           status={initialStatus}
           onChange={handleStatusChange}
-          disabled={isStatusPending}
           dict={statusDict}
         />
       </form>
       <RatingInput
         rating={initialRating}
         onChange={handleRatingChange}
-        disabled={isRatingPending}
         dict={ratingDict}
       />
       <ProgressTracker
         progress={initialProgress}
         total={episodes}
         onChange={handleProgressChange}
-        disabled={isProgressPending}
         mediaType={type}
         dict={progressDict}
       />

@@ -21,7 +21,7 @@ export function RatingInput({ rating, onChange, disabled, dict }: RatingInputPro
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-700">
+        <span className="text-sm font-medium text-foreground">
           {rating !== null ? `${labels.rated} ${rating} / 10` : labels.notRated}
         </span>
         {rating !== null && (
@@ -30,7 +30,7 @@ export function RatingInput({ rating, onChange, disabled, dict }: RatingInputPro
             onClick={() => onChange(null)}
             disabled={disabled}
             aria-label="Clear rating"
-            className="text-sm text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:text-gray-400"
+            className="text-sm text-error hover:text-error/70 disabled:cursor-not-allowed disabled:text-muted-foreground"
           >
             {labels.clear}
           </button>
@@ -50,11 +50,11 @@ export function RatingInput({ rating, onChange, disabled, dict }: RatingInputPro
             disabled={disabled}
             aria-label={`Rate ${value}`}
             aria-pressed={rating === value}
-            className={`h-9 w-9 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 min-h-[44px] min-w-[44px] flex items-center justify-center ${
+            className={`h-9 w-9 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 min-h-[44px] min-w-[44px] flex items-center justify-center ${
               rating === value
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            } disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400`}
+                ? "bg-accent text-primary-foreground"
+                : "bg-muted text-foreground hover:bg-muted/80"
+            } disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground`}
           >
             {value}
           </button>

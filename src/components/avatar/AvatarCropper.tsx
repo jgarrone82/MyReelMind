@@ -1,12 +1,21 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Cropper from "react-easy-crop";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface AvatarCropperProps {
   imageSrc: string;
   onCropComplete: (blob: Blob) => void;
   onCancel: () => void;
+  open: boolean;
   dict: {
     cropAvatar: string;
     cancel: string;
@@ -14,11 +23,10 @@ interface AvatarCropperProps {
   };
 }
 
-export function AvatarCropper({ imageSrc, onCropComplete, onCancel, dict }: AvatarCropperProps) {
+export function AvatarCropper({ imageSrc, onCropComplete, onCancel, open, dict }: AvatarCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const onCropCompleteHandler = (
     _croppedArea: { width: number; height: number },
@@ -82,52 +90,49 @@ export function AvatarCropper({ imageSrc, onCropComplete, onCancel, dict }: Avat
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex max-w-md flex-col gap-4 rounded-lg bg-primary p-6 shadow-lg">
-        <h2 className="text-lg font-semibold text-primary">{dict.cropAvatar}</h2>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleCancel()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{dict.cropAvatar}</DialogTitle>
+        </DialogHeader>
 
-        <div className="relative h-64 w-64 overflow-hidden rounded-full">
-          <Cropper
-            image={imageSrc}
-            crop={crop}
-            zoom={zoom}
-            onCropChange={setCrop}
-            onCropComplete={onCropCompleteHandler}
-            cropShape="round"
-            aspect={1}
-          />
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative h-64 w-64 overflow-hidden rounded-full">
+            <Cropper
+              image={imageSrc}
+              crop={crop}
+              zoom={zoom}
+              onCropChange={setCrop}
+              onCropComplete={onCropCompleteHandler}
+              cropShape="round"
+              aspect={1}
+            />
+          </div>
+
+          <div className="flex w-full flex-col gap-1">
+            <label htmlFor="zoom-slider" className="text-sm text-muted-foreground">Zoom</label>
+            <input
+              id="zoom-slider"
+              type="range"
+              min="1"
+              max="3"
+              step="0.1"
+              value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-secondary">Zoom</label>
-          <input
-            type="range"
-            min="1"
-            max="3"
-            step="0.1"
-            value={zoom}
-            onChange={(e) => setZoom(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="rounded-md border border-primary px-4 py-2 text-sm hover:bg-muted"
-          >
+        <DialogFooter>
+          <Button variant="outline" onClick={handleCancel}>
             {dict.cancel}
-          </button>
-          <button
-            type="button"
-            onClick={handleConfirm}
-            className="rounded-md bg-accent px-4 py-2 text-sm text-white hover:bg-accent-hover"
-          >
+          </Button>
+          <Button onClick={handleConfirm}>
             {dict.confirm}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

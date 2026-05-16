@@ -1,14 +1,14 @@
 import { SignupForm } from "@/components/auth/SignupForm";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
-import type { Dictionary } from "@/i18n/types";
+import { getDictionary, type Locale } from "@/i18n";
 
 interface SignupPageProps {
   params: Promise<{ lang: string }>;
-  dictionary: Dictionary;
 }
 
-export default async function SignupPage({ params, dictionary }: SignupPageProps) {
+export default async function SignupPage({ params }: SignupPageProps) {
   const { lang } = await params;
+  const dictionary = await getDictionary(lang as Locale);
 
   return (
     <main className="mx-auto max-w-md px-4 py-8">

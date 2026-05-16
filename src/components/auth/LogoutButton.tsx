@@ -16,7 +16,7 @@ export function LogoutButton({ dict }: LogoutButtonProps) {
       <button
         type="submit"
         disabled={pending}
-        className="px-3 py-1 text-sm text-red-600 hover:text-red-800 disabled:opacity-50 min-h-[44px]"
+        className="px-3 py-1 text-sm text-error hover:text-error/80 disabled:opacity-50 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       >
         {pending ? dict.common.loading : dict.auth.logout}
       </button>

@@ -41,7 +41,7 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded bg-error px-3 py-1 text-sm text-white hover:bg-error/80 disabled:opacity-50"
+            className="rounded bg-error px-3 py-1 text-sm text-white hover:bg-error/80 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
             {isPending ? "..." : dict.remove}
           </button>
@@ -49,7 +49,7 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
         <button
           type="button"
           onClick={() => setShowConfirm(false)}
-          className="rounded bg-muted px-3 py-1 text-sm text-primary hover:bg-muted/80"
+          className="rounded bg-muted px-3 py-1 text-sm text-primary hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           {dict.cancel ?? "Cancel"}
         </button>
@@ -61,7 +61,7 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
     <button
       type="button"
       onClick={() => setShowConfirm(true)}
-      className="rounded text-error hover:text-error/80"
+      className="rounded text-error hover:text-error/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       aria-label={dict.remove}
     >
       {dict.remove}

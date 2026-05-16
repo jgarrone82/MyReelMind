@@ -83,7 +83,7 @@ export async function getStatsByStatus(
     .orderBy(desc(count()));
 
   return result.map((row) => ({
-    status: row.status as watchStatusEnum,
+    status: row.status as "want_to_watch" | "watching" | "completed" | "paused" | "dropped",
     count: row.count,
   }));
 }

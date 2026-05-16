@@ -50,7 +50,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   return (
     <Suspense fallback={<DashboardSkeleton dict={dict.dashboard} />}>
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-8 text-2xl font-bold text-gray-900 sm:text-3xl">
+        <h1 className="mb-8 text-2xl font-bold text-foreground sm:text-3xl">
           {dict.dashboard.title}
         </h1>
 

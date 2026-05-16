@@ -1,18 +1,17 @@
 import { VerifyEmailForm } from "@/components/auth/VerifyEmailForm";
 import { getSession } from "@/lib/auth/server";
+import { getDictionary, type Locale } from "@/i18n";
 import { redirect } from "next/navigation";
-import type { Dictionary } from "@/i18n/types";
 
 interface VerifyEmailPageProps {
   params: Promise<{ lang: string }>;
-  dictionary: Dictionary;
 }
 
 export default async function VerifyEmailPage({
   params,
-  dictionary,
 }: VerifyEmailPageProps) {
   const { lang } = await params;
+  const dictionary = await getDictionary(lang as Locale);
   const session = await getSession();
 
   // Protected route: redirect to login if no session

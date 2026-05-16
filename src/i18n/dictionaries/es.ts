@@ -15,6 +15,7 @@ export const dictionary: Dictionary = {
   search: {
     placeholder: "Buscar películas o anime...",
     noResults: "No se encontraron resultados",
+    tryAdjusting: "Intentá ajustar tu búsqueda o filtros",
     loading: "Buscando...",
     title: "Buscar",
     all: "Todo",

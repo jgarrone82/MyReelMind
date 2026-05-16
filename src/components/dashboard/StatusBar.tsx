@@ -13,11 +13,11 @@ export function StatusBar({ stats, dict }: StatusBarProps) {
   if (stats.length === 0) return null;
 
   const statusConfig: Record<string, { label: string; color: string }> = {
-    want_to_watch: { label: dict.want_to_watch, color: "bg-yellow-400" },
-    watching: { label: dict.watching, color: "bg-blue-400" },
-    completed: { label: dict.completed, color: "bg-green-400" },
+    want_to_watch: { label: dict.want_to_watch, color: "bg-warning" },
+    watching: { label: dict.watching, color: "bg-accent" },
+    completed: { label: dict.completed, color: "bg-success" },
     paused: { label: dict.paused, color: "bg-orange-400" },
-    dropped: { label: dict.dropped, color: "bg-red-400" },
+    dropped: { label: dict.dropped, color: "bg-error" },
   };
 
   const total = stats.reduce((sum, s) => sum + s.count, 0);

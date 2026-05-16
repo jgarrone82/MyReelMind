@@ -39,7 +39,7 @@ export function ThemeToggle({ dict }: ThemeToggleProps) {
     <button
       onClick={cycleTheme}
       aria-label={getLabel()}
-      className="rounded-md p-2 hover:bg-muted transition-colors"
+      className="rounded-md p-2 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
     >
       <span className="text-lg" aria-hidden="true">
         {getIcon()}

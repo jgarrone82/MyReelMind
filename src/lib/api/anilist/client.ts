@@ -126,13 +126,6 @@ export function createAniListClient(options: AniListClientOptions = {}) {
           throw error;
         }
 
-        if (data.errors) {
-          const error = new Error(`GraphQL error: ${data.errors[0].message}`);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (error as any).status = 400;
-          throw error;
-        }
-
         const data = await response.json();
         
         if (data.errors) {

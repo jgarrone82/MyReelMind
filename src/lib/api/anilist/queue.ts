@@ -75,9 +75,11 @@ export class AniListQueue {
       if (attempt < this.maxRetries) {
         let delayMs: number;
 
-        if (error.status === 429) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = error as any;
+        if (err.status === 429) {
           // Use Retry-After header if available
-          const retryAfter = error.response?.headers?.get?.("retry-after");
+          const retryAfter = err.response?.headers?.get?.("retry-after");
           if (retryAfter) {
             delayMs = parseInt(retryAfter, 10) * 1000;
           } else {

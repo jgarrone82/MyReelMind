@@ -1,18 +1,17 @@
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { createClient } from "@/lib/supabase/server";
+import { getDictionary, type Locale } from "@/i18n";
 import Link from "next/link";
-import type { Dictionary } from "@/i18n/types";
 
 interface ResetPasswordPageProps {
   params: Promise<{ lang: string }>;
-  dictionary: Dictionary;
 }
 
 export default async function ResetPasswordPage({
   params,
-  dictionary,
 }: ResetPasswordPageProps) {
   const { lang } = await params;
+  const dictionary = await getDictionary(lang as Locale);
   const t = dictionary.auth.passwordReset;
   const supabase = await createClient();
   const {

@@ -45,10 +45,10 @@ export function TypeFilterChips({
           <Link
             key={filter.key ?? "all"}
             href={buildHref(lang, currentStatus, filter.key)}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
               isActive
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-accent text-accent-foreground"
+                : "bg-muted text-foreground hover:bg-muted/80"
             }`}
           >
             {dict[filter.labelKey]}

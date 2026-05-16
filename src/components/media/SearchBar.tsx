@@ -4,7 +4,11 @@ import { useEffect } from "react";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 
-export function SearchBar() {
+interface SearchBarProps {
+  placeholder: string;
+}
+
+export function SearchBar({ placeholder }: SearchBarProps) {
   const { query, debouncedQuery, setQuery, setDebouncedQuery } =
     useSearchFilters();
 
@@ -30,7 +34,7 @@ export function SearchBar() {
           aria-label="Search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search movies or anime..."
+          placeholder={placeholder}
           className="w-full rounded-lg border border-primary px-4 py-3 text-base focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
         {isFetching && (

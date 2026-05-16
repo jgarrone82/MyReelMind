@@ -41,7 +41,7 @@ export interface MediaItem {
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
-export function normalizeTmdbResults(response: TmdbSearchResponse): MediaItem[] {
+export function normalizeTmdbResults(response: TmdbSearchResponse | null): MediaItem[] {
   if (!response?.results) return [];
 
   return response.results
@@ -65,7 +65,7 @@ export function normalizeTmdbResults(response: TmdbSearchResponse): MediaItem[] 
         popularity: item.popularity ?? null,
         coverImage: item.poster_path ? `${TMDB_IMAGE_BASE}/w500${item.poster_path}` : null,
         bannerImage: item.backdrop_path ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}` : null,
-        genres: item.genre_ids ?? [],
+        genres: (item.genre_ids ?? []).map(String),
       };
     });
 }

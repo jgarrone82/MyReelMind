@@ -16,6 +16,6 @@ export type GenreStat = {
 };
 
 export type StatusStat = {
-  status: typeof watchStatusEnum;
+  status: "want_to_watch" | "watching" | "completed" | "paused" | "dropped";
   count: number;
 };

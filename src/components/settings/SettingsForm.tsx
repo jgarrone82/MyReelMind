@@ -101,18 +101,17 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
 
   return (
     <>
-      {isCropping && selectedFile && (
-        <AvatarCropper
-          imageSrc={URL.createObjectURL(selectedFile)}
-          onCropComplete={handleCropComplete}
-          onCancel={handleCropCancel}
-          dict={{
-            cropAvatar: s.avatarCrop || s.avatarUpload,
-            cancel: s.avatarCancel || dict.common.cancel,
-            confirm: s.avatarConfirm || dict.common.save,
-          }}
-        />
-      )}
+      <AvatarCropper
+        imageSrc={selectedFile ? URL.createObjectURL(selectedFile) : ""}
+        onCropComplete={handleCropComplete}
+        onCancel={handleCropCancel}
+        open={isCropping && !!selectedFile}
+        dict={{
+          cropAvatar: s.avatarCrop || s.avatarUpload,
+          cancel: s.avatarCancel || dict.common.cancel,
+          confirm: s.avatarConfirm || dict.common.save,
+        }}
+      />
 
       <form action={action} className="space-y-6 max-w-md mx-auto">
         {/* Display Name */}
@@ -161,7 +160,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
           </div>
           {/* Upload error */}
           {uploadError && (
-            <p role="alert" className="mt-1 text-sm text-danger">
+            <p role="alert" className="mt-1 text-sm text-error">
               {uploadError}
             </p>
           )}
@@ -191,7 +190,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
 
         {/* Error message */}
         {state?.error && (
-          <p role="alert" className="text-sm text-danger">
+          <p role="alert" className="text-sm text-error">
             {errorMessage(state.error, dict)}
           </p>
         )}

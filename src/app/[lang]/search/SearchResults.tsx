@@ -5,6 +5,7 @@ import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 import { MediaGrid } from "@/components/media/MediaGrid";
 import { useDictionary } from "@/i18n/provider";
+import type { MediaItem } from "@/lib/api/merge";
 
 interface SearchResultsProps {
   lang?: string;
@@ -14,7 +15,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
   const dict = useDictionary();
   const { debouncedQuery, type, year, page, setPage } = useSearchFilters();
   const { data, isLoading } = useSearch(debouncedQuery, type, year, page);
-  const [allResults, setAllResults] = useState<typeof data["results"]>([]);
+  const [allResults, setAllResults] = useState<MediaItem[]>([]);
   const prevQueryRef = useRef(debouncedQuery);
 
   // When query changes, reset accumulated results
@@ -42,7 +43,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
   const hasResults = allResults.length > 0;
 
   if (!debouncedQuery.trim()) {
-    return <MediaGrid items={[]} lang={lang} />;
+    return <MediaGrid items={[]} lang={lang} noResults={dict.search.noResults} tryAdjusting={dict.search.tryAdjusting} />;
   }
 
   if (isLoading && !hasResults) {
@@ -51,7 +52,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="aspect-[2/3] animate-pulse rounded-lg bg-gray-200"
+            className="aspect-[2/3] animate-pulse rounded-lg bg-muted"
           />
         ))}
       </div>
@@ -63,13 +64,13 @@ export function SearchResults({ lang }: SearchResultsProps) {
 
   return (
     <div className="space-y-4">
-      <MediaGrid items={allResults} lang={lang} />
+      <MediaGrid items={allResults} lang={lang} noResults={dict.search.noResults} tryAdjusting={dict.search.tryAdjusting} />
       {showLoadMore && (
         <div className="flex justify-center">
           <button
             onClick={() => setPage(page + 1)}
             disabled={isLoading}
-            className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-blue-400"
+            className="rounded-lg bg-accent px-6 py-2 text-primary-foreground hover:bg-accent-hover disabled:bg-muted"
           >
             {isLoading ? dict.search.loadingMore : dict.search.loadMore}
           </button>

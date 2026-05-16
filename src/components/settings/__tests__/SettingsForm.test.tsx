@@ -125,7 +125,6 @@ describe("SettingsForm - Avatar Upload", () => {
     render(
       <SettingsForm
         userId="test-user-123"
-        userId="test-user-123"
         dict={mockDict as any}
         initialValues={{
           displayName: "John",

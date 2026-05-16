@@ -7,6 +7,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Toaster } from "sonner";
+import { Providers } from "./providers";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -85,11 +86,13 @@ export default async function LocaleLayout({
           </div>
         </header>
         <Toaster position="top-right" />
-        <AuthProvider>
-          <DictionaryProvider dictionary={dict}>
-            {children}
-          </DictionaryProvider>
-        </AuthProvider>
+        <Providers>
+          <AuthProvider>
+            <DictionaryProvider dictionary={dict}>
+              {children}
+            </DictionaryProvider>
+          </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

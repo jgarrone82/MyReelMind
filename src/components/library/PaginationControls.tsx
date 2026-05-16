@@ -42,31 +42,33 @@ export function PaginationControls({
 
   return (
     <div className="flex items-center justify-between py-4">
-      <span className="text-sm text-gray-500">
+      <span className="text-sm text-muted-foreground">
         {totalItems} {dict.totalItems}
       </span>
       <div className="flex items-center gap-2">
         <Link
           href={buildHref(lang, currentPage - 1, currentStatus, currentType)}
+          tabIndex={hasPrevious ? undefined : -1}
           aria-disabled={!hasPrevious}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
             hasPrevious
-              ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              : "bg-gray-50 text-gray-400 cursor-not-allowed"
+              ? "bg-muted text-foreground hover:bg-muted/80"
+              : "bg-muted text-muted-foreground pointer-events-none"
           }`}
         >
           {dict.previous}
         </Link>
-        <span className="text-sm text-gray-500">
+<span className="text-sm text-muted-foreground">
           {dict.page} {currentPage} / {totalPages}
         </span>
         <Link
           href={buildHref(lang, currentPage + 1, currentStatus, currentType)}
+          tabIndex={hasNext ? undefined : -1}
           aria-disabled={!hasNext}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
             hasNext
-              ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              : "bg-gray-50 text-gray-400 cursor-not-allowed"
+              ? "bg-muted text-foreground hover:bg-muted/80"
+              : "bg-muted text-muted-foreground pointer-events-none"
           }`}
         >
           {dict.next}

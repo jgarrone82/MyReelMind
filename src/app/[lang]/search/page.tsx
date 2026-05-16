@@ -14,8 +14,8 @@ export default async function SearchPage({ params }: SearchPageProps) {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">{dict.search.title}</h1>
-      <SearchBar />
+      <h1 className="mb-6 text-2xl font-bold text-foreground">{dict.search.title}</h1>
+      <SearchBar placeholder={dict.search.placeholder} />
       <div className="mt-4">
         <TypeFilterChips
           dict={{
@@ -33,7 +33,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="aspect-[2/3] animate-pulse rounded-lg bg-gray-200"
+                  className="aspect-[2/3] animate-pulse rounded-lg bg-muted"
                 />
               ))}
             </div>

@@ -7,7 +7,6 @@ let onCropCompleteCallback: ((croppedArea: { width: number; height: number }, pi
 
 vi.mock("react-easy-crop", () => ({
   default: ({
-    image,
     onCropComplete,
   }: {
     image: string;
@@ -20,7 +19,7 @@ vi.mock("react-easy-crop", () => ({
 }));
 
 // Mock canvas.toBlob - callback is the FIRST argument
-HTMLCanvasElement.prototype.toBlob = vi.fn((callback, type, quality) => {
+HTMLCanvasElement.prototype.toBlob = vi.fn((callback, _type, _quality) => {
   if (callback) {
     act(() => {
       callback(new Blob(["cropped-image-data"], { type: "image/jpeg" }));

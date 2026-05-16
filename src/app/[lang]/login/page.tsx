@@ -1,15 +1,15 @@
 import { LoginForm } from "@/components/auth/LoginForm";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
-import type { Dictionary } from "@/i18n/types";
+import { getDictionary, type Locale } from "@/i18n";
 
 interface LoginPageProps {
   params: Promise<{ lang: string }>;
   searchParams: Promise<{ password_updated?: string; verified?: string }>;
-  dictionary: Dictionary;
 }
 
-export default async function LoginPage({ params, searchParams, dictionary }: LoginPageProps) {
+export default async function LoginPage({ params, searchParams }: LoginPageProps) {
   const { lang } = await params;
+  const dictionary = await getDictionary(lang as Locale);
   const { password_updated, verified } = await searchParams;
 
   return (
@@ -20,23 +20,23 @@ export default async function LoginPage({ params, searchParams, dictionary }: Lo
 
       <div className="space-y-6">
         {password_updated && (
-          <div className="rounded-md bg-green-50 p-4">
-            <p className="text-sm text-green-700">{dictionary.auth.passwordReset.passwordUpdated}</p>
+          <div className="rounded-md bg-success p-4">
+            <p className="text-sm text-success-foreground">{dictionary.auth.passwordReset.passwordUpdated}</p>
           </div>
         )}
         {verified && (
-          <div className="rounded-md bg-green-50 p-4">
-            <p className="text-sm text-green-700">{dictionary.auth.emailVerification.emailConfirmed}</p>
+          <div className="rounded-md bg-success p-4">
+            <p className="text-sm text-success-foreground">{dictionary.auth.emailVerification.emailConfirmed}</p>
           </div>
         )}
         <LoginForm lang={lang} dict={dictionary} />
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-2 text-gray-500">o</span>
+            <span className="bg-primary px-2 text-muted-foreground">o</span>
           </div>
         </div>
 

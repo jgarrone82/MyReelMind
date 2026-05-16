@@ -150,7 +150,6 @@ export function LibraryItem({
             <StatusSelector
               status={initialStatus}
               onChange={handleStatusChange}
-              disabled={isStatusPending}
               dict={dict.status}
             />
           </form>
@@ -159,7 +158,6 @@ export function LibraryItem({
           <RatingInput
             rating={initialRating}
             onChange={handleRatingChange}
-            disabled={isRatingPending}
             dict={{ rated: dict.yourRating, notRated: dict.notRated, clear: dict.clear }}
           />
 
@@ -169,7 +167,6 @@ export function LibraryItem({
               progress={initialProgress}
               total={runtime}
               onChange={handleProgressChange}
-              disabled={isProgressPending}
               dict={{ progress: dict.progress, episode: dict.episode, chapter: dict.chapter, of: dict.of }}
             />
           )}

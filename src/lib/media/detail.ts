@@ -73,9 +73,9 @@ async function fetchFromTmdb(sourceId: string): Promise<MediaItem | null> {
 
     if (!details) return null;
 
-    const title = type === "movie" ? details.title : details.name;
-    const originalTitle = type === "movie" ? details.original_title : details.original_name;
-    const date = type === "movie" ? details.release_date : details.first_air_date;
+    const title = type === "movie" ? (details as any).title : (details as any).name;
+    const originalTitle = type === "movie" ? (details as any).original_title : (details as any).original_name;
+    const date = type === "movie" ? (details as any).release_date : (details as any).first_air_date;
     const year = date ? parseInt(date.split("-")[0], 10) : null;
 
     return {
@@ -85,12 +85,12 @@ async function fetchFromTmdb(sourceId: string): Promise<MediaItem | null> {
       title: title ?? null,
       originalTitle: originalTitle ?? null,
       year,
-      description: details.overview ?? null,
-      score: details.vote_average != null ? Math.round(details.vote_average * 10) : null,
-      popularity: details.popularity ?? null,
-      coverImage: details.poster_path ? `https://image.tmdb.org/t/p/w500${details.poster_path}` : null,
-      bannerImage: details.backdrop_path ? `https://image.tmdb.org/t/p/original${details.backdrop_path}` : null,
-      genres: details.genre_ids ?? [],
+      description: (details as any).overview ?? null,
+      score: (details as any).vote_average != null ? Math.round((details as any).vote_average * 10) : null,
+      popularity: (details as any).popularity ?? null,
+      coverImage: (details as any).poster_path ? `https://image.tmdb.org/t/p/w500${(details as any).poster_path}` : null,
+      bannerImage: (details as any).backdrop_path ? `https://image.tmdb.org/t/p/original${(details as any).backdrop_path}` : null,
+      genres: (details as any).genre_ids ?? [],
     };
   } catch {
     return null;

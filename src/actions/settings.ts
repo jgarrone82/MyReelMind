@@ -20,7 +20,7 @@ export type SettingsState = {
  * Returns { error: "name_required" | "name_too_long" | "invalid_url" } on validation failure.
  */
 export async function updateProfile(
-  prevState: SettingsState,
+  prevState: SettingsState | undefined,
   formData: FormData
 ): Promise<SettingsState> {
   const session = await getSession();

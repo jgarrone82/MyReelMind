@@ -13,6 +13,7 @@ export interface Dictionary {
   search: {
     placeholder: string;
     noResults: string;
+    tryAdjusting: string;
     loading: string;
     title: string;
     all: string;

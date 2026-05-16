@@ -122,14 +122,14 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
     <Suspense fallback={<div className="p-8">{dict.common.loading}</div>}>
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">{dict.library.title}</h1>
-          <span className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-foreground">{dict.library.title}</h1>
+          <span className="text-sm text-muted-foreground">
             {totalItems} {dict.library.collection}
           </span>
         </div>
 
         {/* Status filter tabs */}
-        <nav className="mb-6 flex gap-2 border-b border-gray-200">
+        <nav className="mb-6 flex gap-2 border-b border-border">
           {statusFilters.map((filter) => (
             <Link
               key={filter.key}
@@ -140,8 +140,8 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
               }
               className={`border-b-2 px-4 py-2 text-sm font-medium ${
                 (statusParam ?? "all") === filter.key
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  ? "border-accent text-accent"
+                  : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
               }`}
             >
               {filter.label}
@@ -191,10 +191,10 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
           />
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-lg text-gray-500">{dict.library.empty}</p>
+            <p className="text-lg text-muted-foreground">{dict.library.empty}</p>
             <Link
               href={`/${lang}/search`}
-              className="mt-4 text-blue-600 hover:text-blue-800"
+              className="mt-4 text-accent hover:text-accent/80"
             >
               {dict.dashboard.ctaSearch}
             </Link>
