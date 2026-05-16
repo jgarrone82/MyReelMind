@@ -35,14 +35,14 @@ export function PublicProfileCard({ user, stats, dict }: PublicProfileCardProps)
           className="h-20 w-20 rounded-full object-cover"
         />
       ) : (
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent text-xl font-bold text-white">
           {initials}
         </div>
       )}
 
       {/* Info */}
       <div className="flex-1">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-primary">
           {user.displayName ?? "Anonymous"}
         </h1>
 
@@ -60,8 +60,8 @@ export function PublicProfileCard({ user, stats, dict }: PublicProfileCardProps)
 function StatCounter({ value, label }: { value: number; label: string }) {
   return (
     <div className="text-center">
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-2xl font-bold text-primary">{value}</p>
+      <p className="text-sm text-secondary">{label}</p>
     </div>
   );
 }

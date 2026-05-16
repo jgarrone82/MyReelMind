@@ -107,6 +107,13 @@ export interface Dictionary {
     themeSystem: string;
     themeLight: string;
     themeDark: string;
+    avatarUpload: string;
+    avatarCrop: string;
+    avatarCancel: string;
+    avatarConfirm: string;
+    avatarFileSize: string;
+    avatarFileType: string;
+    avatarUploadError: string;
   };
   profile: {
     title: string;

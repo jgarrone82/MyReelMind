@@ -5,7 +5,7 @@ import { z } from "zod";
  *
  * Fields:
  * - displayName: 1–50 trimmed characters (required)
- * - avatarUrl: valid URL string or null (optional)
+ * - avatarUrl: valid Supabase Storage URL string, null, or empty string (optional)
  * - isPublic: boolean
  */
 export const settingsSchema = z.object({
@@ -20,8 +20,15 @@ export const settingsSchema = z.object({
 
   avatarUrl: z
     .string()
-    .url("Invalid URL")
+    .url()
+    .refine(
+      (url) =>
+        url.includes("supabase") ||
+        url.includes("storage.googleapis.com"),
+      "Must be Supabase Storage URL"
+    )
     .nullable()
+    .or(z.literal(""))
     .transform((v) => (v === "" ? null : v)),
 
   isPublic: z.boolean(),

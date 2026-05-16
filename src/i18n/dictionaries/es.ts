@@ -109,6 +109,13 @@ export const dictionary: Dictionary = {
     themeSystem: "Tema del sistema",
     themeLight: "Tema claro",
     themeDark: "Tema oscuro",
+    avatarUpload: "Subir avatar",
+    avatarCrop: "Recortar avatar",
+    avatarCancel: "Cancelar",
+    avatarConfirm: "Confirmar",
+    avatarFileSize: "Archivo muy grande (máx 2MB)",
+    avatarFileType: "Tipo de archivo inválido",
+    avatarUploadError: "Error al subir",
   },
   profile: {
     title: "Perfil",
