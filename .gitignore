@@ -59,3 +59,4 @@ playwright/.cache/
 # Optional: Vitest
 **/*.vitest.log
 sdd/
+.env*
