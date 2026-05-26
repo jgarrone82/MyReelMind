@@ -60,3 +60,6 @@ playwright/.cache/
 **/*.vitest.log
 sdd/
 .env*
+
+# Windows ADS artifacts (WSL downloads from browser)
+*:Zone.Identifier

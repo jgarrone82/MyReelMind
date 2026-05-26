@@ -1,13 +1,30 @@
 # Claude Design Prompts — MyReelMind
 
-Each section below is a self-contained prompt to paste into Claude Design (or any UI generator). Every prompt **assumes you've already pasted [`docs/design-system-vhs.md`](./design-system-vhs.md) as system / context** in the same Claude Design session. If you start a fresh session, paste the design system first, then the screen prompt.
+Each section below is a self-contained prompt to paste into Claude Design (or any UI generator). Every prompt **assumes you've already pasted [`docs/design-system-vhs.md`](./design-system-vhs.md) as project-level system design**. If you start a fresh session in a project where the spec is not loaded, paste the spec first, then the screen prompt.
 
 **Workflow per screen:**
-1. Open Claude Design in a fresh session
-2. Paste the full design system spec
-3. Paste the screen prompt below
-4. Attach the current screenshot when prompted
-5. Iterate
+1. Open Claude Design in a fresh session within the project (where the spec is loaded)
+2. Paste the screen prompt below
+3. Attach the current screenshot when prompted
+4. Iterate
+
+---
+
+## ⚡ Standing rules (apply to EVERY screen prompt below)
+
+Add these as the closing paragraph of any prompt you paste, OR rely on Claude Design's project memory if it persists across chats:
+
+> **Reuse the visual primitives validated in the Detail screen of this project:**
+> - **Header**: chunky M-logo box + "MyReelMind · Video & Tape Rental · Est. 1985" Cooper Black logotype + acid-green "OPEN" sticker + nav links right + "SIGN IN" CTA. Border-bottom with phosphor cyan accent.
+> - **Bottom remote-control tab bar**: 5 chunky color-coded buttons (HOME / BROWSE / RENT / LIBRARY / ACCOUNT), active state pressed-in with magenta fill, persistent across all screens including mobile.
+> - **VHS box cards**: top-strip with title in colored bg, year + rental ID label, geometric tinted-SVG poster placeholder, diagonal "RENTAL" / "NEW ARRIVAL" / "STAFF PICK" sticker top-right, footer with year/rating/aspect/catalog-ID in mono.
+> - **Genre stickers**: rotated -4deg/+4deg chips with hard offset shadows, color per genre (magenta/phosphor/acid/sodium/paper).
+> - **Source badges**: stamped-label style "SOURCE: TMDB-149" with hard offset shadows, color per source.
+> - **Receipts**: cream paper bg, monospace, dashed perforated borders, line-by-line label+value with dot leaders.
+> - **Cream paper panels** (`--paper`): for long-form text (synopses, lists, instructions). Two-column layout where appropriate.
+> - **MEMBERS ONLY pattern**: circular badge in sodium + headline with chromatic aberration + magenta-fill CTA + secondary outlined CTA + Permanent Marker annotation, for any state requiring authentication.
+>
+> Use the SAME palette tokens, font stack, and motion language from the spec. Do NOT reinvent components — extend, compose, or adapt the validated primitives. If a screen needs a new pattern not in the validated list, introduce it intentionally and explain why.
 
 ---
 
