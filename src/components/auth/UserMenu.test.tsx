@@ -9,6 +9,24 @@ vi.mock("@/lib/auth/server", () => ({
   getSession: vi.fn(),
 }));
 
+type Session = NonNullable<Awaited<ReturnType<typeof auth.getSession>>>;
+
+const createMockSession = (emailConfirmedAt: string | null): Session => ({
+  user: {
+    id: "user-123",
+    email: "test@example.com",
+    email_confirmed_at: emailConfirmedAt ?? undefined,
+    app_metadata: {},
+    user_metadata: {},
+    aud: "authenticated",
+    created_at: "2024-01-01T00:00:00.000Z",
+  },
+  access_token: "mock-token",
+  refresh_token: "mock-refresh",
+  expires_in: 3600,
+  token_type: "bearer" as const,
+});
+
 describe("UserMenu", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,13 +41,7 @@ describe("UserMenu", () => {
   });
 
   it("should render user email when authenticated", async () => {
-    const mockSession = {
-      user: { id: "user-123", email: "test@example.com", email_confirmed_at: "2024-01-01" },
-      access_token: "mock-token",
-      refresh_token: "mock-refresh",
-      expires_in: 3600,
-      token_type: "bearer",
-    };
+    const mockSession = createMockSession("2024-01-01");
     vi.mocked(auth.getSession).mockResolvedValue(mockSession);
 
     render(await UserMenu({ dict: dictionary, lang: "en" }));
@@ -40,13 +52,7 @@ describe("UserMenu", () => {
   });
 
   it("should render logout button when authenticated", async () => {
-    const mockSession = {
-      user: { id: "user-123", email: "test@example.com", email_confirmed_at: "2024-01-01" },
-      access_token: "mock-token",
-      refresh_token: "mock-refresh",
-      expires_in: 3600,
-      token_type: "bearer",
-    };
+    const mockSession = createMockSession("2024-01-01");
     vi.mocked(auth.getSession).mockResolvedValue(mockSession);
 
     render(await UserMenu({ dict: dictionary, lang: "en" }));
@@ -57,13 +63,7 @@ describe("UserMenu", () => {
   });
 
   it("should show verification warning when email is not confirmed", async () => {
-    const mockSession = {
-      user: { id: "user-123", email: "test@example.com", email_confirmed_at: null },
-      access_token: "mock-token",
-      refresh_token: "mock-refresh",
-      expires_in: 3600,
-      token_type: "bearer",
-    };
+    const mockSession = createMockSession(null);
     vi.mocked(auth.getSession).mockResolvedValue(mockSession);
 
     render(await UserMenu({ dict: dictionary, lang: "en" }));
@@ -74,13 +74,7 @@ describe("UserMenu", () => {
   });
 
   it("should NOT show verification warning when email is confirmed", async () => {
-    const mockSession = {
-      user: { id: "user-123", email: "test@example.com", email_confirmed_at: "2024-01-01" },
-      access_token: "mock-token",
-      refresh_token: "mock-refresh",
-      expires_in: 3600,
-      token_type: "bearer",
-    };
+    const mockSession = createMockSession("2024-01-01");
     vi.mocked(auth.getSession).mockResolvedValue(mockSession);
 
     render(await UserMenu({ dict: dictionary, lang: "en" }));

@@ -11,8 +11,8 @@ describe("GET /api/media/[id]", () => {
   it("should return media details for valid id", async () => {
     const mockMedia = {
       id: "tmdb-123",
-      source: "tmdb",
-      type: "movie",
+      source: "tmdb" as const,
+      type: "movie" as const,
       title: "Inception",
       originalTitle: null,
       year: 2010,
