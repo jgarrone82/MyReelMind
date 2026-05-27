@@ -37,7 +37,7 @@ describe("Search Normalizer", () => {
         popularity: 100,
         coverImage: "https://image.tmdb.org/t/p/w500/poster.jpg",
         bannerImage: "https://image.tmdb.org/t/p/original/backdrop.jpg",
-        genres: [28, 12],
+        genres: ["28", "12"],
       });
     });
 
@@ -74,7 +74,7 @@ describe("Search Normalizer", () => {
         popularity: 200,
         coverImage: "https://image.tmdb.org/t/p/w500/series.jpg",
         bannerImage: null,
-        genres: [18],
+        genres: ["18"],
       });
     });
 
