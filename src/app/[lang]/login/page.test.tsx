@@ -107,4 +107,17 @@ describe("LoginPage", () => {
 
     expect(screen.getByTestId("oauth-buttons")).toBeInTheDocument();
   });
+
+  it("should render the localized OAuth divider (not a hardcoded Spanish 'o')", async () => {
+    const page = await LoginPage({
+      params: Promise.resolve({ lang: "en" }),
+      searchParams: Promise.resolve({}),
+      dictionary: mockDict as any,
+    });
+
+    render(page);
+
+    expect(screen.getByText("or")).toBeInTheDocument();
+    expect(screen.queryByText("o")).not.toBeInTheDocument();
+  });
 });

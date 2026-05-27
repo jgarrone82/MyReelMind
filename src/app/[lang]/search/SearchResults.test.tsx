@@ -10,7 +10,14 @@ vi.mock("@/stores/search-filters");
 vi.mock("@/hooks/queries/useSearch");
 vi.mock("@/i18n/provider", () => ({
   useDictionary: () => ({
-    search: { loadMore: "Load More", loadingMore: "Loading..." },
+    search: {
+      loadMore: "Load More",
+      loadingMore: "Loading...",
+      noResults: "No results found",
+      tryAdjusting: "Try adjusting your search or filters",
+      searchPrompt: "Search for movies or anime",
+      searchPromptHint: "Find something to add to your library",
+    },
   }),
 }));
 
@@ -47,7 +54,7 @@ describe("SearchResults", () => {
     vi.clearAllMocks();
   });
 
-  it("should render empty state when no query", () => {
+  it("should render the initial search prompt when no query (not the no-results message)", () => {
     vi.mocked(useSearchFilters).mockReturnValue({
       query: "",
       debouncedQuery: "",
@@ -65,7 +72,30 @@ describe("SearchResults", () => {
 
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/no results/i)).toBeInTheDocument();
+    expect(screen.getByText(/search for movies or anime/i)).toBeInTheDocument();
+    expect(screen.queryByText(/no results/i)).not.toBeInTheDocument();
+  });
+
+  it("should render the no-results message when a query is present but returns nothing", () => {
+    vi.mocked(useSearchFilters).mockReturnValue({
+      query: "zxqw",
+      debouncedQuery: "zxqw",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    });
+    vi.mocked(useSearch).mockReturnValue({ data: { results: [], totalPages: 0 }, isLoading: false } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/no results found/i)).toBeInTheDocument();
+    expect(screen.queryByText(/search for movies or anime/i)).not.toBeInTheDocument();
   });
 
   it("should render search results when query exists", async () => {

@@ -81,6 +81,14 @@ describe("LoginForm", () => {
     expect(link).toHaveAttribute("href", "/en/signup");
   });
 
+  it("should render the signup prompt without duplicating the link label", () => {
+    render(<LoginForm lang="en" dict={dictionary} />);
+
+    expect(screen.getByText(/don't have an account/i)).toBeInTheDocument();
+    // "Create account" must appear once (the link), not as both prompt and link
+    expect(screen.getAllByText(/create account/i)).toHaveLength(1);
+  });
+
   it("should have correct input types", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 

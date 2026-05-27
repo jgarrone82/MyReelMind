@@ -43,7 +43,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
   const hasResults = allResults.length > 0;
 
   if (!debouncedQuery.trim()) {
-    return <MediaGrid items={[]} lang={lang} noResults={dict.search.noResults} tryAdjusting={dict.search.tryAdjusting} />;
+    return <MediaGrid items={[]} lang={lang} noResults={dict.search.searchPrompt} tryAdjusting={dict.search.searchPromptHint} />;
   }
 
   if (isLoading && !hasResults) {

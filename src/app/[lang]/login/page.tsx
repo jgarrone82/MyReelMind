@@ -36,7 +36,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-primary px-2 text-muted-foreground">o</span>
+            <span className="bg-primary px-2 text-muted-foreground">{dictionary.auth.login.divider}</span>
           </div>
         </div>
 

@@ -59,7 +59,7 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
       )}
 
       <p className="text-sm text-secondary">
-        {dict.auth.signup.title}{" "}
+        {t.noAccount}{" "}
         <Link href={`/${lang}/signup`} className="text-accent hover:text-accent/80">
           {dict.auth.signup.submit}
         </Link>
