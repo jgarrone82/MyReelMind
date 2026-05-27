@@ -45,6 +45,7 @@ describe("ActivityFeed", () => {
   it("should render empty state when no activities", () => {
     render(
       <ActivityFeed
+        lang="en"
         activities={[]}
         dict={mockDashboardDict}
         mediaDict={mockMediaDict}
@@ -104,6 +105,7 @@ describe("ActivityFeed", () => {
 
     render(
       <ActivityFeed
+        lang="en"
         activities={mockActivities}
         dict={mockDashboardDict}
         mediaDict={mockMediaDict}
@@ -187,6 +189,7 @@ describe("ActivityFeed", () => {
 
     render(
       <ActivityFeed
+        lang="en"
         activities={mockActivities}
         dict={mockDashboardDict}
         mediaDict={mockMediaDict}

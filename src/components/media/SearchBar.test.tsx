@@ -28,7 +28,7 @@ describe("SearchBar", () => {
   });
 
   it("should render search input only (type filter moved to chips)", () => {
-    render(<SearchBar />, { wrapper: createWrapper() });
+    render(<SearchBar placeholder="Search..." />, { wrapper: createWrapper() });
 
     expect(
       screen.getByRole("searchbox", { name: /search/i })
@@ -39,7 +39,7 @@ describe("SearchBar", () => {
 
   it("should update query in store when user types", async () => {
     const user = userEvent.setup();
-    render(<SearchBar />, { wrapper: createWrapper() });
+    render(<SearchBar placeholder="Search..." />, { wrapper: createWrapper() });
 
     const input = screen.getByRole("searchbox", { name: /search/i });
     await user.type(input, "naruto");
@@ -49,7 +49,7 @@ describe("SearchBar", () => {
 
   it("should debounce query update to debouncedQuery", async () => {
     const user = userEvent.setup();
-    render(<SearchBar />, { wrapper: createWrapper() });
+    render(<SearchBar placeholder="Search..." />, { wrapper: createWrapper() });
 
     const input = screen.getByRole("searchbox", { name: /search/i });
     await user.type(input, "naruto");
@@ -67,7 +67,7 @@ describe("SearchBar", () => {
     // Pre-set a query so useSearch will attempt to fetch
     useSearchFilters.setState({ query: "naruto", debouncedQuery: "naruto" });
 
-    render(<SearchBar />, { wrapper: createWrapper() });
+    render(<SearchBar placeholder="Search..." />, { wrapper: createWrapper() });
 
     expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
   });
@@ -76,7 +76,7 @@ describe("SearchBar", () => {
     const user = userEvent.setup();
     useSearchFilters.setState({ query: "naruto", debouncedQuery: "naruto" });
 
-    render(<SearchBar />, { wrapper: createWrapper() });
+    render(<SearchBar placeholder="Search..." />, { wrapper: createWrapper() });
 
     const input = screen.getByRole("searchbox", { name: /search/i });
     await user.clear(input);
