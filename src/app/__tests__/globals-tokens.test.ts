@@ -17,10 +17,10 @@ describe("globals.css tokens", () => {
       "--text-primary": "#111827",
       "--text-secondary": "#6b7280",
       "--border-primary": "#e5e7eb",
-      "--accent": "#2563eb",
+      "--accent": "oklch(0.97 0 0)",
       "--accent-hover": "#1d4ed8",
       "--error": "#dc2626",
-      "--muted": "#f3f4f6",
+      "--muted": "oklch(0.97 0 0)",
     };
 
     it("should define all required CSS custom properties in :root", () => {
@@ -48,10 +48,10 @@ describe("globals.css tokens", () => {
       "--text-primary": "#f1f5f9",
       "--text-secondary": "#94a3b8",
       "--border-primary": "#334155",
-      "--accent": "#3b82f6",
+      "--accent": "oklch(0.269 0 0)",
       "--accent-hover": "#60a5fa",
       "--error": "#f87171",
-      "--muted": "#1e293b",
+      "--muted": "oklch(0.269 0 0)",
     };
 
     it("should define dark mode custom properties in .dark selector", () => {
