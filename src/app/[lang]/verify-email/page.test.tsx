@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import VerifyEmailPage from "./page";
-import { dictionary } from "@/i18n/dictionaries/en";
 
 vi.mock("@/lib/auth/server", () => ({
   getSession: vi.fn(),
@@ -26,7 +25,7 @@ describe("VerifyEmailPage", () => {
     vi.mocked(getSession).mockResolvedValue(null);
 
     const params = Promise.resolve({ lang: "en" });
-    await expect(VerifyEmailPage({ params, dictionary })).rejects.toThrow(
+    await expect(VerifyEmailPage({ params })).rejects.toThrow(
       "Redirect to: /en/login"
     );
   });
@@ -37,7 +36,7 @@ describe("VerifyEmailPage", () => {
     } as any);
 
     const params = Promise.resolve({ lang: "en" });
-    await expect(VerifyEmailPage({ params, dictionary })).rejects.toThrow(
+    await expect(VerifyEmailPage({ params })).rejects.toThrow(
       "Redirect to: /en/dashboard"
     );
   });
@@ -48,7 +47,7 @@ describe("VerifyEmailPage", () => {
     } as any);
 
     const params = Promise.resolve({ lang: "en" });
-    render(await VerifyEmailPage({ params, dictionary }));
+    render(await VerifyEmailPage({ params }));
 
     expect(screen.getByTestId("verify-email-form")).toBeInTheDocument();
     expect(screen.getByText("test@example.com")).toBeInTheDocument();
