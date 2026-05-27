@@ -43,7 +43,7 @@ describe("MediaGrid", () => {
   });
 
   it("should show empty state when no items", () => {
-    render(<MediaGrid items={[]} />);
+    render(<MediaGrid items={[]} noResults="No results" />);
 
     expect(screen.getByText(/no results/i)).toBeInTheDocument();
   });

@@ -87,7 +87,7 @@ describe("uploadAvatar", () => {
 
     vi.mocked(createClient).mockReturnValue({
       storage: { from: mockStorageFrom },
-    } as ReturnType<typeof createClient>);
+    } as unknown as ReturnType<typeof createClient>);
 
     const blob = new Blob(["test"], { type: "image/jpeg" });
     const result = await uploadAvatar("user123", blob);
@@ -108,7 +108,7 @@ describe("uploadAvatar", () => {
 
     vi.mocked(createClient).mockReturnValue({
       storage: { from: mockStorageFrom },
-    } as ReturnType<typeof createClient>);
+    } as unknown as ReturnType<typeof createClient>);
 
     const blob = new Blob(["test"], { type: "image/jpeg" });
     const result = await uploadAvatar("user123", blob);
@@ -129,7 +129,7 @@ describe("uploadAvatar", () => {
 
     vi.mocked(createClient).mockReturnValue({
       storage: { from: mockStorageFrom },
-    } as ReturnType<typeof createClient>);
+    } as unknown as ReturnType<typeof createClient>);
 
     const blob = new Blob(["test"], { type: "image/jpeg" });
     const result = await uploadAvatar("wronguser", blob);

@@ -61,7 +61,7 @@ describe("searchMedia", () => {
       })
     );
 
-    const results = await searchMedia("test", { page: 1, type: "all" });
+    const { results } = await searchMedia("test", { page: 1, type: "all" });
     expect(results).toHaveLength(2);
     expect(results.map((r) => r.source)).toEqual(["tmdb", "anilist"]);
   });
@@ -81,7 +81,7 @@ describe("searchMedia", () => {
       })
     );
 
-    const results = await searchMedia("test", { page: 1, type: "all" });
+    const { results } = await searchMedia("test", { page: 1, type: "all" });
     expect(results).toHaveLength(1);
     expect(results[0].source).toBe("tmdb");
   });
@@ -111,7 +111,7 @@ describe("searchMedia", () => {
       })
     );
 
-    const results = await searchMedia("anime", { page: 1, type: "anime" });
+    const { results } = await searchMedia("anime", { page: 1, type: "anime" });
     expect(results).toHaveLength(1);
     expect(results[0].type).toBe("anime");
   });

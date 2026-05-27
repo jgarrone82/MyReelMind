@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import VerificationSentPage from "./page";
-import { dictionary } from "@/i18n/dictionaries/en";
 
 vi.mock("@/components/auth/VerificationSentView", () => ({
   VerificationSentView: ({ email, lang }: { email: string; lang: string }) => (
@@ -17,7 +16,7 @@ describe("VerificationSentPage", () => {
     const params = Promise.resolve({ lang: "en" });
     const searchParams = Promise.resolve({ email: "test@example.com" });
 
-    render(await VerificationSentPage({ params, searchParams, dictionary }));
+    render(await VerificationSentPage({ params, searchParams }));
 
     expect(screen.getByTestId("verification-sent-view")).toBeInTheDocument();
     expect(screen.getByText("test@example.com")).toBeInTheDocument();
@@ -27,7 +26,7 @@ describe("VerificationSentPage", () => {
     const params = Promise.resolve({ lang: "en" });
     const searchParams = Promise.resolve({});
 
-    render(await VerificationSentPage({ params, searchParams, dictionary }));
+    render(await VerificationSentPage({ params, searchParams }));
 
     expect(screen.getByText(/no email provided/i)).toBeInTheDocument();
   });

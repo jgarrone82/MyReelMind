@@ -67,7 +67,6 @@ describe("SignupPage", () => {
   it("should render signup heading", async () => {
     const page = await SignupPage({
       params: Promise.resolve({ lang: "en" }),
-      dictionary: mockDict as any,
     });
 
     render(page);
@@ -78,7 +77,6 @@ describe("SignupPage", () => {
   it("should render SignupForm component", async () => {
     const page = await SignupPage({
       params: Promise.resolve({ lang: "en" }),
-      dictionary: mockDict as any,
     });
 
     render(page);
@@ -89,7 +87,6 @@ describe("SignupPage", () => {
   it("should render OAuthButtons component", async () => {
     const page = await SignupPage({
       params: Promise.resolve({ lang: "en" }),
-      dictionary: mockDict as any,
     });
 
     render(page);

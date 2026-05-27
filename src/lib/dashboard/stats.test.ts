@@ -253,8 +253,8 @@ describe("getRecentActivity", () => {
     const result = await getRecentActivity("user-123", 5);
 
     expect(result).toHaveLength(2);
-    expect(result[0].mediaItem.title).toBe("Inception");
-    expect(result[1].mediaItem.title).toBe("Attack on Titan");
+    expect(result[0].mediaItem?.title).toBe("Inception");
+    expect(result[1].mediaItem?.title).toBe("Attack on Titan");
   });
 
   it("should respect limit parameter", async () => {

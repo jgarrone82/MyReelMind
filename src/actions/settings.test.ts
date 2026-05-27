@@ -13,17 +13,27 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
+// Mock the drizzle db so the action never hits a real database connection.
+// The action runs: db.update(users).set({...}).where(...)
+vi.mock("@/db", () => ({
+  db: {
+    update: vi.fn(() => ({
+      set: vi.fn(() => ({
+        where: vi.fn(() => Promise.resolve()),
+      })),
+    })),
+  },
+}));
+
 import { getSession } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
 
-interface MockSession {
-  user: { id: string; email: string };
-}
+type Session = Awaited<ReturnType<typeof getSession>>;
 
 const mockSession = (userId: string | null) => {
   vi.mocked(getSession).mockResolvedValue(
     userId
-      ? ({ user: { id: userId, email: "test@example.com" } } as MockSession)
+      ? ({ user: { id: userId, email: "test@example.com" } } as unknown as Session)
       : null
   );
 };

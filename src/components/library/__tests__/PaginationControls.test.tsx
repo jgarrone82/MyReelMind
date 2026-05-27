@@ -31,14 +31,14 @@ describe("PaginationControls", () => {
   it("should have Previous enabled when not on page 1", () => {
     render(<PaginationControls {...baseProps} currentPage={2} />);
     const prevLink = screen.getByText("Previous").closest("a");
-    expect(prevLink).not.toHaveClass("cursor-not-allowed");
+    expect(prevLink).not.toHaveClass("pointer-events-none");
     expect(prevLink?.getAttribute("href")).toBe("/en/library?page=1");
   });
 
   it("should have Previous disabled on page 1", () => {
     render(<PaginationControls {...baseProps} currentPage={1} />);
     const prevLink = screen.getByText("Previous").closest("a");
-    expect(prevLink?.className).toContain("cursor-not-allowed");
+    expect(prevLink?.className).toContain("pointer-events-none");
   });
 
   it("should have Next enabled when more pages exist", () => {
@@ -50,7 +50,7 @@ describe("PaginationControls", () => {
   it("should have Next disabled on last page", () => {
     render(<PaginationControls {...baseProps} currentPage={5} totalPages={5} />);
     const nextLink = screen.getByText("Next").closest("a");
-    expect(nextLink?.className).toContain("cursor-not-allowed");
+    expect(nextLink?.className).toContain("pointer-events-none");
   });
 
   it("should preserve status and type params in links", () => {

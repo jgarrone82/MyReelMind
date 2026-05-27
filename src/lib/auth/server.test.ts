@@ -19,7 +19,7 @@ describe("getSession", () => {
       },
     };
 
-    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as ReturnType<typeof createClient>);
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const result = await getSession();
     expect(result).toEqual(mockSession);
@@ -35,7 +35,7 @@ describe("getSession", () => {
       },
     };
 
-    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as ReturnType<typeof createClient>);
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const result = await getSession();
     expect(result).toBeNull();
@@ -48,7 +48,7 @@ describe("getSession", () => {
       },
     };
 
-    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as ReturnType<typeof createClient>);
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const result = await getSession();
     expect(result).toBeNull();

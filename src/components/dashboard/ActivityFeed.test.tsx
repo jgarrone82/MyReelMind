@@ -2,29 +2,10 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ActivityFeed } from "./ActivityFeed";
 import type { UserMediaWithMedia } from "@/lib/dashboard/types";
-import type { Dictionary } from "@/i18n/types";
+import { mockDictionary } from "@tests/fixtures/mockDictionary";
 
-const mockDashboardDict: Dictionary["dashboard"] = {
-  title: "Tu actividad",
-  totalWatched: "Completados",
-  totalHours: "Horas vistas",
-  recentActivity: "Actividad reciente",
-  noActivity: "No tenés actividad aún",
-  ctaSearch: "Buscá algo para ver",
-};
-
-const mockMediaDict: Dictionary["media"] = {
-  movie: "Película",
-  tv: "Serie",
-  anime: "Anime",
-  status: {
-    want_to_watch: "Quiero ver",
-    watching: "Viendo",
-    completed: "Completado",
-    paused: "Pausado",
-    dropped: "Abandonado",
-  },
-};
+const mockDashboardDict = mockDictionary.dashboard;
+const mockMediaDict = mockDictionary.media;
 
 function createMockActivity(overrides: Partial<UserMediaWithMedia> = {}): UserMediaWithMedia {
   return {
@@ -64,13 +45,14 @@ describe("ActivityFeed", () => {
   it("should render empty state when no activities", () => {
     render(
       <ActivityFeed
+        lang="en"
         activities={[]}
         dict={mockDashboardDict}
         mediaDict={mockMediaDict}
       />
     );
 
-    expect(screen.getByText(/no tenés actividad aún/i)).toBeInTheDocument();
+    expect(screen.getByText(/no activity yet/i)).toBeInTheDocument();
   });
 
   it("should render activities list", () => {
@@ -123,6 +105,7 @@ describe("ActivityFeed", () => {
 
     render(
       <ActivityFeed
+        lang="en"
         activities={mockActivities}
         dict={mockDashboardDict}
         mediaDict={mockMediaDict}
@@ -206,6 +189,7 @@ describe("ActivityFeed", () => {
 
     render(
       <ActivityFeed
+        lang="en"
         activities={mockActivities}
         dict={mockDashboardDict}
         mediaDict={mockMediaDict}

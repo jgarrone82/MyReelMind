@@ -40,7 +40,7 @@ describe('Auth Callback Route', () => {
       const response = await GET(request);
 
       expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('abc123');
-      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('/en/dashboard'));
+      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/en/dashboard') }));
       expect(response.type).toBe('redirect');
     });
 
@@ -52,7 +52,7 @@ describe('Auth Callback Route', () => {
       await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('/en/login?error=oauth_exchange_failed')
+        expect.objectContaining({ href: expect.stringContaining('/en/login?error=oauth_exchange_failed') })
       );
     });
   });
@@ -71,7 +71,7 @@ describe('Auth Callback Route', () => {
         type: 'recovery',
         token_hash: 'xyz789',
       });
-      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('/en/reset-password'));
+      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/en/reset-password') }));
     });
 
     it('should redirect to login with error on token verification failure', async () => {
@@ -84,7 +84,7 @@ describe('Auth Callback Route', () => {
       await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('/en/login?error=token_verification_failed')
+        expect.objectContaining({ href: expect.stringContaining('/en/login?error=token_verification_failed') })
       );
     });
   });
@@ -103,7 +103,7 @@ describe('Auth Callback Route', () => {
         type: 'signup',
         token_hash: 'verify123',
       });
-      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('/en/login?verified=true'));
+      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/en/login?verified=true') }));
     });
   });
 
@@ -116,7 +116,7 @@ describe('Auth Callback Route', () => {
       await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('/en/login?error=access_denied')
+        expect.objectContaining({ href: expect.stringContaining('/en/login?error=access_denied') })
       );
     });
 
@@ -128,7 +128,7 @@ describe('Auth Callback Route', () => {
       await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('/en/login?error=unknown_callback_type')
+        expect.objectContaining({ href: expect.stringContaining('/en/login?error=unknown_callback_type') })
       );
     });
 
@@ -142,7 +142,7 @@ describe('Auth Callback Route', () => {
       await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('/en/login?error=internal_server_error')
+        expect.objectContaining({ href: expect.stringContaining('/en/login?error=internal_server_error') })
       );
     });
   });
@@ -155,7 +155,7 @@ describe('Auth Callback Route', () => {
       const { GET } = await import('./route');
       await GET(request);
 
-      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('/es/dashboard'));
+      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/es/dashboard') }));
     });
 
     it('should default to English locale if not specified', async () => {
@@ -167,7 +167,7 @@ describe('Auth Callback Route', () => {
       const { GET } = await import('./route');
       await GET(request);
 
-      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.stringContaining('/en/login?verified=true'));
+      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/en/login?verified=true') }));
     });
   });
 });

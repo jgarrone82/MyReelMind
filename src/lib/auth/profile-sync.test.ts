@@ -52,7 +52,7 @@ describe("ensureUserProfile", () => {
             limit: vi.fn().mockResolvedValue([{ id: "auth-user-uuid-123" }]),
           }),
         }),
-      });
+      } as unknown as ReturnType<typeof db.select>);
 
       await ensureUserProfile(mockAuthUser);
 
@@ -72,7 +72,7 @@ describe("ensureUserProfile", () => {
             limit: vi.fn().mockResolvedValue([]),
           }),
         }),
-      });
+      } as unknown as ReturnType<typeof db.select>);
 
       const insertValuesMock = vi.fn().mockResolvedValue(undefined);
       vi.mocked(db.insert).mockReturnValue({
@@ -101,7 +101,7 @@ describe("ensureUserProfile", () => {
             limit: vi.fn().mockResolvedValue([]),
           }),
         }),
-      });
+      } as unknown as ReturnType<typeof db.select>);
 
       const insertValuesMock = vi.fn().mockResolvedValue(undefined);
       vi.mocked(db.insert).mockReturnValue({

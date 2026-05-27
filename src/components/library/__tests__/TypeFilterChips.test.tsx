@@ -31,7 +31,7 @@ describe("TypeFilterChips", () => {
   it("should highlight the active chip", () => {
     render(<TypeFilterChips {...baseProps} currentType="movie" />);
     const movieChip = screen.getByText("Movies").closest("a");
-    expect(movieChip).toHaveClass("bg-blue-100", "text-blue-700");
+    expect(movieChip).toHaveClass("bg-accent", "text-accent-foreground");
   });
 
   it("should preserve status param in links", () => {

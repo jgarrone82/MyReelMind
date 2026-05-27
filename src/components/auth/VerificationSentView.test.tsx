@@ -1,43 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { VerificationSentView } from "./VerificationSentView";
+import { mockDictionary as mockDict } from "@tests/fixtures/mockDictionary";
 
 vi.mock("@/actions/auth", () => ({
   sendVerificationEmail: vi.fn(),
 }));
-
-const mockDict = {
-  app: { title: "MyReelMind", description: "" },
-  nav: { home: "", search: "", library: "", dashboard: "" },
-  search: { placeholder: "", noResults: "", loading: "", title: "", all: "", movies: "", tv: "", anime: "" },
-  library: { title: "", empty: "", added: "", removed: "", statusUpdated: "", ratingUpdated: "", progressUpdated: "", markedCompleted: "", remove: "", filterAll: "", filterWatching: "", filterCompleted: "", filterDropped: "", filterPlanned: "", addToLibrary: "", collection: "", noEpisodes: "", removeConfirm: "" },
-  media: { movie: "", tv: "", anime: "", status: { want_to_watch: "", watching: "", completed: "", paused: "", dropped: "" } },
-  dashboard: { title: "", totalWatched: "", totalHours: "", recentActivity: "", noActivity: "", ctaSearch: "" },
-  common: { save: "", cancel: "", delete: "", edit: "", loading: "", error: "" },
-  auth: {
-    login: { title: "", email: "", password: "", submit: "", loading: "", error: "", oauth: "", forgotPassword: "" },
-    signup: { title: "", email: "", password: "", confirmPassword: "", submit: "", loading: "", success: "" },
-    logout: "",
-    errors: { invalidCredentials: "", weakPassword: "", passwordsMismatch: "", emailInUse: "" },
-    passwordReset: { title: "", description: "", email: "", submit: "", loading: "", success: "", successDescription: "", backToLogin: "", newPassword: "", confirmPassword: "", updatePassword: "", updatingPassword: "", passwordUpdated: "", noSession: "", requestNewReset: "" },
-    emailVerification: {
-      title: "Check your email",
-      description: "We sent a verification link",
-      checkInbox: "Check your inbox at",
-      resendButton: "Resend email",
-      resendLoading: "Sending...",
-      resendSuccess: "Email sent!",
-      resendError: "Failed to send",
-      backToLogin: "Back to login",
-      goToDashboard: "Go to dashboard",
-      verifyTitle: "",
-      verifyDescription: "",
-      verifyEmail: "",
-      notYourEmail: "",
-      emailConfirmed: "",
-    },
-  },
-};
 
 describe("VerificationSentView", () => {
   it("should render heading with title", () => {
@@ -49,7 +17,7 @@ describe("VerificationSentView", () => {
   it("should render description text", () => {
     render(<VerificationSentView email="test@example.com" dict={mockDict} lang="en" />);
 
-    expect(screen.getByText(/we sent a verification link/i)).toBeInTheDocument();
+    expect(screen.getByText(/we've sent you a verification link/i)).toBeInTheDocument();
   });
 
   it("should display the email address", () => {
@@ -61,7 +29,7 @@ describe("VerificationSentView", () => {
   it("should render resend button", () => {
     render(<VerificationSentView email="test@example.com" dict={mockDict} lang="en" />);
 
-    expect(screen.getByRole("button", { name: /resend email/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /resend verification email/i })).toBeInTheDocument();
   });
 
   it("should render login link", () => {
@@ -73,7 +41,7 @@ describe("VerificationSentView", () => {
   it("should show success message after resend", async () => {
     render(<VerificationSentView email="test@example.com" dict={mockDict} lang="en" />);
 
-    const button = screen.getByRole("button", { name: /resend email/i });
+    const button = screen.getByRole("button", { name: /resend verification email/i });
     button.click();
 
     // Simulate success state

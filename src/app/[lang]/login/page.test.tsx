@@ -76,7 +76,6 @@ describe("LoginPage", () => {
     const page = await LoginPage({
       params: Promise.resolve({ lang: "en" }),
       searchParams: Promise.resolve({}),
-      dictionary: mockDict as any,
     });
 
     render(page);
@@ -88,7 +87,6 @@ describe("LoginPage", () => {
     const page = await LoginPage({
       params: Promise.resolve({ lang: "en" }),
       searchParams: Promise.resolve({}),
-      dictionary: mockDict as any,
     });
 
     render(page);
@@ -100,7 +98,6 @@ describe("LoginPage", () => {
     const page = await LoginPage({
       params: Promise.resolve({ lang: "en" }),
       searchParams: Promise.resolve({}),
-      dictionary: mockDict as any,
     });
 
     render(page);
@@ -112,7 +109,6 @@ describe("LoginPage", () => {
     const page = await LoginPage({
       params: Promise.resolve({ lang: "en" }),
       searchParams: Promise.resolve({}),
-      dictionary: mockDict as any,
     });
 
     render(page);

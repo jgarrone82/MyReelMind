@@ -64,9 +64,19 @@ describe("MediaDetailPage", () => {
   it("should render media details when found with user session", async () => {
     vi.mocked(fetchMediaDetail).mockResolvedValue(mockMedia);
     vi.mocked(getSession).mockResolvedValue({
-      user: { id: "user-1", email: "test@example.com" },
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60),
-    });
+      user: {
+        id: "user-1",
+        email: "test@example.com",
+        app_metadata: {},
+        user_metadata: {},
+        aud: "authenticated",
+        created_at: "2024-01-01T00:00:00.000Z",
+      },
+      access_token: "mock-token",
+      refresh_token: "mock-refresh",
+      expires_in: 3600,
+      token_type: "bearer",
+    } as unknown as Awaited<ReturnType<typeof getSession>>);
     vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue({
       id: "media-uuid-1",
       source: "tmdb",
@@ -79,17 +89,21 @@ describe("MediaDetailPage", () => {
       posterPath: null,
       backdropPath: null,
       genres: [],
+      status: null,
       rawData: null,
       fetchedAt: new Date(),
       runtime: null,
+      createdAt: new Date(),
     });
     vi.mocked(db.query.userMedia.findFirst).mockResolvedValue({
       id: "user-media-1",
       userId: "user-1",
       mediaItemId: "media-uuid-1",
-      status: "watching",
+      status: "watching" as const,
       progress: 5,
       rating: 8,
+      notes: null,
+      dates: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

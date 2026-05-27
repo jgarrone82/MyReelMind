@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { locales } from '@/i18n';
 
 /**
  * Auth Callback Route Handler
@@ -18,8 +19,12 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
 
-  // Build redirect URL with locale
-  const locale = request.nextUrl.pathname.split('/')[1] ?? 'en';
+  // Build redirect URL with locale.
+  // The first path segment is only a locale if it matches a known locale;
+  // for unprefixed paths like /auth/callback the segment is "auth", so we
+  // must fall back to the default English locale instead of trusting it.
+  const segment = request.nextUrl.pathname.split('/')[1];
+  const locale = (locales as string[]).includes(segment) ? segment : 'en';
 
   // Handle OAuth error
   if (error) {

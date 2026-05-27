@@ -2,20 +2,9 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ActivityItem } from "./ActivityItem";
 import type { UserMediaWithMedia } from "@/lib/dashboard/types";
-import type { Dictionary } from "@/i18n/types";
+import { mockDictionary } from "@tests/fixtures/mockDictionary";
 
-const mockDict: Dictionary["media"] = {
-  movie: "Película",
-  tv: "Serie",
-  anime: "Anime",
-  status: {
-    want_to_watch: "Quiero ver",
-    watching: "Viendo",
-    completed: "Completado",
-    paused: "Pausado",
-    dropped: "Abandonado",
-  },
-};
+const mockDict = mockDictionary.media;
 
 describe("ActivityItem", () => {
   it("should render media title", () => {
@@ -89,7 +78,7 @@ describe("ActivityItem", () => {
 
     render(<ActivityItem activity={mockActivity} dict={mockDict} lang="es" />);
 
-    expect(screen.getByText("Completado")).toBeInTheDocument();
+    expect(screen.getByText("Completed")).toBeInTheDocument();
   });
 
   it("should render progress when available", () => {

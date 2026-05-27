@@ -55,7 +55,11 @@ describe("fetchMediaDetail", () => {
       posterPath: "/poster.jpg",
       backdropPath: "/backdrop.jpg",
       genres: ["Sci-Fi", "Action"],
+      runtime: 148,
+      status: null,
+      rawData: null,
       fetchedAt: new Date(),
+      createdAt: new Date(),
     };
 
     vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue(cachedItem);
@@ -133,7 +137,11 @@ describe("fetchMediaDetail", () => {
       posterPath: "/old.jpg",
       backdropPath: null,
       genres: [],
+      runtime: null,
+      status: null,
+      rawData: null,
       fetchedAt: new Date(Date.now() - 1000 * 60 * 61), // 61 minutes ago
+      createdAt: new Date(),
     };
 
     vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue(staleItem);
