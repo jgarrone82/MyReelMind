@@ -14,6 +14,8 @@ export interface Dictionary {
     placeholder: string;
     noResults: string;
     tryAdjusting: string;
+    searchPrompt: string;
+    searchPromptHint: string;
     loading: string;
     title: string;
     all: string;
@@ -136,6 +138,8 @@ export interface Dictionary {
       loading: string;
       error: string;
       oauth: string;
+      divider: string;
+      noAccount: string;
       forgotPassword: string;
     };
     signup: {

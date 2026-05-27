@@ -18,8 +18,8 @@ describe("OAuthButtons", () => {
   it("should render Google and GitHub buttons", () => {
     render(<OAuthButtons dict={dictionary} />);
 
-    expect(screen.getByRole("button", { name: /or continue with google/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /or continue with github/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /continue with google/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /continue with github/i })).toBeInTheDocument();
   });
 
   it("should call signInWithOAuth with 'google' when Google button is clicked", async () => {
@@ -27,7 +27,7 @@ describe("OAuthButtons", () => {
 
     render(<OAuthButtons dict={dictionary} />);
 
-    const googleButton = screen.getByRole("button", { name: /or continue with google/i });
+    const googleButton = screen.getByRole("button", { name: /continue with google/i });
     fireEvent.click(googleButton);
 
     await waitFor(() => {
@@ -40,7 +40,7 @@ describe("OAuthButtons", () => {
 
     render(<OAuthButtons dict={dictionary} />);
 
-    const githubButton = screen.getByRole("button", { name: /or continue with github/i });
+    const githubButton = screen.getByRole("button", { name: /continue with github/i });
     fireEvent.click(githubButton);
 
     await waitFor(() => {
@@ -59,7 +59,7 @@ describe("OAuthButtons", () => {
 
     render(<OAuthButtons dict={dictionary} />);
 
-    const googleButton = screen.getByRole("button", { name: /or continue with google/i });
+    const googleButton = screen.getByRole("button", { name: /continue with google/i });
     fireEvent.click(googleButton);
 
     await waitFor(() => {
