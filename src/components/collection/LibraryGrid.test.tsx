@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { LibraryGrid } from "./LibraryGrid";
+import { mockDictionary as dict } from "@tests/fixtures/mockDictionary";
 
 vi.mock("@/actions/collection", () => ({
   updateStatus: vi.fn(),
@@ -49,9 +50,33 @@ const baseItems = [
 const baseProps = {
   lang: "en" as const,
   dict: {
-    remove: "Remove",
-    removeConfirm: "Remove this item?",
-    noEpisodes: "No episodes",
+    remove: dict.library.remove,
+    removeConfirm: dict.library.removeConfirm,
+    cancel: dict.common.cancel,
+    noEpisodes: dict.library.noEpisodes,
+    statusUpdated: dict.library.statusUpdated,
+    ratingUpdated: dict.library.ratingUpdated,
+    progressUpdated: dict.library.progressUpdated,
+    removed: dict.library.removed,
+    error: dict.common.error,
+    status: dict.media.status,
+    statusLabel: dict.library.status,
+    rating: dict.library.rating,
+    yourRating: dict.library.yourRating,
+    notRated: dict.library.notRated,
+    clear: dict.common.cancel,
+    progress: dict.library.progress,
+    episode: dict.media.episode,
+    chapter: dict.media.chapter,
+    of: dict.media.of,
+    previous: dict.library.previous,
+    next: dict.library.next,
+    page: dict.library.page,
+    totalItems: dict.library.totalItems,
+    allTypes: dict.library.allTypes,
+    filterMovie: dict.library.filterMovie,
+    filterTv: dict.library.filterTv,
+    filterAnime: dict.library.filterAnime,
   },
 };
 
