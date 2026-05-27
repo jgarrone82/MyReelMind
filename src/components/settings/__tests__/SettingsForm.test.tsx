@@ -19,9 +19,11 @@ let mockOnCancel: (() => void) | null = null;
 
 vi.mock("@/components/avatar/AvatarCropper", () => ({
   AvatarCropper: ({
+    open,
     onCropComplete,
     onCancel,
   }: {
+    open: boolean;
     imageSrc: string;
     onCropComplete: (blob: Blob) => void;
     onCancel: () => void;
@@ -29,6 +31,7 @@ vi.mock("@/components/avatar/AvatarCropper", () => ({
   }) => {
     mockOnCropComplete = onCropComplete;
     mockOnCancel = onCancel;
+    if (!open) return null;
     return (
       <div data-testid="avatar-cropper">
         <button type="button" data-testid="crop-confirm" onClick={() => onCropComplete(new Blob(["cropped"], { type: "image/jpeg" }))}>
@@ -155,7 +158,7 @@ describe("SettingsForm - Avatar Upload", () => {
     const file = new File(["test"], "document.pdf", { type: "application/pdf" });
 
     await act(async () => {
-      userEvent.upload(input, file);
+      await userEvent.upload(input, file, { applyAccept: false });
     });
 
     expect(screen.getByText(/invalid file type/i)).toBeInTheDocument();
@@ -180,7 +183,7 @@ describe("SettingsForm - Avatar Upload", () => {
     const file = new File([buffer], "large-avatar.jpg", { type: "image/jpeg" });
 
     await act(async () => {
-      userEvent.upload(input, file);
+      await userEvent.upload(input, file);
     });
 
     expect(screen.getByText(/file too large/i)).toBeInTheDocument();
@@ -203,7 +206,7 @@ describe("SettingsForm - Avatar Upload", () => {
     const file = new File(["test"], "avatar.jpg", { type: "image/jpeg" });
 
     await act(async () => {
-      userEvent.upload(input, file);
+      await userEvent.upload(input, file);
     });
 
     await waitFor(() => {
@@ -234,7 +237,7 @@ describe("SettingsForm - Avatar Upload", () => {
     const file = new File(["test"], "avatar.jpg", { type: "image/jpeg" });
 
     await act(async () => {
-      userEvent.upload(input, file);
+      await userEvent.upload(input, file);
     });
 
     await waitFor(() => {
@@ -274,7 +277,7 @@ describe("SettingsForm - Avatar Upload", () => {
     const file = new File(["test"], "avatar.jpg", { type: "image/jpeg" });
 
     await act(async () => {
-      userEvent.upload(input, file);
+      await userEvent.upload(input, file);
     });
 
     await waitFor(() => {
@@ -309,7 +312,7 @@ describe("SettingsForm - Avatar Upload", () => {
     const file = new File(["test"], "avatar.jpg", { type: "image/jpeg" });
 
     await act(async () => {
-      userEvent.upload(input, file);
+      await userEvent.upload(input, file);
     });
 
     await waitFor(() => {
@@ -318,10 +321,12 @@ describe("SettingsForm - Avatar Upload", () => {
 
     // Cancel crop
     await act(async () => {
-      userEvent.click(screen.getByTestId("crop-cancel"));
+      await userEvent.click(screen.getByTestId("crop-cancel"));
     });
 
-    expect(mockRevokeObjectURL).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockRevokeObjectURL).toHaveBeenCalled();
+    });
     await waitFor(() => {
       expect(screen.queryByTestId("avatar-cropper")).not.toBeInTheDocument();
     });
