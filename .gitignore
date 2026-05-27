@@ -63,3 +63,6 @@ sdd/
 
 # Windows ADS artifacts (WSL downloads from browser)
 *:Zone.Identifier
+
+# Auto-generated, machine-specific skill registry (regenerate with `gentle-ai skill-registry refresh`)
+.atl/
