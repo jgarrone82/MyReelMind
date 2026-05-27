@@ -30,7 +30,7 @@ HTMLCanvasElement.prototype.toBlob = vi.fn((callback, _type, _quality) => {
 // Mock getContext
 HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
   drawImage: vi.fn(),
-}));
+})) as unknown as HTMLCanvasElement["getContext"];
 
 // Mock Image constructor
 class MockImage {
@@ -70,6 +70,7 @@ describe("AvatarCropper", () => {
 
     render(
       <AvatarCropper
+        open={true}
         imageSrc={originalImageSrc}
         onCropComplete={onCropComplete}
         onCancel={onCancel}
@@ -91,6 +92,7 @@ describe("AvatarCropper", () => {
 
     render(
       <AvatarCropper
+        open={true}
         imageSrc={originalImageSrc}
         onCropComplete={onCropComplete}
         onCancel={onCancel}
@@ -134,6 +136,7 @@ describe("AvatarCropper", () => {
 
     render(
       <AvatarCropper
+        open={true}
         imageSrc={originalImageSrc}
         onCropComplete={onCropComplete}
         onCancel={onCancel}
