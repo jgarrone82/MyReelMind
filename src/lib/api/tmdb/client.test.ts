@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createTmdbClient } from "./client";
+import type { TmdbMovieDetails, TmdbTvDetails } from "./types";
 import { server } from "../../../../tests/mocks/server";
 import { http, HttpResponse } from "msw";
 
@@ -73,7 +74,7 @@ describe("TMDB Client", () => {
 
       const result = await client.getDetails("movie", 123);
       expect(result.id).toBe(123);
-      expect(result.title).toBe("Inception");
+      expect((result as TmdbMovieDetails).title).toBe("Inception");
     });
 
     it("should fetch tv details by id", async () => {
@@ -89,7 +90,7 @@ describe("TMDB Client", () => {
 
       const result = await client.getDetails("tv", 456);
       expect(result.id).toBe(456);
-      expect(result.name).toBe("Breaking Bad");
+      expect((result as TmdbTvDetails).name).toBe("Breaking Bad");
     });
   });
 
@@ -129,7 +130,7 @@ describe("TMDB Client", () => {
 
       const result = await client.getDetails("movie", 999);
       expect(attempts).toBe(3);
-      expect(result.title).toBe("Recovered");
+      expect((result as TmdbMovieDetails).title).toBe("Recovered");
     });
 
     it("should throw after exhausting retries", async () => {
