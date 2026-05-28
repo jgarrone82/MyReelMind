@@ -72,6 +72,33 @@ export interface Dictionary {
       paused: string;
       dropped: string;
     };
+    stickers: {
+      new: string;
+      staff: string;
+      rental: string;
+    };
+    detail: {
+      backCover: string;
+      synopsis: string;
+      specs: string;
+      catalogNo: string;
+      year: string;
+      source: string;
+      episodes: string;
+      score: string;
+      format: string;
+      beKindRewind: string;
+      signInKicker: string;
+      signInHeadline: string;
+      signInBody: string;
+      signInPrimary: string;
+      signInSecondary: string;
+      signInTertiary: string;
+      addToLibraryKicker: string;
+      addToLibraryHeadline: string;
+      addToLibraryBody: string;
+      addToLibraryCta: string;
+    };
   };
   dashboard: {
     title: string;
