@@ -8,6 +8,7 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Toaster } from "sonner";
 import { Providers } from "./providers";
+import { vhsFontVariables } from "../fonts";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -56,7 +57,7 @@ export default async function LocaleLayout({
   return (
     <html lang={lang}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${vhsFontVariables} antialiased`}
       >
         <header className="border-b border-primary bg-primary">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
