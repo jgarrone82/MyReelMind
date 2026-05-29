@@ -23,8 +23,8 @@ interface MediaDetailPageProps {
 }
 
 export async function generateMetadata({ params }: MediaDetailPageProps): Promise<Metadata> {
-  const { id } = await params;
-  const media = await fetchMediaDetail(id);
+  const { lang, id } = await params;
+  const media = await fetchMediaDetail(id, lang);
 
   if (!media) {
     return { title: "Media Not Found" };
@@ -60,7 +60,7 @@ function deriveUpc(id: string): string {
 
 export default async function MediaDetailPage({ params }: MediaDetailPageProps) {
   const { lang, id: mediaId } = await params;
-  const media = await fetchMediaDetail(mediaId);
+  const media = await fetchMediaDetail(mediaId, lang);
 
   if (!media) {
     notFound();
