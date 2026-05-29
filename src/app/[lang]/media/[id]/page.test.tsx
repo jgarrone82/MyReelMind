@@ -85,6 +85,7 @@ describe("MediaDetailPage", () => {
       title: "Inception",
       originalTitle: null,
       overview: null,
+      overviews: null,
       releaseDate: "2010",
       posterPath: null,
       backdropPath: null,
@@ -147,6 +148,6 @@ describe("MediaDetailPage", () => {
       })
     ).rejects.toThrow("NEXT_NOT_FOUND");
 
-    expect(vi.mocked(fetchMediaDetail)).toHaveBeenCalledWith("tmdb-999");
+    expect(vi.mocked(fetchMediaDetail)).toHaveBeenCalledWith("tmdb-999", "en");
   });
 });
