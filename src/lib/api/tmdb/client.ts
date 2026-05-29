@@ -54,8 +54,14 @@ export function createTmdbClient(options: TmdbClientOptions) {
       return fetchWithRetry<TmdbSearchResponse>(url);
     },
 
-    async getDetails(type: "movie" | "tv", id: number): Promise<TmdbMediaDetails> {
-      const url = buildUrl(`/${type}/${id}`);
+    async getDetails(
+      type: "movie" | "tv",
+      id: number,
+      opts: { language?: string } = {}
+    ): Promise<TmdbMediaDetails> {
+      const params: Record<string, string> = {};
+      if (opts.language) params.language = opts.language;
+      const url = buildUrl(`/${type}/${id}`, params);
       return fetchWithRetry<TmdbMediaDetails>(url);
     },
 

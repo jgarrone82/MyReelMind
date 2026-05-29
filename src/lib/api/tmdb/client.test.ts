@@ -92,6 +92,32 @@ describe("TMDB Client", () => {
       expect(result.id).toBe(456);
       expect((result as TmdbTvDetails).name).toBe("Breaking Bad");
     });
+
+    it("should append the language param when provided", async () => {
+      server.use(
+        http.get("https://api.themoviedb.org/3/movie/123", ({ request }) => {
+          const url = new URL(request.url);
+          expect(url.searchParams.get("language")).toBe("es-ES");
+          return HttpResponse.json({ id: 123, title: "El origen" });
+        })
+      );
+
+      const result = await client.getDetails("movie", 123, { language: "es-ES" });
+      expect(result.id).toBe(123);
+    });
+
+    it("should omit the language param when not provided", async () => {
+      server.use(
+        http.get("https://api.themoviedb.org/3/movie/123", ({ request }) => {
+          const url = new URL(request.url);
+          expect(url.searchParams.has("language")).toBe(false);
+          return HttpResponse.json({ id: 123, title: "Inception" });
+        })
+      );
+
+      const result = await client.getDetails("movie", 123);
+      expect(result.id).toBe(123);
+    });
   });
 
   describe("getConfiguration", () => {
