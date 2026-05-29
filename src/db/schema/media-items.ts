@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { mediaSourceEnum, mediaTypeEnum } from "./enums";
 import { userMedia } from "./user-media";
@@ -13,6 +13,7 @@ export const mediaItems = pgTable(
     title: text("title").notNull(),
     originalTitle: text("original_title"),
     overview: text("overview"),
+    overviews: jsonb("overviews").$type<Record<string, string>>(),
     releaseDate: text("release_date"),
     posterPath: text("poster_path"),
     backdropPath: text("backdrop_path"),
@@ -24,7 +25,8 @@ export const mediaItems = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    index("media_items_source_source_id_idx").on(table.source, table.sourceId),
+    // Unique: the media cache upserts via ON CONFLICT (source, source_id).
+    uniqueIndex("media_items_source_source_id_idx").on(table.source, table.sourceId),
     index("media_items_source_type_idx").on(table.source, table.type),
   ]
 );

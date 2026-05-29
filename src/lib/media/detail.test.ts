@@ -51,6 +51,7 @@ describe("fetchMediaDetail", () => {
       title: "Inception",
       originalTitle: "Inception",
       overview: "A mind-bending thriller",
+      overviews: { en: "A mind-bending thriller" },
       releaseDate: "2010-07-16",
       posterPath: "/poster.jpg",
       backdropPath: "/backdrop.jpg",
@@ -92,7 +93,7 @@ describe("fetchMediaDetail", () => {
 
     expect(result).not.toBeNull();
     expect(result?.title).toBe("Inception");
-    expect(mockTmdbGetDetails).toHaveBeenCalledWith("movie", 123);
+    expect(mockTmdbGetDetails).toHaveBeenCalledWith("movie", 123, { language: "en-US" });
   });
 
   it("should fetch from AniList API when not cached", async () => {
@@ -133,6 +134,7 @@ describe("fetchMediaDetail", () => {
       title: "Old Title",
       originalTitle: "Old Title",
       overview: "Old overview",
+      overviews: null,
       releaseDate: "2010-07-16",
       posterPath: "/old.jpg",
       backdropPath: null,
@@ -163,5 +165,154 @@ describe("fetchMediaDetail", () => {
 
     expect(result?.title).toBe("New Title");
     expect(mockTmdbGetDetails).toHaveBeenCalled();
+  });
+
+  it("should pass the user locale to TMDB as a language tag", async () => {
+    vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue(undefined);
+    mockTmdbGetDetails.mockResolvedValue({
+      id: 123,
+      title: "El origen",
+      overview: "Un ladron que roba secretos corporativos...",
+      release_date: "2010-07-16",
+      media_type: "movie",
+    });
+
+    const result = await fetchMediaDetail("tmdb-123", "es");
+
+    expect(result?.description).toBe("Un ladron que roba secretos corporativos...");
+    expect(mockTmdbGetDetails).toHaveBeenCalledWith("movie", 123, { language: "es-ES" });
+  });
+
+  it("should serve the cached overview for the requested locale without hitting the API", async () => {
+    vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue({
+      id: "uuid-1",
+      source: "tmdb" as const,
+      sourceId: "123",
+      type: "movie" as const,
+      title: "Inception",
+      originalTitle: "Inception",
+      overview: "A mind-bending thriller",
+      overviews: { en: "A mind-bending thriller", es: "Un thriller alucinante" },
+      releaseDate: "2010-07-16",
+      posterPath: "/poster.jpg",
+      backdropPath: "/backdrop.jpg",
+      genres: ["Sci-Fi"],
+      runtime: 148,
+      status: null,
+      rawData: null,
+      fetchedAt: new Date(),
+      createdAt: new Date(),
+    });
+
+    const result = await fetchMediaDetail("tmdb-123", "es");
+
+    expect(result?.description).toBe("Un thriller alucinante");
+    expect(mockTmdbGetDetails).not.toHaveBeenCalled();
+  });
+
+  it("should refetch when the requested locale is missing from the cached overviews", async () => {
+    vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue({
+      id: "uuid-1",
+      source: "tmdb" as const,
+      sourceId: "123",
+      type: "movie" as const,
+      title: "Inception",
+      originalTitle: "Inception",
+      overview: "A mind-bending thriller",
+      overviews: { en: "A mind-bending thriller" },
+      releaseDate: "2010-07-16",
+      posterPath: "/poster.jpg",
+      backdropPath: "/backdrop.jpg",
+      genres: ["Sci-Fi"],
+      runtime: 148,
+      status: null,
+      rawData: null,
+      fetchedAt: new Date(),
+      createdAt: new Date(),
+    });
+    mockTmdbGetDetails.mockResolvedValue({
+      id: 123,
+      title: "El origen",
+      overview: "Un thriller alucinante",
+      release_date: "2010-07-16",
+      media_type: "movie",
+    });
+
+    const result = await fetchMediaDetail("tmdb-123", "es");
+
+    expect(result?.description).toBe("Un thriller alucinante");
+    expect(mockTmdbGetDetails).toHaveBeenCalledWith("movie", 123, { language: "es-ES" });
+  });
+
+  it("should serve the English fallback from cache without refetching when the locale overview is empty", async () => {
+    vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue({
+      id: "uuid-1",
+      source: "tmdb" as const,
+      sourceId: "123",
+      type: "movie" as const,
+      title: "Inception",
+      originalTitle: "Inception",
+      overview: "A mind-bending thriller",
+      overviews: { en: "A mind-bending thriller", es: "" },
+      releaseDate: "2010-07-16",
+      posterPath: "/poster.jpg",
+      backdropPath: "/backdrop.jpg",
+      genres: ["Sci-Fi"],
+      runtime: 148,
+      status: null,
+      rawData: null,
+      fetchedAt: new Date(),
+      createdAt: new Date(),
+    });
+
+    const result = await fetchMediaDetail("tmdb-123", "es");
+
+    expect(result?.description).toBe("A mind-bending thriller");
+    expect(mockTmdbGetDetails).not.toHaveBeenCalled();
+  });
+
+  it("should always request English for AniList regardless of locale", async () => {
+    vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue(undefined);
+    mockAnilistGetMediaById.mockResolvedValue({
+      id: 456,
+      title: { english: "Attack on Titan", romaji: "Shingeki no Kyojin", native: "進撃の巨人" },
+      description: "Humanity fights titans",
+      startDate: { year: 2013 },
+      coverImage: { large: "https://example.com/cover.jpg" },
+      genres: ["Action"],
+      averageScore: 92,
+      popularity: 200,
+      type: "ANIME",
+    });
+
+    const result = await fetchMediaDetail("anilist-456", "es");
+
+    expect(result?.description).toBe("Humanity fights titans");
+    expect(mockAnilistGetMediaById).toHaveBeenCalledWith(456);
+  });
+
+  it("should fall back to English when TMDB has no overview in the requested locale", async () => {
+    vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue(undefined);
+    mockTmdbGetDetails
+      .mockResolvedValueOnce({
+        id: 123,
+        title: "El origen",
+        overview: "",
+        release_date: "2010-07-16",
+        media_type: "movie",
+      })
+      .mockResolvedValueOnce({
+        id: 123,
+        title: "Inception",
+        overview: "A mind-bending thriller",
+        release_date: "2010-07-16",
+        media_type: "movie",
+      });
+
+    const result = await fetchMediaDetail("tmdb-123", "es");
+
+    expect(result?.description).toBe("A mind-bending thriller");
+    expect(mockTmdbGetDetails).toHaveBeenNthCalledWith(1, "movie", 123, { language: "es-ES" });
+    expect(mockTmdbGetDetails).toHaveBeenNthCalledWith(2, "movie", 123, { language: "en-US" });
   });
 });
