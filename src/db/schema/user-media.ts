@@ -1,4 +1,4 @@
-import { pgTable, uuid, integer, text, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, integer, text, timestamp, jsonb, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { users } from "./users";
 import { mediaItems } from "./media-items";
@@ -24,7 +24,8 @@ export const userMedia = pgTable(
   },
   (table) => [
     index("user_media_user_id_status_idx").on(table.userId, table.status),
-    index("user_media_user_id_media_item_id_idx").on(table.userId, table.mediaItemId),
+    // Unique: addToLibrary upserts via ON CONFLICT (user_id, media_item_id).
+    uniqueIndex("user_media_user_id_media_item_id_idx").on(table.userId, table.mediaItemId),
   ]
 );
 
