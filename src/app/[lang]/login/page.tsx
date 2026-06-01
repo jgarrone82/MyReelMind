@@ -70,7 +70,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
 
           <OAuthButtons dict={dictionary} />
 
-          <div className="vhs-mono mt-4 text-center text-[0.6rem] tracking-[0.12em] text-[var(--vhs-cream-dim)]/55">
+          <div className="vhs-mono mt-4 text-center text-[0.6rem] tracking-[0.12em] text-[var(--vhs-cream-dim)]">
             {t.terminalFooter}
           </div>
         </CRTFrame>
@@ -83,7 +83,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
           {t.newHere} →
         </Link>
 
-        <div className="vhs-mono mt-3.5 text-center text-[0.62rem] leading-relaxed text-[var(--vhs-cream-dim)]/50">
+        <div className="vhs-mono mt-3.5 text-center text-[0.62rem] leading-relaxed text-[var(--vhs-cream-dim)]">
           {t.finePrint}
         </div>
       </div>

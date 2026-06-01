@@ -199,7 +199,6 @@ export const dictionary: Dictionary = {
       error: "Error al iniciar sesión",
       oauth: "Continuá con",
       divider: "o",
-      noAccount: "¿No tenés cuenta?",
       forgotPassword: "¿Olvidaste tu código?",
       kicker: "Mostrador de socios",
       headline: "Acceso de socios",

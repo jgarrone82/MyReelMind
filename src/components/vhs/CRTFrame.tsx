@@ -57,7 +57,7 @@ export function CRTFrame({
   className,
   ...props
 }: CRTFrameProps) {
-  const glowKey = glow ?? "phosphor";
+  const glowKey = glow;
 
   return (
     <div className={cn(bezelVariants({ glow: glowKey }), className)} {...props}>

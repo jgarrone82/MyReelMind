@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, useState } from "react";
+import { useActionState, useState } from "react";
 import { signIn } from "@/actions/auth";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
@@ -44,8 +44,9 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
     <form action={action} className="flex flex-col gap-4">
       {hasError && (
         <div
+          id="login-error"
           role="alert"
-          className="flex items-start gap-2.5 border-2 border-[var(--vhs-ground)] bg-[var(--vhs-error)] px-3 py-2.5 text-[var(--vhs-cream)] shadow-[3px_3px_0_var(--vhs-ground)]"
+          className="flex items-start gap-2.5 border-2 border-[var(--vhs-ground)] bg-[var(--vhs-error)] px-3 py-2.5 text-[var(--vhs-ground)] shadow-[3px_3px_0_var(--vhs-ground)]"
         >
           <span aria-hidden className="vhs-display text-[1.2rem] leading-none">
             ⚠
@@ -81,7 +82,11 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
           required
           autoComplete="email"
           placeholder={t.emailPlaceholder}
+          // Both fields are flagged aria-invalid + described-by deliberately:
+          // we never reveal which field failed, so AT users hear the same
+          // generic error context on either input.
           aria-invalid={hasError || undefined}
+          aria-describedby={hasError ? "login-error" : undefined}
           className={`${inputBase} ${inputBorder}`}
         />
       </div>
@@ -99,6 +104,7 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
             onClick={() => setShowPassword((s) => !s)}
             aria-pressed={showPassword}
             aria-controls="password"
+            aria-label={`${showPassword ? t.hidePassword : t.showPassword} ${t.passwordLabel}`}
             className="vhs-kicker rounded-[2px] p-0 text-[0.7rem] tracking-[0.14em] text-[var(--vhs-phosphor)] hover:text-[var(--vhs-cream)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)]"
           >
             {showPassword ? t.hidePassword : t.showPassword}
@@ -111,7 +117,10 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
           required
           autoComplete="current-password"
           placeholder={t.passwordPlaceholder}
+          // See email input: both fields share the same error association on
+          // purpose so we never disclose which credential was wrong.
           aria-invalid={hasError || undefined}
+          aria-describedby={hasError ? "login-error" : undefined}
           className={`${inputBase} ${inputBorder}`}
         />
         <div className="mt-1.5 text-right">
@@ -135,7 +144,6 @@ function SubmitButton({
   t: Pick<Dictionary["auth"]["login"], "submit" | "loadingTape">;
 }) {
   const { pending } = useFormStatus();
-  const spinnerLabelId = useId();
 
   return (
     <button
@@ -150,7 +158,7 @@ function SubmitButton({
           className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[var(--vhs-cream)] border-t-transparent"
         />
       )}
-      <span id={spinnerLabelId}>{pending ? t.loadingTape : t.submit}</span>
+      <span>{pending ? t.loadingTape : t.submit}</span>
     </button>
   );
 }

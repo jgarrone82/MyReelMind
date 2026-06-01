@@ -195,7 +195,6 @@ export interface Dictionary {
       error: string;
       oauth: string;
       divider: string;
-      noAccount: string;
       forgotPassword: string;
       // VHS membership-desk redesign (Screen 02)
       kicker: string;

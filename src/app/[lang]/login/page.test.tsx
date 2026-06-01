@@ -38,7 +38,6 @@ const mockDict = {
       error: "Failed to sign in",
       oauth: "Continue with",
       divider: "or",
-      noAccount: "Don't have an account?",
       forgotPassword: "Forgot your pass code?",
       kicker: "Membership Desk",
       headline: "Member sign-in",

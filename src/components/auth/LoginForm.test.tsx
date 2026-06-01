@@ -19,7 +19,7 @@ describe("LoginForm", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 
     expect(screen.getByRole("textbox", { name: /member email/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/pass code/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/pass code/i, { selector: "input" })).toBeInTheDocument();
   });
 
   it("should render submit button", () => {
@@ -34,7 +34,7 @@ describe("LoginForm", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 
     const emailInput = screen.getByRole("textbox", { name: /member email/i });
-    const passwordInput = screen.getByLabelText(/pass code/i);
+    const passwordInput = screen.getByLabelText(/pass code/i, { selector: "input" });
     const submitButton = screen.getByRole("button", { name: /sign in/i });
 
     fireEvent.input(emailInput, { target: { value: "test@example.com" } });
@@ -61,7 +61,7 @@ describe("LoginForm", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 
     const emailInput = screen.getByRole("textbox", { name: /member email/i });
-    const passwordInput = screen.getByLabelText(/pass code/i);
+    const passwordInput = screen.getByLabelText(/pass code/i, { selector: "input" });
     const submitButton = screen.getByRole("button", { name: /sign in/i });
 
     fireEvent.input(emailInput, { target: { value: "wrong@example.com" } });
@@ -86,7 +86,7 @@ describe("LoginForm", () => {
     fireEvent.input(screen.getByRole("textbox", { name: /member email/i }), {
       target: { value: "wrong@example.com" },
     });
-    fireEvent.input(screen.getByLabelText(/pass code/i), {
+    fireEvent.input(screen.getByLabelText(/pass code/i, { selector: "input" }), {
       target: { value: "x" },
     });
     fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
@@ -101,7 +101,7 @@ describe("LoginForm", () => {
   it("should toggle the password field between hidden and visible", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 
-    const passwordInput = screen.getByLabelText(/pass code/i);
+    const passwordInput = screen.getByLabelText(/pass code/i, { selector: "input" });
     const toggle = screen.getByRole("button", { name: /show/i });
 
     // starts hidden
@@ -118,7 +118,7 @@ describe("LoginForm", () => {
     fireEvent.click(hideToggle);
 
     // back to hidden
-    expect(screen.getByLabelText(/pass code/i)).toHaveAttribute("type", "password");
+    expect(screen.getByLabelText(/pass code/i, { selector: "input" })).toHaveAttribute("type", "password");
   });
 
   it("should render the forgot-password link", () => {
@@ -132,7 +132,7 @@ describe("LoginForm", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 
     const emailInput = screen.getByRole("textbox", { name: /member email/i });
-    const passwordInput = screen.getByLabelText(/pass code/i);
+    const passwordInput = screen.getByLabelText(/pass code/i, { selector: "input" });
 
     expect(emailInput).toHaveAttribute("type", "email");
     expect(passwordInput).toHaveAttribute("type", "password");
