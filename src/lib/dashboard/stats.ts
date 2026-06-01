@@ -2,7 +2,6 @@ import { eq, desc, count, sql, and, inArray, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { userMedia, mediaItems } from "@/db/schema";
 import type { UserMediaWithMedia, TypeStat, GenreStat, StatusStat, DashboardCounts } from "./types";
-import type { watchStatusEnum } from "@/db/schema";
 
 export async function getTotalWatched(userId: string): Promise<number> {
   const [result] = await db
@@ -117,9 +116,9 @@ export async function getDashboardCounts(
 ): Promise<DashboardCounts> {
   // The FILTER predicates are built from TYPED Drizzle expressions
   // (inArray/eq against userMedia.status) rather than raw string literals, so
-  // the status values are checked against watchStatusEnum at compile time — a
-  // future enum rename becomes a type error here. Behavior is identical to the
-  // previous `... FILTER (WHERE status IN ('watching','paused'))` SQL.
+  // the status values are checked against the column's enum type at compile
+  // time — a future enum rename becomes a type error here. Behavior is
+  // identical to the previous `... FILTER (WHERE status IN ('watching','paused'))` SQL.
   const [result] = await db
     .select({
       inProgress: sql<number>`count(*) filter (where ${inArray(userMedia.status, ["watching", "paused"])})`,
