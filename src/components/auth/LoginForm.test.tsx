@@ -18,8 +18,8 @@ describe("LoginForm", () => {
   it("should render email and password fields", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 
-    expect(screen.getByRole("textbox", { name: /email/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /member email/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/pass code/i)).toBeInTheDocument();
   });
 
   it("should render submit button", () => {
@@ -33,8 +33,8 @@ describe("LoginForm", () => {
 
     render(<LoginForm lang="en" dict={dictionary} />);
 
-    const emailInput = screen.getByRole("textbox", { name: /email/i });
-    const passwordInput = screen.getByLabelText(/password/i);
+    const emailInput = screen.getByRole("textbox", { name: /member email/i });
+    const passwordInput = screen.getByLabelText(/pass code/i);
     const submitButton = screen.getByRole("button", { name: /sign in/i });
 
     fireEvent.input(emailInput, { target: { value: "test@example.com" } });
@@ -55,13 +55,13 @@ describe("LoginForm", () => {
     expect(formData.get("password")).toBe("password123");
   });
 
-  it("should display error message when action returns error", async () => {
+  it("should display an error banner with the action's error message", async () => {
     vi.mocked(signIn).mockResolvedValue({ error: "Invalid email or password" });
 
     render(<LoginForm lang="en" dict={dictionary} />);
 
-    const emailInput = screen.getByRole("textbox", { name: /email/i });
-    const passwordInput = screen.getByLabelText(/password/i);
+    const emailInput = screen.getByRole("textbox", { name: /member email/i });
+    const passwordInput = screen.getByLabelText(/pass code/i);
     const submitButton = screen.getByRole("button", { name: /sign in/i });
 
     fireEvent.input(emailInput, { target: { value: "wrong@example.com" } });
@@ -70,30 +70,69 @@ describe("LoginForm", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent("Invalid email or password");
+      const alert = screen.getByRole("alert");
+      // banner shows the "TRACKING ERROR" headline plus the real message
+      expect(alert).toHaveTextContent(/tracking error/i);
+      expect(alert).toHaveTextContent("Invalid email or password");
     });
   });
 
-  it("should render link to signup", () => {
+  it("should fall back to the generic error body when the action gives no message", async () => {
+    // signIn returns a truthy error object without a usable string message
+    vi.mocked(signIn).mockResolvedValue({ error: "" });
+
     render(<LoginForm lang="en" dict={dictionary} />);
 
-    const link = screen.getByRole("link", { name: /create account/i });
-    expect(link).toHaveAttribute("href", "/en/signup");
+    fireEvent.input(screen.getByRole("textbox", { name: /member email/i }), {
+      target: { value: "wrong@example.com" },
+    });
+    fireEvent.input(screen.getByLabelText(/pass code/i), {
+      target: { value: "x" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        dictionary.auth.login.errorBody,
+      );
+    });
   });
 
-  it("should render the signup prompt without duplicating the link label", () => {
+  it("should toggle the password field between hidden and visible", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 
-    expect(screen.getByText(/don't have an account/i)).toBeInTheDocument();
-    // "Create account" must appear once (the link), not as both prompt and link
-    expect(screen.getAllByText(/create account/i)).toHaveLength(1);
+    const passwordInput = screen.getByLabelText(/pass code/i);
+    const toggle = screen.getByRole("button", { name: /show/i });
+
+    // starts hidden
+    expect(passwordInput).toHaveAttribute("type", "password");
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(toggle);
+
+    // now visible, label flips to Hide
+    expect(passwordInput).toHaveAttribute("type", "text");
+    const hideToggle = screen.getByRole("button", { name: /hide/i });
+    expect(hideToggle).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(hideToggle);
+
+    // back to hidden
+    expect(screen.getByLabelText(/pass code/i)).toHaveAttribute("type", "password");
   });
 
-  it("should have correct input types", () => {
+  it("should render the forgot-password link", () => {
     render(<LoginForm lang="en" dict={dictionary} />);
 
-    const emailInput = screen.getByRole("textbox", { name: /email/i });
-    const passwordInput = screen.getByLabelText(/password/i);
+    const link = screen.getByRole("link", { name: /forgot your pass code/i });
+    expect(link).toHaveAttribute("href", "/en/forgot-password");
+  });
+
+  it("should have correct default input types", () => {
+    render(<LoginForm lang="en" dict={dictionary} />);
+
+    const emailInput = screen.getByRole("textbox", { name: /member email/i });
+    const passwordInput = screen.getByLabelText(/pass code/i);
 
     expect(emailInput).toHaveAttribute("type", "email");
     expect(passwordInput).toHaveAttribute("type", "password");
