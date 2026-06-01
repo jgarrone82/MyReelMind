@@ -69,6 +69,16 @@ describe("vhs-cosmetics", () => {
     it("handles ids with no digits", () => {
       expect(deriveCatalog("abc").padded).toBe("00000");
     });
+
+    it("truncates long all-digit ids to a fixed 5-digit card width", () => {
+      // A uuid yields many digits; the card number must stay 5 digits, not a
+      // long string shown verbatim. Deterministic: last 5 digits.
+      const uuid = "123e4567-e89b-12d3-a456-426614174000";
+      const { padded, full } = deriveCatalog(uuid);
+      expect(padded).toHaveLength(5);
+      expect(padded).toBe("74000");
+      expect(full).toBe("MRM-74000-A");
+    });
   });
 
   describe("deriveUpc", () => {
@@ -183,6 +193,28 @@ describe("vhs-cosmetics", () => {
       const a = mediaToCardProps(makeRow(), "en");
       const b = mediaToCardProps(makeRow(), "en");
       expect(a).toEqual(b);
+    });
+
+    it("returns href undefined (no link) when the media item is missing", () => {
+      // The detail route only resolves public ids (tmdb-/anilist-). Falling
+      // back to the internal uuid would 404, so the card must render linkless.
+      const row = makeRow({}, { mediaItem: null });
+      const props = mediaToCardProps(row, "en");
+      expect(props.href).toBeUndefined();
+      // Cosmetic fallbacks still resolve.
+      expect(props.title).toBe("Unknown");
+      expect(["magenta", "acid", "sodium", "phosphor", "cream"]).toContain(
+        props.hue
+      );
+      expect([
+        "circle",
+        "grid",
+        "triangle",
+        "silhouette",
+        "bars",
+        "spool",
+        "mesh",
+      ]).toContain(props.motif);
     });
   });
 });

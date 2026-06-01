@@ -21,7 +21,10 @@ export function deriveCatalog(id: string): {
   sub: string;
 } {
   const numeric = id.replace(/\D/g, "");
-  const padded = numeric.padStart(5, "0");
+  // Fixed 5-digit display width: pad short ids, and take the LAST 5 digits of
+  // long ones (e.g. a uuid's digits) so the card number stays card-shaped
+  // rather than rendering a long all-digit string verbatim. Deterministic.
+  const padded = numeric.padStart(5, "0").slice(-5);
   return {
     full: `MRM-${padded}-A`,
     padded,
@@ -83,7 +86,9 @@ export function motifFromType(
  * - catalog / hue / motif are cosmetic, derived deterministically.
  * - href points at the media detail page using the composite public id
  *   (`tmdb-603` / `anilist-21`) — NOT the internal uuid, which the detail route
- *   cannot resolve. Always locale-prefixed.
+ *   cannot resolve. Always locale-prefixed. When the media item is missing we
+ *   return `href: undefined` (the card renders without a link) rather than
+ *   falling back to the internal uuid, which the detail route would 404 on.
  * - NO progress prop (honest-data: progress is an episode count with no
  *   persisted total, so there is no honest % to show).
  */
@@ -93,10 +98,12 @@ export function mediaToCardProps(
 ): VHSBoxCardProps {
   const media = item.mediaItem;
   const title = media?.title ?? "Unknown";
+  // Catalog/href need a PUBLIC id (tmdb-/anilist-). The internal uuid is not
+  // resolvable by the detail route, so without a media item there is no href.
   const publicId = media
     ? formatPublicId(media.source, media.sourceId)
-    : item.mediaItemId;
-  const catalog = deriveCatalog(publicId).full;
+    : undefined;
+  const catalog = deriveCatalog(publicId ?? item.mediaItemId).full;
 
   return {
     title,
@@ -105,6 +112,6 @@ export function mediaToCardProps(
     catalog,
     hue: hueFromGenre(media?.genres),
     motif: motifFromType(media?.type ?? "movie"),
-    href: `/${lang}/media/${publicId}`,
+    href: publicId ? `/${lang}/media/${publicId}` : undefined,
   };
 }

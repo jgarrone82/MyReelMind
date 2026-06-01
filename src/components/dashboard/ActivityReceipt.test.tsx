@@ -6,9 +6,9 @@ import {
 } from "./ActivityReceipt";
 
 const items: ActivityReceiptItem[] = [
-  { title: "Blade Runner", statusLabel: "COMPLETED", statusColor: "acid", timestamp: "TODAY · 21:14", href: "/media/1" },
-  { title: "Brazil", statusLabel: "WATCHING", statusColor: "phosphor", timestamp: "MON · 22:31" },
-  { title: "Videodrome", statusLabel: "WANT TO WATCH", statusColor: "sodium", timestamp: "SAT · 18:45" },
+  { id: "um-1", title: "Blade Runner", statusLabel: "COMPLETED", statusColor: "acid", timestamp: "TODAY · 21:14", href: "/media/1" },
+  { id: "um-2", title: "Brazil", statusLabel: "WATCHING", statusColor: "phosphor", timestamp: "MON · 22:31" },
+  { id: "um-3", title: "Videodrome", statusLabel: "WANT TO WATCH", statusColor: "sodium", timestamp: "SAT · 18:45" },
 ];
 
 describe("ActivityReceipt", () => {

@@ -90,8 +90,11 @@ export function ShelfRow({
           "[grid-auto-columns:minmax(160px,200px)]",
         )}
       >
-        {React.Children.map(children, (child, i) => (
-          <li key={i} className="snap-start">
+        {React.Children.toArray(children).map((child) => (
+          <li
+            key={React.isValidElement(child) ? child.key : undefined}
+            className="snap-start"
+          >
             {child}
           </li>
         ))}

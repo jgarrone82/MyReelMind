@@ -16,6 +16,8 @@ const STATUS_COLOR_VAR: Record<ActivityStatusColor, string> = {
 };
 
 export interface ActivityReceiptItem {
+  /** Stable row id (the user_media row id) — used as the React list key. */
+  id: string;
   /** Media title. */
   title: string;
   /** CURRENT status label (e.g. "WATCHING") — never a fabricated event type. */
@@ -49,7 +51,7 @@ export function ActivityReceipt({ heading, items }: ActivityReceiptProps) {
       </div>
 
       <ul className="vhs-mono m-0 max-w-[640px] list-none border-[1.5px] border-[var(--vhs-ground)] bg-[var(--vhs-paper)] px-[18px] py-[20px] text-[var(--vhs-ground)]">
-        {items.map((item, i) => {
+        {items.map((item) => {
           const titleNode = item.href ? (
             <Link
               href={item.href}
@@ -65,7 +67,7 @@ export function ActivityReceipt({ heading, items }: ActivityReceiptProps) {
 
           return (
             <li
-              key={`${item.title}-${i}`}
+              key={item.id}
               className="flex items-baseline gap-[10px] border-b border-dashed border-[rgba(10,8,7,0.28)] py-[7px] last:border-b-0"
             >
               <span

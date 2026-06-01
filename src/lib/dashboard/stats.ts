@@ -115,11 +115,16 @@ export async function getRecentActivity(
 export async function getDashboardCounts(
   userId: string
 ): Promise<DashboardCounts> {
+  // The FILTER predicates are built from TYPED Drizzle expressions
+  // (inArray/eq against userMedia.status) rather than raw string literals, so
+  // the status values are checked against watchStatusEnum at compile time — a
+  // future enum rename becomes a type error here. Behavior is identical to the
+  // previous `... FILTER (WHERE status IN ('watching','paused'))` SQL.
   const [result] = await db
     .select({
-      inProgress: sql<number>`COUNT(*) FILTER (WHERE ${userMedia.status} IN ('watching', 'paused'))`,
-      toWatch: sql<number>`COUNT(*) FILTER (WHERE ${userMedia.status} = 'want_to_watch')`,
-      totalLogged: sql<number>`COUNT(*)`,
+      inProgress: sql<number>`count(*) filter (where ${inArray(userMedia.status, ["watching", "paused"])})`,
+      toWatch: sql<number>`count(*) filter (where ${eq(userMedia.status, "want_to_watch")})`,
+      totalLogged: sql<number>`count(*)`,
     })
     .from(userMedia)
     .where(eq(userMedia.userId, userId));
