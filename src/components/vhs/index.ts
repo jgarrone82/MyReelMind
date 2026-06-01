@@ -27,6 +27,9 @@ export type {
 export { VHSBoxCard } from "./VHSBoxCard";
 export type { VHSBoxCardProps } from "./VHSBoxCard";
 
+export { ShelfRow } from "./ShelfRow";
+export type { ShelfRowProps, ShelfRowAccent } from "./ShelfRow";
+
 export { VhsHeader } from "./Header";
 export type { VhsHeaderProps } from "./Header";
 

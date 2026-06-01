@@ -1,5 +1,4 @@
 import type { userMedia, mediaItems } from "@/db/schema";
-import type { watchStatusEnum } from "@/db/schema";
 
 export type UserMediaWithMedia = typeof userMedia.$inferSelect & {
   mediaItem?: typeof mediaItems.$inferSelect | null;
@@ -18,4 +17,10 @@ export type GenreStat = {
 export type StatusStat = {
   status: "want_to_watch" | "watching" | "completed" | "paused" | "dropped";
   count: number;
+};
+
+export type DashboardCounts = {
+  inProgress: number;
+  toWatch: number;
+  totalLogged: number;
 };

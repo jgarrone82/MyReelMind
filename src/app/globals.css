@@ -268,6 +268,19 @@ body {
     animation: vhs-tracking-error 220ms cubic-bezier(0.3, 0, 0.7, 1);
   }
 
+  /* Horizontal snap-scroll track for ShelfRow (design-system §7). */
+  .vhs-shelf-track {
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vhs-ground-3) transparent;
+  }
+  .vhs-shelf-track > * { scroll-snap-align: start; }
+  .vhs-shelf-track::-webkit-scrollbar { height: 8px; }
+  .vhs-shelf-track::-webkit-scrollbar-thumb {
+    background: var(--vhs-ground-3);
+    border: 1px solid var(--vhs-ground);
+  }
+
   .vhs-btn {
     font-family: var(--vhs-font-kicker);
     text-transform: uppercase;

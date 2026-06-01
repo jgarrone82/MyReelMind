@@ -1,25 +1,16 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { getSession } from "@/lib/auth/server";
 import { getDictionary, type Locale } from "@/i18n";
-import {
-  getTotalWatched,
-  getTotalHours,
-  getRecentActivity,
-  getStatsByType,
-  getStatsByGenre,
-  getStatsByStatus,
-} from "@/lib/dashboard/stats";
-import { StatsCard } from "@/components/dashboard/StatsCard";
-import { StatsBreakdown } from "@/components/dashboard/StatsBreakdown";
-import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
 
 interface DashboardPageProps {
   params: Promise<{ lang: string }>;
 }
 
-export async function generateMetadata({ params }: DashboardPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: DashboardPageProps): Promise<Metadata> {
   const { lang } = await params;
   const dict = await getDictionary(lang as Locale);
 
@@ -28,64 +19,23 @@ export async function generateMetadata({ params }: DashboardPageProps): Promise<
   };
 }
 
+/**
+ * Home route `/[lang]`. This route is NOT in middleware.ts protectedRoutes, so
+ * there is no auth gate here — a null session is handled inside DashboardContent
+ * by rendering the empty ("STORE CLOSED") state.
+ *
+ * The data-fetching body lives in DashboardContent behind a <Suspense> boundary
+ * so its awaits stream the DashboardSkeleton fallback during fetch. Keeping the
+ * boundary here (rather than a [lang]/loading.tsx) scopes the skeleton to the
+ * dashboard and does not leak it to other routes under [lang].
+ */
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { lang } = await params;
   const dict = await getDictionary(lang as Locale);
 
-  // Middleware gates access — we still need userId for stats
-  const session = await getSession();
-  const userId = session?.user.id;
-
-  const [totalWatched, totalHours, recentActivity, statsByType, statsByGenre, statsByStatus] = userId
-    ? await Promise.all([
-        getTotalWatched(userId),
-        getTotalHours(userId),
-        getRecentActivity(userId, 5),
-        getStatsByType(userId),
-        getStatsByGenre(userId),
-        getStatsByStatus(userId),
-      ])
-    : [0, 0, [], [], [], []];
-
   return (
     <Suspense fallback={<DashboardSkeleton dict={dict.dashboard} />}>
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-8 text-2xl font-bold text-foreground sm:text-3xl">
-          {dict.dashboard.title}
-        </h1>
-
-        {/* Stats Grid */}
-        <section
-          aria-label={dict.dashboard.title}
-          className="mb-8 grid gap-4 sm:grid-cols-2"
-        >
-          <StatsCard
-            label={dict.dashboard.totalWatched}
-            value={totalWatched}
-          />
-          <StatsCard
-            label={dict.dashboard.totalHours}
-            value={totalHours.toFixed(1)}
-          />
-        </section>
-
-        {/* Stats Breakdown */}
-        <section aria-label={dict.dashboard.statsByType} className="mb-8">
-          <StatsBreakdown
-            statsByType={statsByType}
-            statsByGenre={statsByGenre}
-            statsByStatus={statsByStatus}
-            dict={dict.dashboard}
-            mediaDict={dict.media}
-            statusDict={dict.media.status}
-          />
-        </section>
-
-        {/* Activity Feed */}
-        <section aria-label={dict.dashboard.recentActivity}>
-          <ActivityFeed activities={recentActivity} dict={dict.dashboard} mediaDict={dict.media} lang={lang} />
-        </section>
-      </main>
+      <DashboardContent lang={lang} dict={dict} />
     </Suspense>
   );
 }
