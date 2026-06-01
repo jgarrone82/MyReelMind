@@ -113,6 +113,35 @@ export interface Dictionary {
     byType: string;
     byGenre: string;
     byStatus: string;
+    kicker: string;
+    greeting: string;
+    inProgress: string;
+    toWatch: string;
+    seeAll: string;
+    resumeRow: string;
+    recentlyWatched: string;
+    addedThisWeek: string;
+    activityLog: string;
+    memberCard: {
+      title: string;
+      member: string;
+      memberSince: string;
+      cardNo: string;
+    };
+    receipt: {
+      tally: string;
+      subtotal: string;
+      thankYou: string;
+      drillHint: string;
+    };
+    empty: {
+      kicker: string;
+      headline: string;
+      body: string;
+      cta: string;
+      ctaSecondary: string;
+      note: string;
+    };
   };
   common: {
     save: string;
