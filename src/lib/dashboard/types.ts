@@ -19,3 +19,9 @@ export type StatusStat = {
   status: "want_to_watch" | "watching" | "completed" | "paused" | "dropped";
   count: number;
 };
+
+export type DashboardCounts = {
+  inProgress: number;
+  toWatch: number;
+  totalLogged: number;
+};
