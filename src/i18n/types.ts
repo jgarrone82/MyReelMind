@@ -195,8 +195,26 @@ export interface Dictionary {
       error: string;
       oauth: string;
       divider: string;
-      noAccount: string;
       forgotPassword: string;
+      // VHS membership-desk redesign (Screen 02)
+      kicker: string;
+      headline: string;
+      subtitle: string;
+      emailLabel: string;
+      emailPlaceholder: string;
+      emailRequired: string;
+      passwordLabel: string;
+      passwordPlaceholder: string;
+      showPassword: string;
+      hidePassword: string;
+      loadingTape: string;
+      oauthGoogle: string;
+      oauthGithub: string;
+      errorHeadline: string;
+      errorBody: string;
+      newHere: string;
+      terminalFooter: string;
+      finePrint: string;
     };
     signup: {
       title: string;

@@ -38,3 +38,6 @@ export type { TabBarProps, TabItem, TabAccent } from "./TabBar";
 
 export { MembersOnlyPanel } from "./MembersOnlyPanel";
 export type { MembersOnlyPanelProps } from "./MembersOnlyPanel";
+
+export { CRTFrame } from "./CRTFrame";
+export type { CRTFrameProps, CRTFrameGlow } from "./CRTFrame";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { signIn } from "@/actions/auth";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
@@ -11,15 +11,69 @@ interface LoginFormProps {
   dict: Dictionary;
 }
 
+type SignInState = Awaited<ReturnType<typeof signIn>> | null;
+
+function getErrorMessage(state: SignInState): string | null {
+  if (state && typeof state === "object" && "error" in state) {
+    return String(state.error ?? "");
+  }
+  return null;
+}
+
 export function LoginForm({ lang, dict }: LoginFormProps) {
-  const [error, action] = useActionState(signIn, null);
+  const [state, action] = useActionState<SignInState, FormData>(signIn, null);
   const t = dict.auth.login;
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const rawError = getErrorMessage(state);
+  // An error key is present whenever the action returns an { error } object,
+  // even if the message string is empty (we then fall back to the generic body).
+  const hasError = rawError !== null;
+  const errorBody = rawError && rawError.length > 0 ? rawError : t.errorBody;
+
+  // Cassette-field input chrome. Phosphor focus ring/glow by default, tape-red
+  // border while an error is present.
+  const inputBase =
+    "vhs-mono mt-1 block w-full rounded-[2px] border-2 bg-[var(--vhs-ground-2)] px-3 py-2.5 text-[var(--vhs-cream)] placeholder:text-[var(--vhs-cream-dim)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--vhs-phosphor)] focus:ring-offset-0 focus:shadow-[0_0_0_1px_var(--vhs-phosphor),0_0_14px_rgba(74,255,240,0.35)]";
+  const inputBorder = hasError
+    ? "border-[var(--vhs-error)] focus:border-[var(--vhs-error)]"
+    : "border-[var(--vhs-ground-3)] focus:border-[var(--vhs-phosphor)]";
+
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="flex flex-col gap-4">
+      {hasError && (
+        <div
+          id="login-error"
+          role="alert"
+          className="flex items-start gap-2.5 border-2 border-[var(--vhs-ground)] bg-[var(--vhs-error)] px-3 py-2.5 text-[var(--vhs-ground)] shadow-[3px_3px_0_var(--vhs-ground)]"
+        >
+          <span aria-hidden className="vhs-display text-[1.2rem] leading-none">
+            ⚠
+          </span>
+          <div>
+            <div className="vhs-kicker text-[0.78rem] tracking-[0.16em]">
+              {t.errorHeadline}
+            </div>
+            <p className="vhs-mono mt-0.5 text-[0.78rem] leading-snug">
+              {errorBody}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-primary">
-          {t.email}
+        <label
+          htmlFor="email"
+          className="flex items-baseline justify-between text-[var(--vhs-cream)]"
+        >
+          <span className="vhs-kicker text-[0.8rem]">{t.emailLabel}</span>
+          <span
+            aria-hidden
+            className="vhs-mono text-[0.6rem] uppercase tracking-[0.1em] text-[var(--vhs-cream-dim)]/60"
+          >
+            {t.emailRequired}
+          </span>
         </label>
         <input
           id="email"
@@ -27,56 +81,84 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
           type="email"
           required
           autoComplete="email"
-          className="mt-1 block w-full rounded-md border border-primary px-3 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          placeholder={t.emailPlaceholder}
+          // Both fields are flagged aria-invalid + described-by deliberately:
+          // we never reveal which field failed, so AT users hear the same
+          // generic error context on either input.
+          aria-invalid={hasError || undefined}
+          aria-describedby={hasError ? "login-error" : undefined}
+          className={`${inputBase} ${inputBorder}`}
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-primary">
-          {t.password}
-        </label>
+        <div className="flex items-baseline justify-between">
+          <label
+            htmlFor="password"
+            className="vhs-kicker text-[0.8rem] text-[var(--vhs-cream)]"
+          >
+            {t.passwordLabel}
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowPassword((s) => !s)}
+            aria-pressed={showPassword}
+            aria-controls="password"
+            aria-label={`${showPassword ? t.hidePassword : t.showPassword} ${t.passwordLabel}`}
+            className="vhs-kicker rounded-[2px] p-0 text-[0.7rem] tracking-[0.14em] text-[var(--vhs-phosphor)] hover:text-[var(--vhs-cream)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)]"
+          >
+            {showPassword ? t.hidePassword : t.showPassword}
+          </button>
+        </div>
         <input
           id="password"
           name="password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           required
           autoComplete="current-password"
-          className="mt-1 block w-full rounded-md border border-primary px-3 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          placeholder={t.passwordPlaceholder}
+          // See email input: both fields share the same error association on
+          // purpose so we never disclose which credential was wrong.
+          aria-invalid={hasError || undefined}
+          aria-describedby={hasError ? "login-error" : undefined}
+          className={`${inputBase} ${inputBorder}`}
         />
-        <div className="mt-1 text-right">
-          <Link href={`/${lang}/forgot-password`} className="text-xs text-accent hover:text-accent/80">
+        <div className="mt-1.5 text-right">
+          <Link
+            href={`/${lang}/forgot-password`}
+            className="vhs-mono text-[0.78rem] italic text-[var(--vhs-cream-dim)] underline decoration-[var(--vhs-cream-dim)] underline-offset-2 hover:text-[var(--vhs-cream)]"
+          >
             {t.forgotPassword}
           </Link>
         </div>
       </div>
 
       <SubmitButton t={t} />
-
-      {error && typeof error === 'object' && 'error' in error && (
-        <p role="alert" className="text-sm text-error">
-          {String(error.error)}
-        </p>
-      )}
-
-      <p className="text-sm text-secondary">
-        {t.noAccount}{" "}
-        <Link href={`/${lang}/signup`} className="text-accent hover:text-accent/80">
-          {dict.auth.signup.submit}
-        </Link>
-      </p>
     </form>
   );
 }
 
-function SubmitButton({ t }: { t: Pick<Dictionary["auth"]["login"], "submit" | "loading"> }) {
+function SubmitButton({
+  t,
+}: {
+  t: Pick<Dictionary["auth"]["login"], "submit" | "loadingTape">;
+}) {
   const { pending } = useFormStatus();
+
   return (
     <button
       type="submit"
       disabled={pending}
-      className="w-full rounded-md bg-accent px-4 py-2 text-white hover:bg-accent-hover disabled:bg-muted"
+      aria-busy={pending}
+      className="vhs-btn vhs-aberrate mt-1 w-full justify-center disabled:opacity-85"
     >
-      {pending ? t.loading : t.submit}
+      {pending && (
+        <span
+          aria-hidden
+          className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[var(--vhs-cream)] border-t-transparent"
+        />
+      )}
+      <span>{pending ? t.loadingTape : t.submit}</span>
     </button>
   );
 }

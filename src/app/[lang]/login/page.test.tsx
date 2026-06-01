@@ -36,8 +36,27 @@ const mockDict = {
       submit: "Sign in",
       loading: "Signing in...",
       error: "Failed to sign in",
-      oauth: "Or continue with",
-      forgotPassword: "Forgot password?",
+      oauth: "Continue with",
+      divider: "or",
+      forgotPassword: "Forgot your pass code?",
+      kicker: "Membership Desk",
+      headline: "Member sign-in",
+      subtitle: "Insert card to continue",
+      emailLabel: "Member email",
+      emailPlaceholder: "you@videostore.com",
+      emailRequired: "REQ",
+      passwordLabel: "Pass code",
+      passwordPlaceholder: "••••••••",
+      showPassword: "Show",
+      hidePassword: "Hide",
+      loadingTape: "Reading tape...",
+      oauthGoogle: "Continue with Google",
+      oauthGithub: "Continue with GitHub",
+      errorHeadline: "Tracking error",
+      errorBody: "That email or pass code didn't scan. Check the card and try again.",
+      newHere: "New here? Get a member card",
+      terminalFooter: "Terminal 04 · Sign-in · NTSC",
+      finePrint: "By signing in you agree to rewind every tape. Late fees apply.",
     },
     signup: {
       title: "Create account",
@@ -62,8 +81,18 @@ const mockDict = {
       updatingPassword: "", passwordUpdated: "Password updated successfully!",
       noSession: "", requestNewReset: "",
     },
+    emailVerification: {
+      title: "", description: "", checkInbox: "", resendButton: "",
+      resendLoading: "", resendSuccess: "", resendError: "", backToLogin: "",
+      goToDashboard: "", verifyTitle: "", verifyDescription: "", verifyEmail: "",
+      notYourEmail: "", emailConfirmed: "Email verified! You can now sign in.",
+    },
   },
 };
+
+vi.mock("@/i18n", () => ({
+  getDictionary: vi.fn(async () => mockDict),
+}));
 
 import LoginPage from "./page";
 
@@ -80,7 +109,9 @@ describe("LoginPage", () => {
 
     render(page);
 
-    expect(screen.getByRole("heading", { name: /sign in/i })).toBeInTheDocument();
+    // Design headline is "Member sign-in"; tolerate the hyphen but still
+    // require a sign-in heading to be present.
+    expect(screen.getByRole("heading", { name: /sign[\s-]in/i })).toBeInTheDocument();
   });
 
   it("should render LoginForm component", async () => {
@@ -115,5 +146,17 @@ describe("LoginPage", () => {
 
     expect(screen.getByText("or")).toBeInTheDocument();
     expect(screen.queryByText("o")).not.toBeInTheDocument();
+  });
+
+  it("should render the framed 'new here' signup link", async () => {
+    const page = await LoginPage({
+      params: Promise.resolve({ lang: "en" }),
+      searchParams: Promise.resolve({}),
+    });
+
+    render(page);
+
+    const link = screen.getByRole("link", { name: /new here\? get a member card/i });
+    expect(link).toHaveAttribute("href", "/en/signup");
   });
 });
