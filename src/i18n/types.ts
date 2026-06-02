@@ -24,6 +24,18 @@ export interface Dictionary {
     anime: string;
     loadMore: string;
     loadingMore: string;
+    // VHS store-directory redesign (Screen 04)
+    kicker: string;
+    lookupTitle: string;
+    clear: string;
+    resultsSub: string;
+    resultsHead: string;
+    typing: string;
+    zeroHead: string;
+    zeroSub: string;
+    errorHead: string;
+    errorBody: string;
+    errorRetry: string;
   };
   library: {
     title: string;

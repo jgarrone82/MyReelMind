@@ -26,6 +26,18 @@ export const dictionary: Dictionary = {
     anime: "Anime",
     loadMore: "Cargar más",
     loadingMore: "Cargando...",
+    kicker: "Directorio del videoclub",
+    lookupTitle: "Buscá una peli",
+    clear: "BORRAR",
+    resultsSub: "ORDENADO POR RELEVANCIA · TERMINAL 04",
+    resultsHead: "Encontramos {n} resultados para",
+    typing: "LEYENDO LA CINTA…",
+    zeroHead: "Sin stock",
+    zeroSub: "No hay nada en la estantería que coincida con ese título.",
+    errorHead: "TERMINAL FUERA DE LÍNEA",
+    errorBody:
+      "El terminal del directorio perdió la señal. Revisá la conexión y buscá de nuevo.",
+    errorRetry: "Reintentar búsqueda",
   },
   library: {
     title: "Mi biblioteca",

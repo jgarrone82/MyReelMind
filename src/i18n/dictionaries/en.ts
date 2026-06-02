@@ -26,6 +26,18 @@ export const dictionary: Dictionary = {
     anime: "Anime",
     loadMore: "Load More",
     loadingMore: "Loading...",
+    kicker: "Store Directory",
+    lookupTitle: "Look up a title",
+    clear: "CLEAR",
+    resultsSub: "SORTED BY RELEVANCE · TERMINAL 04",
+    resultsHead: "Found {n} results for",
+    typing: "READING TAPE…",
+    zeroHead: "Out of stock",
+    zeroSub: "Nothing on the shelf matches that title.",
+    errorHead: "TERMINAL OFFLINE",
+    errorBody:
+      "The directory terminal lost its signal. Check the connection and search again.",
+    errorRetry: "Retry search",
   },
   library: {
     title: "My Library",
