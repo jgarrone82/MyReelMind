@@ -35,7 +35,7 @@ export default async function SignupPage({ params }: SignupPageProps) {
               {t.headline}
             </h1>
             <div className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
-              ▸ {t.subtitle}
+              <span aria-hidden>★</span> {t.subtitle}
             </div>
           </div>
 

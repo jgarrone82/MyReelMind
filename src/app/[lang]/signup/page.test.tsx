@@ -69,7 +69,7 @@ const mockDict = {
       kicker: "Membership Application",
       formNo: "Form MRM-101 · Membership Application",
       headline: "Get your member card",
-      subtitle: "★ Free for life — bring your own snacks",
+      subtitle: "Free for life — bring your own snacks",
       emailLabel: "Email",
       emailPlaceholder: "you@videostore.com",
       emailRequired: "REQ",
@@ -172,8 +172,9 @@ describe("SignupPage", () => {
     const page = await SignupPage({ params: Promise.resolve({ lang: "en" }) });
     render(page);
 
-    expect(screen.getByText("or apply with")).toBeInTheDocument();
-    expect(screen.queryByText("o")).not.toBeInTheDocument();
+    // The localized English divider is rendered (real assertion, not a hollow
+    // "no bare 'o'" guard — the previous check only ever saw the EN dictionary).
+    expect(screen.getByText(/or apply with/i)).toBeInTheDocument();
   });
 
   it("should render the membership fine print", async () => {

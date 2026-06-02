@@ -232,7 +232,7 @@ export const dictionary: Dictionary = {
       kicker: "Membership Application",
       formNo: "Form MRM-101 · Membership Application",
       headline: "Get your member card",
-      subtitle: "★ Free for life — bring your own snacks",
+      subtitle: "Free for life — bring your own snacks",
       emailLabel: "Email",
       emailPlaceholder: "you@videostore.com",
       emailRequired: "REQ",

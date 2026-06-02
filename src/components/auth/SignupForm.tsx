@@ -168,24 +168,39 @@ export function SignupForm({ lang, dict }: SignupFormProps) {
           aria-describedby={hasError ? "signup-error" : undefined}
           className={`${inputBase} ${inputBorder}`}
         />
-        <div className="mt-1.5 flex items-center gap-3">
-          {/* Decorative dot-matrix meter — pure Tailwind dots, hidden from AT. */}
-          <div aria-hidden className="flex items-center gap-1.5">
-            {[0, 1, 2, 3].map((i) => (
-              <span
-                key={i}
-                className={`h-2 w-2 rounded-full border border-[var(--vhs-ground-3)] ${
-                  i < strength
-                    ? "bg-[var(--vhs-phosphor)]"
-                    : "bg-[var(--vhs-ground-2)]"
-                }`}
-              />
-            ))}
-          </div>
-          {/* The textual label carries the accessible meaning. */}
-          <span className="vhs-mono text-[0.72rem] text-[var(--vhs-cream-dim)]">
-            {strengthLabel}
+        <div className="mt-1.5 flex flex-col gap-1">
+          {/* Caption for the strength meter, styled like the VHS field labels. */}
+          <span
+            id="signup-strength-caption"
+            className="vhs-kicker text-[0.6rem] uppercase tracking-[0.1em] text-[var(--vhs-cream-dim)]/60"
+          >
+            {t.strengthLabel}
           </span>
+          <div className="flex items-center gap-3">
+            {/* Decorative dot-matrix meter — pure Tailwind dots, hidden from AT. */}
+            <div aria-hidden className="flex items-center gap-1.5">
+              {[0, 1, 2, 3].map((i) => (
+                <span
+                  key={i}
+                  className={`h-2 w-2 rounded-full border border-[var(--vhs-ground-3)] ${
+                    i < strength
+                      ? "bg-[var(--vhs-phosphor)]"
+                      : "bg-[var(--vhs-ground-2)]"
+                  }`}
+                />
+              ))}
+            </div>
+            {/* The textual label carries the accessible meaning. */}
+            <span
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-labelledby="signup-strength-caption"
+              className="vhs-mono text-[0.72rem] text-[var(--vhs-cream-dim)]"
+            >
+              {strengthLabel}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -223,26 +238,28 @@ export function SignupForm({ lang, dict }: SignupFormProps) {
           aria-describedby={hasError ? "signup-error" : undefined}
           className={`${inputBase} ${inputBorder}`}
         />
-        {confirmShown && (
-          <div
-            className={`mt-1.5 flex items-center gap-1.5 ${
-              matches
-                ? "text-[var(--vhs-phosphor)]"
-                : "text-[var(--vhs-magenta)]"
-            }`}
-          >
-            <span
-              aria-hidden
-              className="vhs-mono grid h-4 w-4 place-items-center border text-[0.7rem] leading-none"
+        <div role="status" aria-live="polite" aria-atomic="true">
+          {confirmShown && (
+            <div
+              className={`mt-1.5 flex items-center gap-1.5 ${
+                matches
+                  ? "text-[var(--vhs-phosphor)]"
+                  : "text-[var(--vhs-magenta)]"
+              }`}
             >
-              {matches ? "✓" : "✕"}
-            </span>
-            {/* Text — not color — communicates the match state to AT. */}
-            <span className="vhs-mono text-[0.72rem]">
-              {matches ? t.matchOk : t.matchNo}
-            </span>
-          </div>
-        )}
+              <span
+                aria-hidden
+                className="vhs-mono grid h-4 w-4 place-items-center border text-[0.7rem] leading-none"
+              >
+                {matches ? "✓" : "✕"}
+              </span>
+              {/* Text — not color — communicates the match state to AT. */}
+              <span className="vhs-mono text-[0.72rem]">
+                {matches ? t.matchOk : t.matchNo}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       <SubmitButton t={t} />
