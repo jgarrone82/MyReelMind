@@ -5,8 +5,33 @@ import {
   hueFromGenre,
   motifFromType,
   mediaToCardProps,
+  mediaItemToCardProps,
 } from "./vhs-cosmetics";
 import type { UserMediaWithMedia } from "@/lib/dashboard/types";
+import type { MediaItem } from "@/lib/api/merge";
+
+/**
+ * Builds a raw search MediaItem (the merge.ts shape returned by /api/search),
+ * overriding only what a test cares about. Search items already carry the
+ * composite public id ("tmdb-603" / "anilist-21") in `id`.
+ */
+function makeMediaItem(overrides: Partial<MediaItem> = {}): MediaItem {
+  return {
+    id: "tmdb-603",
+    source: "tmdb",
+    type: "movie",
+    title: "The Matrix",
+    originalTitle: null,
+    year: 1999,
+    description: null,
+    score: null,
+    popularity: null,
+    coverImage: "https://image.tmdb.org/t/p/w500/poster.jpg",
+    bannerImage: null,
+    genres: ["Action", "Sci-Fi"],
+    ...overrides,
+  };
+}
 
 /**
  * Builds a UserMediaWithMedia row with a media item, overriding only what a test
@@ -215,6 +240,112 @@ describe("vhs-cosmetics", () => {
         "spool",
         "mesh",
       ]).toContain(props.motif);
+    });
+  });
+
+  describe("mediaItemToCardProps", () => {
+    it("maps a raw search MediaItem to title, year, posterUrl and a locale-prefixed detail href", () => {
+      const props = mediaItemToCardProps(makeMediaItem(), "en");
+      expect(props.title).toBe("The Matrix");
+      expect(props.year).toBe(1999);
+      expect(props.posterUrl).toBe(
+        "https://image.tmdb.org/t/p/w500/poster.jpg"
+      );
+      // MediaItem.id IS the public id, so the href mirrors MediaCard's pattern.
+      expect(props.href).toBe("/en/media/tmdb-603");
+    });
+
+    it("derives the catalog cosmetically from the public id", () => {
+      const props = mediaItemToCardProps(makeMediaItem(), "en");
+      expect(props.catalog).toBe("MRM-00603-A");
+    });
+
+    it("respects the active locale in the href", () => {
+      const props = mediaItemToCardProps(makeMediaItem(), "es");
+      expect(props.href).toBe("/es/media/tmdb-603");
+    });
+
+    it("works for an AniList anime item", () => {
+      const props = mediaItemToCardProps(
+        makeMediaItem({
+          id: "anilist-21",
+          source: "anilist",
+          type: "anime",
+          title: "One Piece",
+          year: 1999,
+          coverImage: "https://anilist.co/cover.jpg",
+        }),
+        "en"
+      );
+      expect(props.title).toBe("One Piece");
+      expect(props.href).toBe("/en/media/anilist-21");
+      expect(props.catalog).toBe("MRM-00021-A");
+    });
+
+    it("falls back to 'Unknown' when title is null", () => {
+      const props = mediaItemToCardProps(makeMediaItem({ title: null }), "en");
+      expect(props.title).toBe("Unknown");
+    });
+
+    it("omits posterUrl when coverImage is absent (falls back to placeholder)", () => {
+      const props = mediaItemToCardProps(
+        makeMediaItem({ coverImage: null }),
+        "en"
+      );
+      expect(props.posterUrl).toBeUndefined();
+    });
+
+    it("omits year when it is absent", () => {
+      const props = mediaItemToCardProps(makeMediaItem({ year: null }), "en");
+      expect(props.year).toBeUndefined();
+    });
+
+    it("provides a valid hue and motif even when genres are empty", () => {
+      const props = mediaItemToCardProps(makeMediaItem({ genres: [] }), "en");
+      expect(["magenta", "acid", "sodium", "phosphor", "cream"]).toContain(
+        props.hue
+      );
+      expect([
+        "circle",
+        "grid",
+        "triangle",
+        "silhouette",
+        "bars",
+        "spool",
+        "mesh",
+      ]).toContain(props.motif);
+    });
+
+    it("maps a manga item to a valid motif without throwing", () => {
+      const props = mediaItemToCardProps(
+        makeMediaItem({ id: "anilist-30", type: "manga", title: "Berserk" }),
+        "en"
+      );
+      expect([
+        "circle",
+        "grid",
+        "triangle",
+        "silhouette",
+        "bars",
+        "spool",
+        "mesh",
+      ]).toContain(props.motif);
+    });
+
+    it("does NOT expose a progress prop (honest-data: no fabricated progress %)", () => {
+      const props = mediaItemToCardProps(makeMediaItem(), "en");
+      expect("progress" in props).toBe(false);
+    });
+
+    it("does NOT expose a library-state badge (search never joins user_media)", () => {
+      const props = mediaItemToCardProps(makeMediaItem(), "en");
+      expect(props.badge).toBeUndefined();
+    });
+
+    it("is deterministic for the same item", () => {
+      const a = mediaItemToCardProps(makeMediaItem(), "en");
+      const b = mediaItemToCardProps(makeMediaItem(), "en");
+      expect(a).toEqual(b);
     });
   });
 });

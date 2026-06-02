@@ -1,6 +1,7 @@
 import type { PosterHue, PosterMotif } from "@/components/vhs";
 import type { VHSBoxCardProps } from "@/components/vhs";
 import type { UserMediaWithMedia } from "@/lib/dashboard/types";
+import type { MediaItem } from "@/lib/api/merge";
 import { formatPublicId } from "./formatPublicId";
 
 /**
@@ -113,5 +114,39 @@ export function mediaToCardProps(
     hue: hueFromGenre(media?.genres),
     motif: motifFromType(media?.type ?? "movie"),
     href: publicId ? `/${lang}/media/${publicId}` : undefined,
+  };
+}
+
+/**
+ * Map a raw search MediaItem (the merge.ts shape returned by /api/search) to
+ * VHSBoxCard props for the results grid.
+ *
+ * Unlike {@link mediaToCardProps}, this consumes a raw `MediaItem` whose `id` is
+ * ALREADY the composite public id (`tmdb-603` / `anilist-21`) — the same id
+ * MediaCard uses to build the detail href — so catalog and href derive directly
+ * from `item.id`, mirroring the existing detail-link convention.
+ *
+ * - title / year / posterUrl come from the real result item.
+ * - catalog / hue / motif are cosmetic, derived deterministically.
+ * - NO badge: search never joins `user_media`, so a library-state badge would
+ *   fabricate data (#800 / #853 honest-data principle).
+ * - NO progress: search has no persisted progress to show.
+ */
+export function mediaItemToCardProps(
+  item: MediaItem,
+  lang: string
+): VHSBoxCardProps {
+  // motifFromType only knows the visual media types; `manga` reuses the anime
+  // motif rather than introducing a new sticker without a card design for it.
+  const motifType = item.type === "manga" ? "anime" : item.type;
+
+  return {
+    title: item.title ?? "Unknown",
+    year: item.year ?? undefined,
+    posterUrl: item.coverImage ?? undefined,
+    catalog: deriveCatalog(item.id).full,
+    hue: hueFromGenre(item.genres),
+    motif: motifFromType(motifType),
+    href: `/${lang}/media/${item.id}`,
   };
 }
