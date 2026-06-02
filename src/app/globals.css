@@ -333,6 +333,46 @@ body {
     transform: none;
     box-shadow: none;
   }
+
+  /* Tape skeletons — decorative loading placeholder mimicking a VHS box card
+     (search-directory §7). Purely cosmetic; mark the container aria-hidden. */
+  .tape-skeleton {
+    border: 2px solid var(--vhs-ground-3);
+    background: var(--vhs-ground-2);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+    animation: vhs-tape-pulse 1.1s ease-in-out infinite;
+  }
+  .tape-skeleton .sk-strip {
+    height: 28px;
+    border-bottom: 2px solid var(--vhs-ground-3);
+    background: var(--vhs-ground-3);
+  }
+  .tape-skeleton .sk-poster {
+    aspect-ratio: 2 / 3;
+    background: linear-gradient(
+      110deg,
+      var(--vhs-ground-2) 30%,
+      var(--vhs-ground-3) 50%,
+      var(--vhs-ground-2) 70%
+    );
+    background-size: 200% 100%;
+    animation: vhs-tape-sheen 1.4s linear infinite;
+  }
+  .tape-skeleton .sk-foot {
+    height: 28px;
+    border-top: 2px solid var(--vhs-ground-3);
+    background: var(--vhs-ground-2);
+  }
+}
+
+@keyframes vhs-tape-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes vhs-tape-sheen {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 @keyframes vhs-tracking-error {
@@ -346,4 +386,6 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .vhs-glitch-once { animation: none; }
+  .tape-skeleton,
+  .tape-skeleton .sk-poster { animation: none; }
 }
