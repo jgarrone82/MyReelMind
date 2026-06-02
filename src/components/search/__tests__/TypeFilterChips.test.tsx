@@ -89,4 +89,19 @@ describe("TypeFilterChips", () => {
     const allChip = screen.getByText("All");
     expect(allChip).toHaveAttribute("aria-pressed", "false");
   });
+
+  it("should expose the filter group with an accessible label", () => {
+    render(<TypeFilterChips dict={defaultDict} />);
+    expect(
+      screen.getByRole("group", { name: /filter by type/i })
+    ).toBeInTheDocument();
+  });
+
+  it("should render the channel-pill LED indicator as decorative (aria-hidden)", () => {
+    const { container } = render(<TypeFilterChips dict={defaultDict} />);
+    // Each pill carries a purely decorative channel LED that must not be
+    // announced to assistive tech.
+    const leds = container.querySelectorAll('[aria-hidden="true"]');
+    expect(leds.length).toBeGreaterThanOrEqual(4);
+  });
 });

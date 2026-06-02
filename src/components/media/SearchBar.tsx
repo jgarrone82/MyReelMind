@@ -6,9 +6,11 @@ import { useSearch } from "@/hooks/queries/useSearch";
 
 interface SearchBarProps {
   placeholder: string;
+  /** Label for the CLEAR control shown while the query is non-empty. */
+  clearLabel?: string;
 }
 
-export function SearchBar({ placeholder }: SearchBarProps) {
+export function SearchBar({ placeholder, clearLabel = "Clear" }: SearchBarProps) {
   const { query, debouncedQuery, setQuery, setDebouncedQuery } =
     useSearchFilters();
 
@@ -22,31 +24,53 @@ export function SearchBar({ placeholder }: SearchBarProps) {
   }, [query, setDebouncedQuery]);
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <div className="relative flex-1">
-        <label htmlFor="search-input" className="sr-only">
-          Search
-        </label>
-        <input
-          id="search-input"
-          type="search"
-          role="searchbox"
-          aria-label="Search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
-          className="w-full rounded-lg border border-primary px-4 py-3 text-base focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-        />
-        {isFetching && (
+    <div className="vhs-glow-phosphor relative flex items-center gap-3 border-2 border-[var(--vhs-phosphor)] bg-[var(--vhs-ground)] px-4 py-3 shadow-[5px_5px_0_rgba(0,0,0,0.8)]">
+      {/* Terminal prompt glyph — decorative chrome. */}
+      <span
+        aria-hidden
+        className="vhs-mono select-none text-[1.1rem] leading-none text-[var(--vhs-phosphor)]"
+      >
+        ▸
+      </span>
+
+      <label htmlFor="search-input" className="sr-only">
+        Search
+      </label>
+      <input
+        id="search-input"
+        type="search"
+        role="searchbox"
+        aria-label="Search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={placeholder}
+        className="vhs-mono w-full flex-1 border-0 bg-transparent p-0 text-[0.95rem] tracking-[0.04em] text-[var(--vhs-cream)] placeholder:text-[var(--vhs-cream-dim)] focus:outline-none"
+      />
+
+      {isFetching && (
+        <span
+          role="status"
+          aria-label="Loading"
+          className="shrink-0"
+        >
+          {/* Reel/tape spinner — decorative; the status text above announces it. */}
           <span
-            role="status"
-            aria-label="Loading"
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-          >
-            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-accent" />
-          </span>
-        )}
-      </div>
+            aria-hidden
+            className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-[var(--vhs-ground-3)] border-t-[var(--vhs-phosphor)]"
+          />
+        </span>
+      )}
+
+      {query.length > 0 && (
+        <button
+          type="button"
+          aria-label="Clear search"
+          onClick={() => setQuery("")}
+          className="vhs-kicker shrink-0 whitespace-nowrap border-0 bg-transparent px-1.5 py-1 text-[0.78rem] tracking-[0.14em] text-[var(--vhs-magenta)] hover:text-[var(--vhs-cream)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--vhs-phosphor)]"
+        >
+          ✕ {clearLabel}
+        </button>
+      )}
     </div>
   );
 }
