@@ -37,6 +37,44 @@ describe("SearchBar", () => {
     expect(screen.queryByRole("combobox", { name: /type/i })).not.toBeInTheDocument();
   });
 
+  it("should not render a CLEAR button when the query is empty", () => {
+    render(<SearchBar placeholder="Search..." clearLabel="CLEAR" />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(
+      screen.queryByRole("button", { name: /clear search/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should render a CLEAR button when the query is non-empty", () => {
+    useSearchFilters.setState({ query: "naruto", debouncedQuery: "naruto" });
+
+    render(<SearchBar placeholder="Search..." clearLabel="CLEAR" />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(
+      screen.getByRole("button", { name: /clear search/i })
+    ).toBeInTheDocument();
+  });
+
+  it("should clear the query in the store when CLEAR is clicked", async () => {
+    const user = userEvent.setup();
+    useSearchFilters.setState({ query: "naruto", debouncedQuery: "naruto" });
+
+    render(<SearchBar placeholder="Search..." clearLabel="CLEAR" />, {
+      wrapper: createWrapper(),
+    });
+
+    await user.click(screen.getByRole("button", { name: /clear search/i }));
+
+    expect(useSearchFilters.getState().query).toBe("");
+    // CLEAR must also reset debouncedQuery instantly (no debounce wait), so the
+    // results view collapses immediately. Pins the setDebouncedQuery("") call.
+    expect(useSearchFilters.getState().debouncedQuery).toBe("");
+  });
+
   it("should update query in store when user types", async () => {
     const user = userEvent.setup();
     render(<SearchBar placeholder="Search..." />, { wrapper: createWrapper() });

@@ -17,6 +17,16 @@ vi.mock("@/i18n/provider", () => ({
       tryAdjusting: "Try adjusting your search or filters",
       searchPrompt: "Search for movies or anime",
       searchPromptHint: "Find something to add to your library",
+      resultsSub: "SORTED BY RELEVANCE · TERMINAL 04",
+      resultsHead: "Found {n} results for",
+      resultsHeadOne: "Found {n} result for",
+      typing: "READING TAPE…",
+      zeroHead: "Out of stock",
+      zeroSub: "Nothing on the shelf matches that title.",
+      errorHead: "TERMINAL OFFLINE",
+      errorBody:
+        "The directory terminal lost its signal. Check the connection and search again.",
+      errorRetry: "Retry search",
     },
   }),
 }));
@@ -94,7 +104,9 @@ describe("SearchResults", () => {
 
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/no results found/i)).toBeInTheDocument();
+    // Restyled no-results panel ("Out of stock") — semantically distinct from
+    // the empty-query prompt, which must NOT appear here.
+    expect(screen.getByText(/out of stock/i)).toBeInTheDocument();
     expect(screen.queryByText(/search for movies or anime/i)).not.toBeInTheDocument();
   });
 
@@ -117,7 +129,9 @@ describe("SearchResults", () => {
     render(<SearchResults lang="es" />, { wrapper: createWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByText("Test Movie")).toBeInTheDocument();
+      // VHSBoxCard renders the title in both the card header strip and the
+      // poster-placeholder (no coverImage in the mock), so exactly 2 instances.
+      expect(screen.getAllByText("Test Movie")).toHaveLength(2);
     });
   });
 
@@ -192,5 +206,183 @@ describe("SearchResults", () => {
     await waitFor(() => {
       expect(screen.queryByText("Load More")).not.toBeInTheDocument();
     });
+  });
+
+  it("should render a receipt-style 'Found N results' header with the real count", async () => {
+    vi.mocked(useSearchFilters).mockReturnValue({
+      query: "alien",
+      debouncedQuery: "alien",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    });
+    vi.mocked(useSearch).mockReturnValue({ data: { results: mockResults, totalPages: 5 }, isLoading: false } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      // N is the real accumulated count (1 mock result), not a fabricated number.
+      // Singular grammar applies for exactly one result.
+      expect(screen.getByText(/found 1 result for/i)).toBeInTheDocument();
+      expect(screen.getByText(/alien/i)).toBeInTheDocument();
+    });
+  });
+
+  it("should render the out-of-stock panel (distinct from the empty-query prompt) when a query returns nothing", () => {
+    vi.mocked(useSearchFilters).mockReturnValue({
+      query: "zxqw",
+      debouncedQuery: "zxqw",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    });
+    vi.mocked(useSearch).mockReturnValue({ data: { results: [], totalPages: 0 }, isLoading: false } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/out of stock/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/nothing on the shelf matches that title/i)
+    ).toBeInTheDocument();
+    // Still NOT the empty-query prompt.
+    expect(
+      screen.queryByText(/search for movies or anime/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("should surface the terminal-offline error panel when the search errors", () => {
+    vi.mocked(useSearchFilters).mockReturnValue({
+      query: "alien",
+      debouncedQuery: "alien",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    });
+    vi.mocked(useSearch).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: vi.fn(),
+    } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/terminal offline/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /retry search/i })
+    ).toBeInTheDocument();
+  });
+
+  it("should call refetch when the RETRY button is clicked", async () => {
+    const mockRefetch = vi.fn();
+    vi.mocked(useSearchFilters).mockReturnValue({
+      query: "alien",
+      debouncedQuery: "alien",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    });
+    vi.mocked(useSearch).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: mockRefetch,
+    } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    screen.getByRole("button", { name: /retry search/i }).click();
+    expect(mockRefetch).toHaveBeenCalled();
+  });
+
+  it("keeps results on screen with an inline retry when a Load More fails (isError with results)", async () => {
+    // Models the REAL Load More flow:
+    //   1. A successful page-1 request populates the on-screen grid (allResults
+    //      fills via the append effect).
+    //   2. The user hits Load More → page becomes 2 → that request FAILS, so
+    //      React Query returns `data: undefined` + `isError: true` for the
+    //      fresh failed page.
+    // The accumulated page-1 cards must survive (not be wiped by the error),
+    // and the inline retry — not the full-screen panel — must surface.
+    const page1Filters = {
+      query: "test",
+      debouncedQuery: "test",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    };
+    vi.mocked(useSearchFilters).mockReturnValue(page1Filters);
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: mockResults, totalPages: 5 },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+
+    const { rerender } = render(<SearchResults lang="es" />, {
+      wrapper: createWrapper(),
+    });
+
+    // Page-1 results are populated on screen via the append effect.
+    await waitFor(() => {
+      expect(screen.getAllByText("Test Movie")).toHaveLength(2);
+    });
+
+    // User hits Load More → page advances to 2 and that request fails.
+    vi.mocked(useSearchFilters).mockReturnValue({
+      ...page1Filters,
+      page: 2,
+    });
+    vi.mocked(useSearch).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: vi.fn(),
+    } as any);
+
+    rerender(<SearchResults lang="es" />);
+
+    // The accumulated page-1 card is STILL rendered (NOT replaced by the
+    // full-screen error panel).
+    expect(screen.getAllByText("Test Movie")).toHaveLength(2);
+    // The full-screen TERMINAL OFFLINE header must NOT appear.
+    expect(screen.queryByText(/terminal offline/i)).not.toBeInTheDocument();
+    // A non-destructive inline retry is present.
+    expect(
+      screen.getByRole("button", { name: /retry search/i })
+    ).toBeInTheDocument();
+    // No double-button: the Load More button must NOT co-exist with the
+    // inline retry while the request is in an error state.
+    expect(screen.queryByText("Load More")).not.toBeInTheDocument();
   });
 });
