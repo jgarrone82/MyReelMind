@@ -224,6 +224,35 @@ export interface Dictionary {
       submit: string;
       loading: string;
       success: string;
+      // VHS membership-application redesign (Screen 03)
+      kicker: string;
+      formNo: string;
+      headline: string;
+      subtitle: string;
+      emailLabel: string;
+      emailPlaceholder: string;
+      emailRequired: string;
+      passwordLabel: string;
+      passwordPlaceholder: string;
+      confirmLabel: string;
+      confirmPlaceholder: string;
+      showPassword: string;
+      hidePassword: string;
+      strengthLabel: string;
+      strength0: string;
+      strength1: string;
+      strength2: string;
+      strength3: string;
+      strength4: string;
+      matchOk: string;
+      matchNo: string;
+      loadingTape: string;
+      divider: string;
+      errorHeadline: string;
+      errorBody: string;
+      already: string;
+      signin: string;
+      finePrint: string;
     };
     logout: string;
     errors: {

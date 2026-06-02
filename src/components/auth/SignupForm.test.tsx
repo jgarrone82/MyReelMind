@@ -25,7 +25,7 @@ describe("SignupForm", () => {
   it("should render submit button", () => {
     render(<SignupForm lang="en" dict={dictionary} />);
 
-    expect(screen.getByRole("button", { name: /create account/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /issue my card/i })).toBeInTheDocument();
   });
 
   it("should call signUp on form submit", async () => {
@@ -36,7 +36,7 @@ describe("SignupForm", () => {
     const emailInput = screen.getByRole("textbox", { name: /email/i });
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmInput = screen.getByLabelText(/confirm password/i);
-    const submitButton = screen.getByRole("button", { name: /create account/i });
+    const submitButton = screen.getByRole("button", { name: /issue my card/i });
 
     fireEvent.input(emailInput, { target: { value: "newuser@example.com" } });
     fireEvent.input(passwordInput, { target: { value: "password123" } });
@@ -66,7 +66,7 @@ describe("SignupForm", () => {
     const emailInput = screen.getByRole("textbox", { name: /email/i });
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmInput = screen.getByLabelText(/confirm password/i);
-    const submitButton = screen.getByRole("button", { name: /create account/i });
+    const submitButton = screen.getByRole("button", { name: /issue my card/i });
 
     fireEvent.input(emailInput, { target: { value: "existing@example.com" } });
     fireEvent.input(passwordInput, { target: { value: "password123" } });
