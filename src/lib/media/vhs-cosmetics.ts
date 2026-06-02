@@ -122,9 +122,9 @@ export function mediaToCardProps(
  * VHSBoxCard props for the results grid.
  *
  * Unlike {@link mediaToCardProps}, this consumes a raw `MediaItem` whose `id` is
- * ALREADY the composite public id (`tmdb-603` / `anilist-21`) — the same id
- * MediaCard uses to build the detail href — so catalog and href derive directly
- * from `item.id`, mirroring the existing detail-link convention.
+ * ALREADY the composite public id (`tmdb-603` / `anilist-21`) — so catalog and
+ * href derive directly from `item.id`, mirroring the existing detail-link
+ * convention.
  *
  * - title / year / posterUrl come from the real result item.
  * - catalog / hue / motif are cosmetic, derived deterministically.

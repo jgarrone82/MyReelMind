@@ -19,6 +19,7 @@ vi.mock("@/i18n/provider", () => ({
       searchPromptHint: "Find something to add to your library",
       resultsSub: "SORTED BY RELEVANCE · TERMINAL 04",
       resultsHead: "Found {n} results for",
+      resultsHeadOne: "Found {n} result for",
       typing: "READING TAPE…",
       zeroHead: "Out of stock",
       zeroSub: "Nothing on the shelf matches that title.",
@@ -129,8 +130,8 @@ describe("SearchResults", () => {
 
     await waitFor(() => {
       // VHSBoxCard renders the title in both the card header strip and the
-      // poster-placeholder (no coverImage in the mock), so match all instances.
-      expect(screen.getAllByText("Test Movie").length).toBeGreaterThan(0);
+      // poster-placeholder (no coverImage in the mock), so exactly 2 instances.
+      expect(screen.getAllByText("Test Movie")).toHaveLength(2);
     });
   });
 
@@ -227,7 +228,8 @@ describe("SearchResults", () => {
 
     await waitFor(() => {
       // N is the real accumulated count (1 mock result), not a fabricated number.
-      expect(screen.getByText(/found 1 results for/i)).toBeInTheDocument();
+      // Singular grammar applies for exactly one result.
+      expect(screen.getByText(/found 1 result for/i)).toBeInTheDocument();
       expect(screen.getByText(/alien/i)).toBeInTheDocument();
     });
   });
@@ -315,5 +317,72 @@ describe("SearchResults", () => {
 
     screen.getByRole("button", { name: /retry search/i }).click();
     expect(mockRefetch).toHaveBeenCalled();
+  });
+
+  it("keeps results on screen with an inline retry when a Load More fails (isError with results)", async () => {
+    // Models the REAL Load More flow:
+    //   1. A successful page-1 request populates the on-screen grid (allResults
+    //      fills via the append effect).
+    //   2. The user hits Load More → page becomes 2 → that request FAILS, so
+    //      React Query returns `data: undefined` + `isError: true` for the
+    //      fresh failed page.
+    // The accumulated page-1 cards must survive (not be wiped by the error),
+    // and the inline retry — not the full-screen panel — must surface.
+    const page1Filters = {
+      query: "test",
+      debouncedQuery: "test",
+      type: "all" as const,
+      year: null,
+      page: 1,
+      setQuery: vi.fn(),
+      setDebouncedQuery: vi.fn(),
+      setType: vi.fn(),
+      setYear: vi.fn(),
+      setPage: vi.fn(),
+      reset: vi.fn(),
+    };
+    vi.mocked(useSearchFilters).mockReturnValue(page1Filters);
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: mockResults, totalPages: 5 },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+
+    const { rerender } = render(<SearchResults lang="es" />, {
+      wrapper: createWrapper(),
+    });
+
+    // Page-1 results are populated on screen via the append effect.
+    await waitFor(() => {
+      expect(screen.getAllByText("Test Movie")).toHaveLength(2);
+    });
+
+    // User hits Load More → page advances to 2 and that request fails.
+    vi.mocked(useSearchFilters).mockReturnValue({
+      ...page1Filters,
+      page: 2,
+    });
+    vi.mocked(useSearch).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: vi.fn(),
+    } as any);
+
+    rerender(<SearchResults lang="es" />);
+
+    // The accumulated page-1 card is STILL rendered (NOT replaced by the
+    // full-screen error panel).
+    expect(screen.getAllByText("Test Movie")).toHaveLength(2);
+    // The full-screen TERMINAL OFFLINE header must NOT appear.
+    expect(screen.queryByText(/terminal offline/i)).not.toBeInTheDocument();
+    // A non-destructive inline retry is present.
+    expect(
+      screen.getByRole("button", { name: /retry search/i })
+    ).toBeInTheDocument();
+    // No double-button: the Load More button must NOT co-exist with the
+    // inline retry while the request is in an error state.
+    expect(screen.queryByText("Load More")).not.toBeInTheDocument();
   });
 });

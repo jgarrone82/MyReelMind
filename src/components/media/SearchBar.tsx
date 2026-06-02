@@ -44,7 +44,7 @@ export function SearchBar({ placeholder, clearLabel = "Clear" }: SearchBarProps)
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
-        className="vhs-mono w-full flex-1 border-0 bg-transparent p-0 text-[0.95rem] tracking-[0.04em] text-[var(--vhs-cream)] placeholder:text-[var(--vhs-cream-dim)] focus:outline-none"
+        className="vhs-mono w-full flex-1 border-0 bg-transparent p-0 text-[0.95rem] tracking-[0.04em] text-[var(--vhs-cream)] placeholder:text-[var(--vhs-cream-dim)] focus:outline-none [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden"
       />
 
       {isFetching && (
@@ -56,7 +56,7 @@ export function SearchBar({ placeholder, clearLabel = "Clear" }: SearchBarProps)
           {/* Reel/tape spinner — decorative; the status text above announces it. */}
           <span
             aria-hidden
-            className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-[var(--vhs-ground-3)] border-t-[var(--vhs-phosphor)]"
+            className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-[var(--vhs-ground-3)] border-t-[var(--vhs-phosphor)] motion-reduce:animate-none"
           />
         </span>
       )}
@@ -65,7 +65,10 @@ export function SearchBar({ placeholder, clearLabel = "Clear" }: SearchBarProps)
         <button
           type="button"
           aria-label="Clear search"
-          onClick={() => setQuery("")}
+          onClick={() => {
+            setQuery("");
+            setDebouncedQuery("");
+          }}
           className="vhs-kicker shrink-0 whitespace-nowrap border-0 bg-transparent px-1.5 py-1 text-[0.78rem] tracking-[0.14em] text-[var(--vhs-magenta)] hover:text-[var(--vhs-cream)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--vhs-phosphor)]"
         >
           ✕ {clearLabel}

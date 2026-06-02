@@ -80,12 +80,12 @@ export function SearchResults({ lang }: SearchResultsProps) {
     );
   }
 
-  // Error state: surface the data-layer error with a retry. NET-NEW thin wiring.
-  if (isError) {
+  // First-load error: nothing on screen yet, so surface the FULL-SCREEN error
+  // panel with a retry. NET-NEW thin wiring.
+  if (isError && !hasResults) {
     return (
       <div
         role="alert"
-        aria-live="polite"
         className="mx-auto mt-2 max-w-xl border-2 border-[var(--vhs-ground)] bg-[var(--vhs-error)] px-4 py-4 text-[var(--vhs-cream)] shadow-[6px_6px_0_rgba(0,0,0,0.8)]"
       >
         <div className="flex items-start gap-3">
@@ -104,10 +104,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
             </p>
             <button
               type="button"
-              onClick={() => {
-                refetch();
-                document.getElementById("search-input")?.focus();
-              }}
+              onClick={() => refetch()}
               className="vhs-btn vhs-btn--secondary mt-3.5 text-[0.82rem]"
             >
               ↻ {t.errorRetry}
@@ -129,7 +126,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
         >
           <span
             aria-hidden
-            className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[var(--vhs-ground-3)] border-t-[var(--vhs-phosphor)]"
+            className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[var(--vhs-ground-3)] border-t-[var(--vhs-phosphor)] motion-reduce:animate-none"
           />
           {t.typing}
         </div>
@@ -183,8 +180,15 @@ export function SearchResults({ lang }: SearchResultsProps) {
   }
 
   // Results: receipt header + VHS box-card grid + Load More.
-  const showLoadMore = hasResults && data && page < data.totalPages;
-  const [headBefore, headAfter] = t.resultsHead.split("{n}");
+  const showLoadMore = !isError && hasResults && data && page < data.totalPages;
+  // Singular grammar: "Found 1 result" instead of "Found 1 results".
+  const headTemplate =
+    allResults.length === 1 ? t.resultsHeadOne : t.resultsHead;
+  // Safe {n} interpolation: a translation missing the placeholder must not
+  // silently drop the count — fall back to empty strings around it.
+  const headParts = headTemplate.split("{n}");
+  const headBefore = headParts[0] ?? "";
+  const headAfter = headParts[1] ?? "";
 
   return (
     <div className="space-y-6">
@@ -212,6 +216,26 @@ export function SearchResults({ lang }: SearchResultsProps) {
       </div>
 
       <ResultsShelf items={allResults} lang={lang} />
+
+      {/* Load-More failure: keep the on-screen results, surface a NON-destructive
+          inline error + retry instead of replacing the grid. */}
+      {isError && (
+        <div
+          role="alert"
+          className="flex flex-col items-center gap-2 text-center"
+        >
+          <p className="vhs-mono text-[0.8rem] text-[var(--vhs-error)]">
+            {t.errorBody}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="vhs-btn vhs-btn--secondary text-[0.82rem]"
+          >
+            ↻ {t.errorRetry}
+          </button>
+        </div>
+      )}
 
       {showLoadMore && (
         <div className="flex justify-center">

@@ -70,6 +70,9 @@ describe("SearchBar", () => {
     await user.click(screen.getByRole("button", { name: /clear search/i }));
 
     expect(useSearchFilters.getState().query).toBe("");
+    // CLEAR must also reset debouncedQuery instantly (no debounce wait), so the
+    // results view collapses immediately. Pins the setDebouncedQuery("") call.
+    expect(useSearchFilters.getState().debouncedQuery).toBe("");
   });
 
   it("should update query in store when user types", async () => {

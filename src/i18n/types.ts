@@ -30,6 +30,7 @@ export interface Dictionary {
     clear: string;
     resultsSub: string;
     resultsHead: string;
+    resultsHeadOne: string;
     typing: string;
     zeroHead: string;
     zeroSub: string;

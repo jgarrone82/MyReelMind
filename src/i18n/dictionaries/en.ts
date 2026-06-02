@@ -31,6 +31,7 @@ export const dictionary: Dictionary = {
     clear: "CLEAR",
     resultsSub: "SORTED BY RELEVANCE · TERMINAL 04",
     resultsHead: "Found {n} results for",
+    resultsHeadOne: "Found {n} result for",
     typing: "READING TAPE…",
     zeroHead: "Out of stock",
     zeroSub: "Nothing on the shelf matches that title.",

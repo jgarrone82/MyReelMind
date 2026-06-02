@@ -251,7 +251,7 @@ describe("vhs-cosmetics", () => {
       expect(props.posterUrl).toBe(
         "https://image.tmdb.org/t/p/w500/poster.jpg"
       );
-      // MediaItem.id IS the public id, so the href mirrors MediaCard's pattern.
+      // MediaItem.id IS the public id, so the href follows the detail-link pattern.
       expect(props.href).toBe("/en/media/tmdb-603");
     });
 
