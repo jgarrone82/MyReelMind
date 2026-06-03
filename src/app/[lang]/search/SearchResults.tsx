@@ -57,6 +57,10 @@ export function SearchResults({ lang }: SearchResultsProps) {
   const queryIdentity = `${debouncedQuery}::${type}::${year ?? ""}`;
   const prevIdentityRef = useRef(queryIdentity);
 
+  // Follow-up (low impact, pre-existing): the reset runs in an effect, so a
+  // query/type/year change leaves one transitional render showing the previous
+  // identity's state before the reset commits. Deriving the reset during render
+  // (compare-previous-identity pattern) would eliminate that frame.
   useEffect(() => {
     if (queryIdentity !== prevIdentityRef.current) {
       prevIdentityRef.current = queryIdentity;

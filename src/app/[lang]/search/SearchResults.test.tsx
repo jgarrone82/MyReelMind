@@ -465,11 +465,17 @@ describe("SearchResults", () => {
     });
   });
 
-  // Bug #3 — out-of-order network responses. When page-2 (APPEND) settles
-  // BEFORE page-1 (REPLACE) for the same query, the list must stay correct:
-  // both pages present, in page order, no duplicates, none lost. The naive
-  // "page === 1 → replace" effect corrupts this (page-1 wipes page-2's items).
-  it("keeps results order-safe when page-1 settles after page-2 (out-of-order race)", async () => {
+  // Bug #3 — slot idempotency. With per-page React Query keys
+  // (['search', q, type, year, page]) the component only ever observes the
+  // CURRENT page's `data`, so a true network reorder is not observable here.
+  // What this verifies is that re-delivering page-1's slot — via a store-driven
+  // `page` reset back to 1 after later pages have already accumulated — does
+  // NOT clobber the page-2 slot. Each settled page lands in its own slot keyed
+  // by page index, so re-writing slot 1 overwrites only slot 1 and leaves slot
+  // 2 intact (both pages present, in page order, no duplicates, none lost). The
+  // naive "page === 1 → replace" effect corrupts this (page-1 wipes page-2's
+  // items).
+  it("keeps results order-safe when page-1's slot is re-delivered after page-2 (slot idempotency)", async () => {
     const page1 = [makeItem("tmdb-1", "Alpha"), makeItem("tmdb-2", "Bravo")];
     const page2 = [makeItem("tmdb-3", "Charlie"), makeItem("tmdb-4", "Delta")];
 
@@ -517,11 +523,12 @@ describe("SearchResults", () => {
       expect(screen.getAllByText("Charlie").length).toBeGreaterThan(0);
     });
 
-    // Step 4: THE RACE. A late, reordered page-1 response is re-delivered AFTER
-    // page 2 already landed (e.g. React Query refetch / cache revalidation
-    // returning page-1 data while the store page is still 2). With the naive
-    // effect this would REPLACE the whole list with only page-1 items, losing
-    // page 2. The order-safe accumulation must keep BOTH pages intact.
+    // Step 4: SLOT IDEMPOTENCY. The store-driven `page` resets back to 1 after
+    // page 2 already landed (e.g. a Load More / pagination control returning to
+    // the first page), so the component observes page-1's `data` again and
+    // re-writes slot 1. With the naive effect this would REPLACE the whole list
+    // with only page-1 items, losing page 2. The slot-keyed accumulation must
+    // overwrite only slot 1 and keep BOTH pages intact.
     vi.mocked(useSearchFilters).mockReturnValue(baseFilters({ page: 1 }));
     vi.mocked(useSearch).mockReturnValue({
       data: { results: page1, totalPages: 5 },
@@ -585,6 +592,99 @@ describe("SearchResults", () => {
     });
     // The previous query's items must be gone, count reflects only query B.
     expect(screen.queryByText("Alien")).not.toBeInTheDocument();
+    expect(screen.getByText(/found 1 result for/i)).toBeInTheDocument();
+  });
+
+  // Bug #3 (companion) — changing a FILTER (type/year) with the SAME query must
+  // also reset accumulation. The query-identity key is
+  // `debouncedQuery::type::year`, so a filter change is a distinct result set.
+  //
+  // Fail-first design: the previous filter accumulates page 1 AND page 2, then
+  // the user switches type and lands back on page 1. The old code keyed its
+  // reset on `debouncedQuery` only, so with the query held constant it would
+  // NOT reset — slot 1 gets overwritten by the new type's page 1, but slot 2
+  // from the previous type SURVIVES and bleeds into the new filter's grid.
+  // The widened identity key clears the whole accumulation map, so slot 2 is
+  // gone and only the new type's results remain.
+  it("resets accumulation when only the type filter changes (no cross-filter bleed)", async () => {
+    // "all" filter, page 1.
+    const allPage1 = [makeItem("all-1", "Naruto Movie")];
+    vi.mocked(useSearchFilters).mockReturnValue(
+      baseFilters({
+        query: "naruto",
+        debouncedQuery: "naruto",
+        type: "all" as const,
+        page: 1,
+      })
+    );
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: allPage1, totalPages: 3 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+
+    const { rerender } = render(<SearchResults lang="es" />, {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Naruto Movie").length).toBeGreaterThan(0);
+    });
+
+    // "all" filter, Load More → page 2 accumulates into slot 2.
+    const allPage2 = [makeItem("all-2", "Naruto Live Action")];
+    vi.mocked(useSearchFilters).mockReturnValue(
+      baseFilters({
+        query: "naruto",
+        debouncedQuery: "naruto",
+        type: "all" as const,
+        page: 2,
+      })
+    );
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: allPage2, totalPages: 3 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+    rerender(<SearchResults lang="es" />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Naruto Live Action").length).toBeGreaterThan(0);
+    });
+
+    // Same query, but the user narrows the type filter to "anime" and lands
+    // back on page 1. The result-set identity changes → accumulation must
+    // reset. The new page-1 results overwrite slot 1; without the reset, slot 2
+    // ("Naruto Live Action") from the previous filter would survive and bleed.
+    const animePage1 = [makeItem("anime-1", "Naruto Shippuden")];
+    vi.mocked(useSearchFilters).mockReturnValue(
+      baseFilters({
+        query: "naruto",
+        debouncedQuery: "naruto",
+        type: "anime" as const,
+        page: 1,
+      })
+    );
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: animePage1, totalPages: 1 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+    rerender(<SearchResults lang="es" />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Naruto Shippuden").length).toBeGreaterThan(0);
+    });
+    // The previous type's accumulated pages must be gone (no cross-filter
+    // bleed), and the count reflects only the new type's result set.
+    expect(screen.queryByText("Naruto Movie")).not.toBeInTheDocument();
+    expect(screen.queryByText("Naruto Live Action")).not.toBeInTheDocument();
     expect(screen.getByText(/found 1 result for/i)).toBeInTheDocument();
   });
 });
