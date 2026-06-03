@@ -47,12 +47,15 @@ describe("GET /api/trending", () => {
     expect(json.results).toEqual([]);
   });
 
-  it("surfaces an error response when the service throws", async () => {
+  it("degrades to an empty 200 (honest degradation) when the service throws", async () => {
     vi.mocked(getTrending).mockRejectedValue(new Error("boom"));
 
     const res = await GET(new Request("http://localhost:3000/api/trending"));
 
-    expect(res.status).toBeGreaterThanOrEqual(500);
+    // Honest degradation: the empty list is a real 200 the hook consumes, so
+    // the UI falls back to its prompt with no error/retry. A 500 would never be
+    // read (the hook throws on !res.ok) and would trigger React Query retries.
+    expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.results).toEqual([]);
   });

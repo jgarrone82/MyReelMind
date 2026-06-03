@@ -5,8 +5,11 @@ export async function GET(_request: Request): Promise<Response> {
     const { results } = await getTrending();
     return Response.json({ results });
   } catch {
-    // Honest degradation: never fabricate data. The empty result lets the UI
-    // fall back to its existing prompt instead of surfacing a hard error.
-    return Response.json({ results: [] }, { status: 500 });
+    // Honest degradation: never fabricate data. Return an empty list as a real
+    // 200 so the hook actually consumes it (the hook throws on !res.ok, so a
+    // 500 body would never be read and would trigger React Query retries). The
+    // UI then falls back to its existing prompt — no fabricated data, no hard
+    // error, no retry storm.
+    return Response.json({ results: [] });
   }
 }

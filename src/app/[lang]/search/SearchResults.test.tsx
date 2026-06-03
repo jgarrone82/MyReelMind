@@ -775,6 +775,32 @@ describe("SearchResults", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("degrades to the honest prompt when trending errors with undefined data (empty query)", () => {
+    // Guards the `trendingData?.results ?? []` optional-chain degradation: a
+    // genuine trending HTTP failure leaves `data` undefined and `isError` true.
+    // The empty-query branch must fall back to the honest prompt — no crash, no
+    // empty grid, no NOW SHOWING heading.
+    vi.mocked(useSearchFilters).mockReturnValue(emptyQueryFilters());
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: [], totalPages: 0 },
+      isLoading: false,
+    } as any);
+    vi.mocked(useTrending).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    expect(
+      screen.getByText(/search for movies or anime/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/now showing — popular this week/i)
+    ).not.toBeInTheDocument();
+  });
+
   it("does NOT show the trending heading when a query is active (no regression)", () => {
     vi.mocked(useSearchFilters).mockReturnValue(
       baseFilters({ query: "naruto", debouncedQuery: "naruto" })

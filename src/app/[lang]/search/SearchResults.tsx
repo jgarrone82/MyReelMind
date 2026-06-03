@@ -36,10 +36,15 @@ export function SearchResults({ lang }: SearchResultsProps) {
   );
 
   // NOW SHOWING trending shelf for the empty-query state. Called
-  // unconditionally (rules of hooks) before any early return; with a 1h
-  // staleTime this is effectively free on re-renders. Only consumed in the
-  // empty-query branch below.
-  const { data: trendingData, isLoading: isTrendingLoading } = useTrending();
+  // unconditionally (rules of hooks) before any early return; only the fetch is
+  // gated. With no active query it fetches (and a 1h staleTime keeps re-renders
+  // free); once a query is active the fetch is disabled so we never hit
+  // /api/trending behind an unused shelf. Only consumed in the empty-query
+  // branch below.
+  const hasActiveQuery = Boolean(debouncedQuery.trim());
+  const { data: trendingData, isLoading: isTrendingLoading } = useTrending({
+    enabled: !hasActiveQuery,
+  });
 
   // Order-safe accumulation: results are keyed by their page index instead of
   // blind replace/append. This makes accumulation idempotent and independent of
