@@ -57,6 +57,30 @@ describe("TMDB Client", () => {
     });
   });
 
+  describe("trending", () => {
+    it("should call the /trending/all/week endpoint with the api key", async () => {
+      server.use(
+        http.get("https://api.themoviedb.org/3/trending/all/week", ({ request }) => {
+          const url = new URL(request.url);
+          expect(url.searchParams.get("api_key")).toBe(API_KEY);
+          return HttpResponse.json({
+            page: 1,
+            results: [
+              { id: 10, media_type: "movie", title: "Trending Movie" },
+              { id: 20, media_type: "tv", name: "Trending Show" },
+            ],
+            total_pages: 1,
+            total_results: 2,
+          });
+        })
+      );
+
+      const result = await client.trending();
+      expect(result.results).toHaveLength(2);
+      expect(result.results[0].title).toBe("Trending Movie");
+    });
+  });
+
   describe("getDetails", () => {
     it("should fetch movie details by id", async () => {
       server.use(

@@ -4,6 +4,7 @@ import type {
   AniListSearchParams,
   AniListSearchResponse,
   AniListMediaDetailsResponse,
+  MediaSort,
 } from "./types";
 
 const API_URL = "https://graphql.anilist.co";
@@ -20,6 +21,50 @@ function buildSearchQuery(params: AniListSearchParams): string {
     query ($search: String, $type: MediaType, $page: Int, $perPage: Int) {
       Page(page: $page, perPage: $perPage) {
         media(search: $search, type: $type) {
+          id
+          title {
+            romaji
+            english
+            native
+          }
+          type
+          format
+          status
+          description
+          startDate {
+            year
+            month
+            day
+          }
+          endDate {
+            year
+            month
+            day
+          }
+          season
+          seasonYear
+          episodes
+          chapters
+          volumes
+          genres
+          averageScore
+          popularity
+          coverImage {
+            large
+            medium
+          }
+          bannerImage
+        }
+      }
+    }
+  `.trim();
+}
+
+function buildTrendingQuery(): string {
+  return `
+    query ($sort: [MediaSort], $type: MediaType, $page: Int, $perPage: Int) {
+      Page(page: $page, perPage: $perPage) {
+        media(sort: $sort, type: $type) {
           id
           title {
             romaji
@@ -148,6 +193,20 @@ export function createAniListClient(options: AniListClientOptions = {}) {
         type: params.type || "ANIME",
         page: params.page || 1,
         perPage: params.perPage || 10,
+      };
+
+      const response = await graphqlRequest<AniListSearchResponse>(query, variables);
+      return response.data.Page.media;
+    },
+
+    async trending(perPage = 15): Promise<AniListMedia[]> {
+      const query = buildTrendingQuery();
+      const sort: MediaSort[] = ["TRENDING_DESC"];
+      const variables = {
+        sort,
+        type: "ANIME",
+        page: 1,
+        perPage,
       };
 
       const response = await graphqlRequest<AniListSearchResponse>(query, variables);

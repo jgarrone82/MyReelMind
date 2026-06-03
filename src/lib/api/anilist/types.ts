@@ -56,3 +56,6 @@ export interface AniListSearchParams {
   page?: number;
   perPage?: number;
 }
+
+// Subset of AniList's MediaSort enum used by this client.
+export type MediaSort = "TRENDING_DESC";

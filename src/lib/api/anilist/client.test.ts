@@ -98,6 +98,51 @@ describe("AniList GraphQL Client", () => {
     });
   });
 
+  describe("trending", () => {
+    it("should request TRENDING_DESC anime with the given perPage", async () => {
+      const mockResponse = {
+        data: {
+          Page: {
+            media: [
+              {
+                id: 99,
+                title: { romaji: "Trending Anime", english: "Trending Anime EN" },
+                type: "ANIME" as const,
+                genres: ["Action"],
+                coverImage: { large: "https://example.com/t.jpg", medium: "https://example.com/tm.jpg" },
+                startDate: { year: 2024 },
+              },
+            ],
+          },
+        },
+      };
+
+      const executeSpy = vi.spyOn(mockQueue, "execute").mockResolvedValue(mockResponse);
+
+      const result = await client.trending(15);
+
+      expect(executeSpy).toHaveBeenCalledTimes(1);
+      const [key, fn] = executeSpy.mock.calls[0];
+      expect(key).toContain('"sort":["TRENDING_DESC"]');
+      expect(key).toContain('"type":"ANIME"');
+      expect(key).toContain('"perPage":15');
+      expect(typeof fn).toBe("function");
+      expect(result).toEqual(mockResponse.data.Page.media);
+    });
+
+    it("should default perPage to 15", async () => {
+      const mockResponse = { data: { Page: { media: [] } } };
+      const executeSpy = vi.spyOn(mockQueue, "execute").mockResolvedValue(mockResponse);
+
+      await client.trending();
+
+      expect(executeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('"perPage":15'),
+        expect.any(Function)
+      );
+    });
+  });
+
   describe("getMediaById", () => {
     it("should fetch media details by ID", async () => {
       const mockResponse = {

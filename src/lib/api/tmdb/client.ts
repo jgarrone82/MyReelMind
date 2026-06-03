@@ -54,6 +54,11 @@ export function createTmdbClient(options: TmdbClientOptions) {
       return fetchWithRetry<TmdbSearchResponse>(url);
     },
 
+    async trending(): Promise<TmdbSearchResponse> {
+      const url = buildUrl("/trending/all/week");
+      return fetchWithRetry<TmdbSearchResponse>(url);
+    },
+
     async getDetails(
       type: "movie" | "tv",
       id: number,
