@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 import { VHSBoxCard } from "@/components/vhs";
@@ -27,36 +27,76 @@ function ResultsShelf({ items, lang }: { items: MediaItem[]; lang?: string }) {
 export function SearchResults({ lang }: SearchResultsProps) {
   const dict = useDictionary();
   const { debouncedQuery, type, year, page, setPage } = useSearchFilters();
-  const { data, isLoading, isError, refetch } = useSearch(
+  const { data, isLoading, isFetching, isError, refetch } = useSearch(
     debouncedQuery,
     type,
     year,
     page
   );
-  const [allResults, setAllResults] = useState<MediaItem[]>([]);
-  const prevQueryRef = useRef(debouncedQuery);
 
-  // When query changes, reset accumulated results
+  // Order-safe accumulation: results are keyed by their page index instead of
+  // blind replace/append. This makes accumulation idempotent and independent of
+  // network arrival order — a late or reordered page response always lands in
+  // its own slot rather than wiping (page 1) or duplicating (page N) the list.
+  // The displayed list is derived by walking pages in ascending order and
+  // deduping by media id, preserving page order. See issue #42 (bug 3).
+  const [resultsByPage, setResultsByPage] = useState<Map<number, MediaItem[]>>(
+    () => new Map()
+  );
+  // Last SETTLED totalPages for the current query identity. Reading totalPages
+  // straight off `data` flips the Load More button on/off mid-revalidation,
+  // when `data.totalPages` can be a stale/transitional value. Capturing it only
+  // when the query has settled (`!isFetching`) keeps the button honest and
+  // stable (issue #42 bug 2).
+  const [settledTotalPages, setSettledTotalPages] = useState<number | null>(
+    null
+  );
+  // A distinct result set is defined by the query + active filters. When that
+  // identity changes the accumulation must reset so stale pages from a
+  // superseded query never bleed into the new results (bug 3 companion).
+  const queryIdentity = `${debouncedQuery}::${type}::${year ?? ""}`;
+  const prevIdentityRef = useRef(queryIdentity);
+
   useEffect(() => {
-    if (debouncedQuery !== prevQueryRef.current) {
-      prevQueryRef.current = debouncedQuery;
-      setAllResults([]);
+    if (queryIdentity !== prevIdentityRef.current) {
+      prevIdentityRef.current = queryIdentity;
+      setResultsByPage(new Map());
+      setSettledTotalPages(null);
     }
-  }, [debouncedQuery]);
+  }, [queryIdentity]);
 
-  // When new data comes in, append to accumulated results
+  // Store each settled page's results in its own slot. Re-delivery of the same
+  // page overwrites that slot (no duplicate append); out-of-order delivery is
+  // harmless because the slot, not arrival order, determines position.
   useEffect(() => {
     if (data && data.results.length > 0) {
-      setAllResults((prev) => {
-        // If page is 1, replace; otherwise append
-        if (page === 1) return data.results;
-        // Avoid duplicates by checking if we already have these results
-        const existingIds = new Set(prev.map((item) => item.id));
-        const newItems = data.results.filter((item) => !existingIds.has(item.id));
-        return [...prev, ...newItems];
+      setResultsByPage((prev) => {
+        const next = new Map(prev);
+        next.set(page, data.results);
+        return next;
       });
     }
   }, [data, page]);
+
+  // Capture totalPages only from a settled (not in-flight) response.
+  useEffect(() => {
+    if (!isFetching && data) {
+      setSettledTotalPages(data.totalPages);
+    }
+  }, [isFetching, data]);
+
+  const allResults = useMemo(() => {
+    const seen = new Set<string>();
+    const flattened: MediaItem[] = [];
+    for (const pageIndex of [...resultsByPage.keys()].sort((a, b) => a - b)) {
+      for (const item of resultsByPage.get(pageIndex) ?? []) {
+        if (seen.has(item.id)) continue;
+        seen.add(item.id);
+        flattened.push(item);
+      }
+    }
+    return flattened;
+  }, [resultsByPage]);
 
   const hasResults = allResults.length > 0;
   const t = dict.search;
@@ -170,7 +210,14 @@ export function SearchResults({ lang }: SearchResultsProps) {
   }
 
   // Results: receipt header + VHS box-card grid + Load More.
-  const showLoadMore = !isError && hasResults && data && page < data.totalPages;
+  // Base the button on the last SETTLED totalPages, never on the transitional
+  // value `data` carries mid-revalidation — that would flip it on/off during a
+  // page transition (issue #42 bug 2).
+  const showLoadMore =
+    !isError &&
+    hasResults &&
+    settledTotalPages !== null &&
+    page < settledTotalPages;
   // Singular grammar: "Found 1 result" instead of "Found 1 results".
   const headTemplate =
     allResults.length === 1 ? t.resultsHeadOne : t.resultsHead;

@@ -42,12 +42,12 @@ function createWrapper() {
   };
 }
 
-const mockResults = [
-  {
-    id: "tmdb-1",
+function makeItem(id: string, title: string) {
+  return {
+    id,
     source: "tmdb",
     type: "movie",
-    title: "Test Movie",
+    title,
     originalTitle: null,
     year: 2023,
     description: null,
@@ -56,8 +56,27 @@ const mockResults = [
     coverImage: null,
     bannerImage: null,
     genres: [],
-  },
-];
+  };
+}
+
+const mockResults = [makeItem("tmdb-1", "Test Movie")];
+
+function baseFilters(overrides: Record<string, unknown> = {}) {
+  return {
+    query: "test",
+    debouncedQuery: "test",
+    type: "all" as const,
+    year: null,
+    page: 1,
+    setQuery: vi.fn(),
+    setDebouncedQuery: vi.fn(),
+    setType: vi.fn(),
+    setYear: vi.fn(),
+    setPage: vi.fn(),
+    reset: vi.fn(),
+    ...overrides,
+  };
+}
 
 describe("SearchResults", () => {
   beforeEach(() => {
@@ -384,5 +403,188 @@ describe("SearchResults", () => {
     // No double-button: the Load More button must NOT co-exist with the
     // inline retry while the request is in an error state.
     expect(screen.queryByText("Load More")).not.toBeInTheDocument();
+  });
+
+  // Bug #2 — stale `totalPages` during an in-flight revalidation must not flip
+  // the Load More button. React Query (staleTime 5m, no placeholderData) can
+  // hand back a CACHED page whose `totalPages` is stale while a background
+  // refetch runs (`isFetching: true`). The button must reflect the SETTLED
+  // query, not the transitional/stale totalPages.
+  it("does not flip Load More on stale totalPages while the query is revalidating", async () => {
+    // Page 1 settled: 5 total pages → button visible.
+    vi.mocked(useSearchFilters).mockReturnValue(baseFilters({ page: 1 }));
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: mockResults, totalPages: 5 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+
+    const { rerender } = render(<SearchResults lang="es" />, {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Load More")).toBeInTheDocument();
+    });
+
+    // Revalidation in flight: the hook still returns the CACHED data but with a
+    // STALE totalPages of 1 (an earlier response said 1 page). The fresh server
+    // response — not yet settled — will say 5. During this in-flight window the
+    // naive `page < data.totalPages` reads `1 < 1` → false and WRONGLY hides the
+    // button. The settled-data guard must suppress the flip while fetching.
+    vi.mocked(useSearchFilters).mockReturnValue(baseFilters({ page: 1 }));
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: mockResults, totalPages: 1 },
+      isLoading: false,
+      isFetching: true,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+
+    rerender(<SearchResults lang="es" />);
+
+    // The button must NOT disappear mid-revalidation on a stale totalPages.
+    expect(screen.getByText("Load More")).toBeInTheDocument();
+
+    // Revalidation settles with the correct totalPages of 5 → button stays.
+    vi.mocked(useSearchFilters).mockReturnValue(baseFilters({ page: 1 }));
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: mockResults, totalPages: 5 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+
+    rerender(<SearchResults lang="es" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Load More")).toBeInTheDocument();
+    });
+  });
+
+  // Bug #3 — out-of-order network responses. When page-2 (APPEND) settles
+  // BEFORE page-1 (REPLACE) for the same query, the list must stay correct:
+  // both pages present, in page order, no duplicates, none lost. The naive
+  // "page === 1 → replace" effect corrupts this (page-1 wipes page-2's items).
+  it("keeps results order-safe when page-1 settles after page-2 (out-of-order race)", async () => {
+    const page1 = [makeItem("tmdb-1", "Alpha"), makeItem("tmdb-2", "Bravo")];
+    const page2 = [makeItem("tmdb-3", "Charlie"), makeItem("tmdb-4", "Delta")];
+
+    // Step 1: page 1 issued. Its response is SLOW — not settled yet.
+    vi.mocked(useSearchFilters).mockReturnValue(baseFilters({ page: 1 }));
+    vi.mocked(useSearch).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+
+    const { rerender } = render(<SearchResults lang="es" />, {
+      wrapper: createWrapper(),
+    });
+
+    // Step 2: page 1 settles → its items populate slot 1.
+    vi.mocked(useSearchFilters).mockReturnValue(baseFilters({ page: 1 }));
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: page1, totalPages: 5 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+    rerender(<SearchResults lang="es" />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Alpha").length).toBeGreaterThan(0);
+    });
+
+    // Step 3: user hits Load More → page 2 settles and APPENDS.
+    vi.mocked(useSearchFilters).mockReturnValue(baseFilters({ page: 2 }));
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: page2, totalPages: 5 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+    rerender(<SearchResults lang="es" />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Charlie").length).toBeGreaterThan(0);
+    });
+
+    // Step 4: THE RACE. A late, reordered page-1 response is re-delivered AFTER
+    // page 2 already landed (e.g. React Query refetch / cache revalidation
+    // returning page-1 data while the store page is still 2). With the naive
+    // effect this would REPLACE the whole list with only page-1 items, losing
+    // page 2. The order-safe accumulation must keep BOTH pages intact.
+    vi.mocked(useSearchFilters).mockReturnValue(baseFilters({ page: 1 }));
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: page1, totalPages: 5 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+    rerender(<SearchResults lang="es" />);
+
+    // All four items survive, in page order, with no duplicates.
+    await waitFor(() => {
+      expect(screen.getAllByText("Alpha").length).toBeGreaterThan(0);
+    });
+    for (const title of ["Alpha", "Bravo", "Charlie", "Delta"]) {
+      expect(screen.getAllByText(title).length).toBeGreaterThan(0);
+    }
+    // The header count reflects exactly 4 unique accumulated results.
+    expect(screen.getByText(/found 4 results for/i)).toBeInTheDocument();
+  });
+
+  // Bug #3 (companion) — a NEW query must reset accumulation so stale pages
+  // from the previous query never bleed into the new result set.
+  it("resets accumulation when the query changes (no cross-query bleed)", async () => {
+    const queryAResults = [makeItem("a-1", "Alien"), makeItem("a-2", "Aliens")];
+    vi.mocked(useSearchFilters).mockReturnValue(
+      baseFilters({ query: "alien", debouncedQuery: "alien", page: 1 })
+    );
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: queryAResults, totalPages: 2 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+
+    const { rerender } = render(<SearchResults lang="es" />, {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Alien").length).toBeGreaterThan(0);
+    });
+
+    // Switch to a brand-new query → page resets to 1, fresh results.
+    const queryBResults = [makeItem("b-1", "Matrix")];
+    vi.mocked(useSearchFilters).mockReturnValue(
+      baseFilters({ query: "matrix", debouncedQuery: "matrix", page: 1 })
+    );
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: queryBResults, totalPages: 1 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as any);
+    rerender(<SearchResults lang="es" />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Matrix").length).toBeGreaterThan(0);
+    });
+    // The previous query's items must be gone, count reflects only query B.
+    expect(screen.queryByText("Alien")).not.toBeInTheDocument();
+    expect(screen.getByText(/found 1 result for/i)).toBeInTheDocument();
   });
 });
