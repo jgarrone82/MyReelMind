@@ -39,8 +39,6 @@ export function SearchBar({ placeholder, clearLabel = "Clear" }: SearchBarProps)
       <input
         id="search-input"
         type="search"
-        role="searchbox"
-        aria-label="Search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
