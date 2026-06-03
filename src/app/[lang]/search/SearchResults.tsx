@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 import { VHSBoxCard } from "@/components/vhs";
+import { TapeSkeleton } from "@/components/search/TapeSkeleton";
 import { mediaItemToCardProps } from "@/lib/media/vhs-cosmetics";
 import { useDictionary } from "@/i18n/provider";
 import type { MediaItem } from "@/lib/api/merge";
@@ -130,18 +131,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
           />
           {t.typing}
         </div>
-        <div
-          aria-hidden
-          className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5"
-        >
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="tape-skeleton">
-              <div className="sk-strip" />
-              <div className="sk-poster" />
-              <div className="sk-foot" />
-            </div>
-          ))}
-        </div>
+        <TapeSkeleton />
       </div>
     );
   }
@@ -166,7 +156,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
               NO TAPE
             </span>
           </div>
-          <div className="absolute left-1/2 top-[40%] w-max max-w-[90%] -translate-x-1/2 -translate-y-1/2 rotate-[-9deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-magenta)] px-5 py-3 text-center text-[var(--vhs-cream)] shadow-[4px_4px_0_var(--vhs-ground)]">
+          <div className="absolute left-1/2 top-[40%] w-max max-w-[90%] -translate-x-1/2 -translate-y-1/2 rotate-[-9deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-magenta)] px-5 py-3 text-center text-[var(--vhs-ground)] shadow-[4px_4px_0_var(--vhs-ground)]">
             <div className="vhs-display text-[1.5rem] leading-none">
               {t.zeroHead}
             </div>

@@ -7,7 +7,10 @@ const stickerVariants = cva(
   {
     variants: {
       hue: {
-        magenta: "bg-[var(--vhs-magenta)] text-[var(--vhs-cream)]",
+        // Deep-ink text on neon magenta (#0a0807 on #ff2e6e ≈ 5.58:1) clears
+        // WCAG AA. Cream-on-magenta was ~2.98:1 and failed AA — mirrors the
+        // .vhs-btn fix in issue #45. The neon background token is unchanged.
+        magenta: "bg-[var(--vhs-magenta)] text-[var(--vhs-ground)]",
         acid: "bg-[var(--vhs-acid)] text-[var(--vhs-ground)]",
         sodium: "bg-[var(--vhs-sodium)] text-[var(--vhs-ground)]",
         phosphor: "bg-[var(--vhs-phosphor)] text-[var(--vhs-ground)]",
