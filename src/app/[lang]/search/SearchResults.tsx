@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
+import { useTrending } from "@/hooks/queries/useTrending";
 import { VHSBoxCard } from "@/components/vhs";
 import { TapeSkeleton } from "@/components/search/TapeSkeleton";
 import { mediaItemToCardProps } from "@/lib/media/vhs-cosmetics";
@@ -33,6 +34,12 @@ export function SearchResults({ lang }: SearchResultsProps) {
     year,
     page
   );
+
+  // NOW SHOWING trending shelf for the empty-query state. Called
+  // unconditionally (rules of hooks) before any early return; with a 1h
+  // staleTime this is effectively free on re-renders. Only consumed in the
+  // empty-query branch below.
+  const { data: trendingData, isLoading: isTrendingLoading } = useTrending();
 
   // Order-safe accumulation: results are keyed by their page index instead of
   // blind replace/append. This makes accumulation idempotent and independent of
@@ -105,8 +112,28 @@ export function SearchResults({ lang }: SearchResultsProps) {
   const hasResults = allResults.length > 0;
   const t = dict.search;
 
-  // Empty-query state: the honest "type to search" prompt, dressed in VHS voice.
+  // Empty-query state: the NOW SHOWING trending shelf, with honest degradation.
   if (!debouncedQuery.trim()) {
+    // Loading: reuse the same tape skeleton search uses. No flash of the prompt.
+    if (isTrendingLoading) {
+      return <TapeSkeleton />;
+    }
+
+    // Success: real trending items only, under the localized NOW SHOWING heading.
+    const trendingItems = trendingData?.results ?? [];
+    if (trendingItems.length > 0) {
+      return (
+        <div className="space-y-6">
+          <h2 className="vhs-display text-[1.4rem] text-[var(--vhs-cream)]">
+            {t.nowShowingHead}
+          </h2>
+          <ResultsShelf items={trendingItems} lang={lang} />
+        </div>
+      );
+    }
+
+    // Total failure / empty: degrade to the existing honest "type to search"
+    // prompt, dressed in VHS voice. Never an empty grid, never fabricated tiles.
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <span
