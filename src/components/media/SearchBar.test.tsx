@@ -32,6 +32,7 @@ describe("SearchBar", () => {
       debouncedQuery: "",
       type: "all",
       year: null,
+      page: 1,
     });
   });
 
