@@ -286,7 +286,10 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.14em;
     font-size: 0.9rem;
-    color: var(--vhs-cream);
+    /* Deep-ink text on neon magenta (#0a0807 on #ff2e6e ≈ 5.58:1) clears
+       WCAG AA. Cream-on-magenta was ~2.98:1 and failed AA — see issue #45.
+       The neon --vhs-magenta token stays untouched everywhere else. */
+    color: var(--vhs-ground);
     background: var(--vhs-magenta);
     border: 2px solid var(--vhs-ground);
     box-shadow: 3px 3px 0 var(--vhs-sodium);

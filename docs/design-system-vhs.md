@@ -193,7 +193,7 @@ Three guiding principles:
 - Glowing phosphor border 1px
 
 ### Buttons
-- **Primary**: magenta fill, cream text, Druk Condensed uppercase, hard 3px offset shadow in ground, no border-radius (or 2px max), chromatic aberration on hover
+- **Primary**: magenta fill, **deep-ink (ground) text**, Druk Condensed uppercase, hard 3px offset shadow in ground, no border-radius (or 2px max), chromatic aberration on hover. Text is `--vhs-ground` on `--vhs-magenta` (≈ 5.58:1) to clear WCAG AA — cream-on-magenta was ~2.98:1 and failed (issue #45). The neon magenta token is unchanged; only the button's text color is dark.
 - **Secondary**: cream outline 2px on ground, cream text in Departure Mono, no shadow
 - **Ghost**: text only, magenta on hover with chromatic aberration
 
