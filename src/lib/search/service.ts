@@ -25,6 +25,57 @@ export interface SearchResults {
   totalPages: number;
 }
 
+export interface TrendingResults {
+  results: MediaItem[];
+}
+
+const TRENDING_LIMIT = 15;
+
+/**
+ * Alternating interleave of two sources (a0, b0, a1, b1, ...), dropping an
+ * exhausted source, deduped by id, capped at TRENDING_LIMIT. Keeps both
+ * sources visible in the first row of the shelf instead of burying one.
+ */
+function interleave(a: MediaItem[], b: MediaItem[]): MediaItem[] {
+  const seen = new Set<string>();
+  const merged: MediaItem[] = [];
+  const max = Math.max(a.length, b.length);
+
+  for (let i = 0; i < max && merged.length < TRENDING_LIMIT; i++) {
+    for (const item of [a[i], b[i]]) {
+      if (!item || seen.has(item.id) || merged.length >= TRENDING_LIMIT) continue;
+      seen.add(item.id);
+      merged.push(item);
+    }
+  }
+
+  return merged;
+}
+
+/**
+ * Trending shelf for the empty-query search state. Fetches both sources in
+ * parallel via allSettled so a single-source failure still yields a populated
+ * shelf; both failing yields an empty array (the UI degrades to the honest
+ * prompt). Trending is weekly/transient — it is NOT persisted to the DB cache.
+ */
+export async function getTrending(): Promise<TrendingResults> {
+  const [tmdbSettled, aniListSettled] = await Promise.allSettled([
+    tmdbClient.trending(),
+    anilistClient.trending(TRENDING_LIMIT),
+  ]);
+
+  const tmdbResults =
+    tmdbSettled.status === "fulfilled"
+      ? normalizeTmdbResults(tmdbSettled.value)
+      : [];
+  const aniListResults =
+    aniListSettled.status === "fulfilled"
+      ? normalizeAniListResults(aniListSettled.value)
+      : [];
+
+  return { results: interleave(tmdbResults, aniListResults) };
+}
+
 export async function searchMedia(query: string, options: SearchOptions = {}): Promise<SearchResults> {
   const { page = 1, type = "all" } = options;
 

@@ -5,9 +5,11 @@ import type { ReactNode } from "react";
 import { SearchResults } from "./SearchResults";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
+import { useTrending } from "@/hooks/queries/useTrending";
 
 vi.mock("@/stores/search-filters");
 vi.mock("@/hooks/queries/useSearch");
+vi.mock("@/hooks/queries/useTrending");
 vi.mock("@/i18n/provider", () => ({
   useDictionary: () => ({
     search: {
@@ -27,6 +29,7 @@ vi.mock("@/i18n/provider", () => ({
       errorBody:
         "The directory terminal lost its signal. Check the connection and search again.",
       errorRetry: "Retry search",
+      nowShowingHead: "Now showing — popular this week",
     },
   }),
 }));
@@ -81,6 +84,12 @@ function baseFilters(overrides: Record<string, unknown> = {}) {
 describe("SearchResults", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: trending degrades to the empty/honest-prompt path. Cases that
+    // exercise the empty-query branch override this per test.
+    vi.mocked(useTrending).mockReturnValue({
+      data: { results: [] },
+      isLoading: false,
+    } as any);
   });
 
   it("should render the initial search prompt when no query (not the no-results message)", () => {
@@ -686,5 +695,132 @@ describe("SearchResults", () => {
     expect(screen.queryByText("Naruto Movie")).not.toBeInTheDocument();
     expect(screen.queryByText("Naruto Live Action")).not.toBeInTheDocument();
     expect(screen.getByText(/found 1 result for/i)).toBeInTheDocument();
+  });
+
+  // Trending NOW SHOWING shelf (empty-query state) — change `search-trending`.
+
+  function emptyQueryFilters() {
+    return baseFilters({ query: "", debouncedQuery: "" });
+  }
+
+  it("shows the TapeSkeleton while trending is loading (empty query)", () => {
+    vi.mocked(useSearchFilters).mockReturnValue(emptyQueryFilters());
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: [], totalPages: 0 },
+      isLoading: false,
+    } as any);
+    vi.mocked(useTrending).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    } as any);
+
+    const { container } = render(<SearchResults lang="es" />, {
+      wrapper: createWrapper(),
+    });
+
+    // TapeSkeleton uses aria-hidden placeholder tiles; assert it rendered and
+    // neither the trending grid nor the honest prompt is shown yet.
+    expect(container.querySelector(".tape-skeleton")).toBeInTheDocument();
+    expect(
+      screen.queryByText(/now showing — popular this week/i)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/search for movies or anime/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the trending grid under the NOW SHOWING heading on success (empty query)", () => {
+    vi.mocked(useSearchFilters).mockReturnValue(emptyQueryFilters());
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: [], totalPages: 0 },
+      isLoading: false,
+    } as any);
+    vi.mocked(useTrending).mockReturnValue({
+      data: {
+        results: [makeItem("tmdb-1", "Trending One"), makeItem("anilist-2", "Trending Two")],
+      },
+      isLoading: false,
+    } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    expect(
+      screen.getByText(/now showing — popular this week/i)
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Trending One").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Trending Two").length).toBeGreaterThan(0);
+    expect(
+      screen.queryByText(/search for movies or anime/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("degrades to the honest prompt when trending returns nothing (empty query)", () => {
+    vi.mocked(useSearchFilters).mockReturnValue(emptyQueryFilters());
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: [], totalPages: 0 },
+      isLoading: false,
+    } as any);
+    vi.mocked(useTrending).mockReturnValue({
+      data: { results: [] },
+      isLoading: false,
+    } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    expect(
+      screen.getByText(/search for movies or anime/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/now showing — popular this week/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("degrades to the honest prompt when trending errors with undefined data (empty query)", () => {
+    // Guards the `trendingData?.results ?? []` optional-chain degradation: a
+    // genuine trending HTTP failure leaves `data` undefined and `isError` true.
+    // The empty-query branch must fall back to the honest prompt — no crash, no
+    // empty grid, no NOW SHOWING heading.
+    vi.mocked(useSearchFilters).mockReturnValue(emptyQueryFilters());
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: [], totalPages: 0 },
+      isLoading: false,
+    } as any);
+    vi.mocked(useTrending).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    expect(
+      screen.getByText(/search for movies or anime/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/now showing — popular this week/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("does NOT show the trending heading when a query is active (no regression)", () => {
+    vi.mocked(useSearchFilters).mockReturnValue(
+      baseFilters({ query: "naruto", debouncedQuery: "naruto" })
+    );
+    vi.mocked(useSearch).mockReturnValue({
+      data: { results: mockResults, totalPages: 1 },
+      isLoading: false,
+    } as any);
+    // Even if trending happens to have data, it must not surface on an active
+    // query.
+    vi.mocked(useTrending).mockReturnValue({
+      data: { results: [makeItem("tmdb-9", "Should Not Show")] },
+      isLoading: false,
+    } as any);
+
+    render(<SearchResults lang="es" />, { wrapper: createWrapper() });
+
+    expect(
+      screen.queryByText(/now showing — popular this week/i)
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Should Not Show")).not.toBeInTheDocument();
   });
 });

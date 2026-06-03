@@ -37,6 +37,7 @@ export interface Dictionary {
     errorHead: string;
     errorBody: string;
     errorRetry: string;
+    nowShowingHead: string;
   };
   library: {
     title: string;

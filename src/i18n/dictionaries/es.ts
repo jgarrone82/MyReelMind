@@ -39,6 +39,7 @@ export const dictionary: Dictionary = {
     errorBody:
       "El terminal del directorio perdió la señal. Revisá la conexión y buscá de nuevo.",
     errorRetry: "Reintentar búsqueda",
+    nowShowingHead: "En cartelera — lo más visto de la semana",
   },
   library: {
     title: "Mi biblioteca",

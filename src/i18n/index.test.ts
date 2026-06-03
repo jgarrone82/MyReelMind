@@ -76,4 +76,14 @@ describe("getDictionary", () => {
     };
     checkKeys(esDict as unknown as Record<string, unknown>, dict as unknown as Record<string, unknown>);
   });
+
+  it("should define search.nowShowingHead in both locales", async () => {
+    const enDict = await getDictionary("en");
+    const esDict = await getDictionary("es");
+
+    expect(typeof enDict.search.nowShowingHead).toBe("string");
+    expect(enDict.search.nowShowingHead.length).toBeGreaterThan(0);
+    expect(typeof esDict.search.nowShowingHead).toBe("string");
+    expect(esDict.search.nowShowingHead.length).toBeGreaterThan(0);
+  });
 });
