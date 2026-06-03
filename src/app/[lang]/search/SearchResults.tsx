@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 import { VHSBoxCard } from "@/components/vhs";
+import { TapeSkeleton } from "@/components/search/TapeSkeleton";
 import { mediaItemToCardProps } from "@/lib/media/vhs-cosmetics";
 import { useDictionary } from "@/i18n/provider";
 import type { MediaItem } from "@/lib/api/merge";
@@ -130,18 +131,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
           />
           {t.typing}
         </div>
-        <div
-          aria-hidden
-          className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5"
-        >
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="tape-skeleton">
-              <div className="sk-strip" />
-              <div className="sk-poster" />
-              <div className="sk-foot" />
-            </div>
-          ))}
-        </div>
+        <TapeSkeleton />
       </div>
     );
   }

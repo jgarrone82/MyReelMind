@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { SearchBar } from "@/components/media/SearchBar";
 import { TypeFilterChips } from "@/components/search/TypeFilterChips";
 import { SearchResults } from "./SearchResults";
@@ -44,24 +43,11 @@ export default async function SearchPage({ params }: SearchPageProps) {
         </div>
 
         <div className="mt-8">
-          <Suspense
-            fallback={
-              <div
-                aria-hidden
-                className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5"
-              >
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className="tape-skeleton">
-                    <div className="sk-strip" />
-                    <div className="sk-poster" />
-                    <div className="sk-foot" />
-                  </div>
-                ))}
-              </div>
-            }
-          >
-            <SearchResults lang={lang} />
-          </Suspense>
+          {/* SearchResults is a client component using React Query's
+              useQuery (non-suspense), so it never throws a promise. A
+              Suspense boundary here would be dead code; the component renders
+              its own TapeSkeleton loading state instead. */}
+          <SearchResults lang={lang} />
         </div>
       </div>
     </main>
