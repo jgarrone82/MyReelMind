@@ -4,4 +4,8 @@ export const queryKeys = {
   trending: () => ["trending"] as const,
   mediaDetail: (id: string) => ["media", id] as const,
   userLibrary: (status?: string) => ["library", status] as const,
+  // ids are sorted so the key is stable regardless of result order; the userId
+  // dimension prevents cross-user cache bleed and auto-evicts on logout.
+  libraryState: (userId: string, ids: string[]) =>
+    ["library-state", userId, [...ids].sort()] as const,
 };
