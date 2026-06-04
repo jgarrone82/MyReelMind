@@ -8,7 +8,10 @@ interface LibraryStateResponse {
 
 const EMPTY_STATE: LibraryStateResponse = { states: {} };
 
-export type LibraryStateMap = Map<string, LibraryBadgeState>;
+// ReadonlyMap (not Map) so consumers cannot mutate the shared, module-level
+// EMPTY_MAP singleton that the disabled/error paths return. Reads (`get`/`has`/
+// `size`/iteration) are all that downstream enrichment needs.
+export type LibraryStateMap = ReadonlyMap<string, LibraryBadgeState>;
 
 // Stable, module-level identities so the hook does not allocate a fresh Map or
 // a fresh `select` closure on every render. React Query memoizes `select`
