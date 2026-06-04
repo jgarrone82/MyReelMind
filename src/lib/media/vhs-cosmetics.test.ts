@@ -337,7 +337,7 @@ describe("vhs-cosmetics", () => {
       expect("progress" in props).toBe(false);
     });
 
-    it("does NOT expose a library-state badge (search never joins user_media)", () => {
+    it("exposes no badge when the optional badge param is omitted (backward compatible)", () => {
       const props = mediaItemToCardProps(makeMediaItem(), "en");
       expect(props.badge).toBeUndefined();
     });
@@ -346,6 +346,53 @@ describe("vhs-cosmetics", () => {
       const a = mediaItemToCardProps(makeMediaItem(), "en");
       const b = mediaItemToCardProps(makeMediaItem(), "en");
       expect(a).toEqual(b);
+    });
+
+    describe("optional badge param (library-state enrichment)", () => {
+      it("produces no badge and matches the no-arg output when badge is undefined", () => {
+        const withParam = mediaItemToCardProps(makeMediaItem(), "en", undefined);
+        const without = mediaItemToCardProps(makeMediaItem(), "en");
+        // Passing an explicit `undefined` badge must be identical to omitting it
+        // entirely — backward compatibility for every existing caller.
+        expect(withParam.badge).toBeUndefined();
+        expect(withParam).toEqual(without);
+      });
+
+      it("passes an IN LIBRARY badge through to the card props (phosphor)", () => {
+        const props = mediaItemToCardProps(makeMediaItem(), "en", {
+          label: "In Library",
+          color: "phosphor",
+        });
+        expect(props.badge).toEqual({ label: "In Library", color: "phosphor" });
+      });
+
+      it("passes an IN PROGRESS badge through to the card props (sodium)", () => {
+        const props = mediaItemToCardProps(makeMediaItem(), "en", {
+          label: "In Progress",
+          color: "sodium",
+        });
+        expect(props.badge).toEqual({ label: "In Progress", color: "sodium" });
+      });
+
+      it("passes an ADD badge through to the card props (magenta)", () => {
+        const props = mediaItemToCardProps(makeMediaItem(), "en", {
+          label: "Add",
+          color: "magenta",
+        });
+        expect(props.badge).toEqual({ label: "Add", color: "magenta" });
+      });
+
+      it("leaves every non-badge prop unchanged when a badge is supplied", () => {
+        const base = mediaItemToCardProps(makeMediaItem(), "en");
+        const badged = mediaItemToCardProps(makeMediaItem(), "en", {
+          label: "In Library",
+          color: "phosphor",
+        });
+        // The badge is purely additive: title/year/href/catalog/hue/motif/poster
+        // are byte-for-byte the pre-change output.
+        const { badge: _ignored, ...rest } = badged;
+        expect(rest).toEqual(base);
+      });
     });
   });
 });
