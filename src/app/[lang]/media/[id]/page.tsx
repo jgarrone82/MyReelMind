@@ -233,6 +233,15 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
                 <form
                   action={async () => {
                     "use server";
+                    // #42 D8: this is a SERVER-COMPONENT inline server action, so
+                    // it has NO access to the client React Query cache and cannot
+                    // call `queryClient.invalidateQueries(["library-state"])` the
+                    // way the client call-sites (MediaDetailClient, LibraryItem,
+                    // RemoveButton) do. The search-results badge stays fresh here
+                    // via `revalidatePath` inside `addToLibrary` plus React
+                    // Query's refetch-on-remount + 5m staleTime: navigating back
+                    // to search remounts the shelf and re-runs `useLibraryState`,
+                    // which reflects the new row. No client invalidation needed.
                     await addToLibrary(mediaId, "want_to_watch");
                   }}
                 >

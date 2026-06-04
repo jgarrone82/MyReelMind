@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { setupServer } from "msw/node";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { MediaDetailClient } from "./MediaDetailClient";
 
 const mockUpdateStatus = vi.fn();
@@ -21,6 +23,20 @@ vi.mock("sonner", () => ({
 }));
 
 const server = setupServer();
+
+// The component now reads `useQueryClient()` to invalidate library-state after
+// a successful mutation (#42 D8). Render under a real client and spy on
+// `invalidateQueries` so the invalidation contract is asserted directly.
+function renderWithClient(ui: ReactNode) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+  const result = render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+  return { ...result, queryClient, invalidateSpy };
+}
 
 describe("MediaDetailClient", () => {
   const defaultProps = {
@@ -68,7 +84,7 @@ describe("MediaDetailClient", () => {
       mockUpdateRating.mockResolvedValue({ success: true });
       mockUpdateProgress.mockResolvedValue({ success: true });
 
-      render(<MediaDetailClient {...defaultProps} />);
+      renderWithClient(<MediaDetailClient {...defaultProps} />);
 
       expect(screen.getByLabelText("Watch status")).toBeInTheDocument();
       expect(screen.getByRole("group", { name: "Rating selection" })).toBeInTheDocument();
@@ -76,7 +92,7 @@ describe("MediaDetailClient", () => {
     });
 
     it("displays initial values correctly", () => {
-      render(<MediaDetailClient {...defaultProps} />);
+      renderWithClient(<MediaDetailClient {...defaultProps} />);
 
       expect(screen.getByLabelText("Watch status")).toHaveValue("want_to_watch");
       expect(screen.getByText("Not rated")).toBeInTheDocument();
@@ -89,7 +105,7 @@ describe("MediaDetailClient", () => {
       const user = userEvent.setup();
       mockUpdateStatus.mockResolvedValue({ success: true });
 
-      render(<MediaDetailClient {...defaultProps} />);
+      renderWithClient(<MediaDetailClient {...defaultProps} />);
 
       const select = screen.getByLabelText("Watch status");
       await user.selectOptions(select, "watching");
@@ -105,7 +121,7 @@ describe("MediaDetailClient", () => {
       const user = userEvent.setup();
       mockUpdateRating.mockResolvedValue({ success: true });
 
-      render(<MediaDetailClient {...defaultProps} />);
+      renderWithClient(<MediaDetailClient {...defaultProps} />);
 
       const ratingButton = screen.getByRole("button", { name: "Rate 8" });
       await user.click(ratingButton);
@@ -121,7 +137,7 @@ describe("MediaDetailClient", () => {
       const user = userEvent.setup();
       mockUpdateProgress.mockResolvedValue({ success: true });
 
-      render(<MediaDetailClient {...defaultProps} episodes={12} />);
+      renderWithClient(<MediaDetailClient {...defaultProps} episodes={12} />);
 
       const input = screen.getByLabelText("Progress");
       await user.clear(input);
@@ -130,6 +146,41 @@ describe("MediaDetailClient", () => {
       await waitFor(() => {
         expect(mockUpdateProgress).toHaveBeenCalledWith("tmdb-123", 5, 12);
       });
+    });
+  });
+
+  describe("library-state invalidation (#42 D8)", () => {
+    it("invalidates the library-state cache after a successful status update", async () => {
+      const user = userEvent.setup();
+      mockUpdateStatus.mockResolvedValue({ success: true });
+
+      const { invalidateSpy } = renderWithClient(
+        <MediaDetailClient {...defaultProps} />
+      );
+
+      await user.selectOptions(screen.getByLabelText("Watch status"), "watching");
+
+      await waitFor(() => {
+        expect(invalidateSpy).toHaveBeenCalledWith({
+          queryKey: ["library-state"],
+        });
+      });
+    });
+
+    it("does NOT invalidate when the status update fails", async () => {
+      const user = userEvent.setup();
+      mockUpdateStatus.mockResolvedValue({ success: false, error: "nope" });
+
+      const { invalidateSpy } = renderWithClient(
+        <MediaDetailClient {...defaultProps} />
+      );
+
+      await user.selectOptions(screen.getByLabelText("Watch status"), "watching");
+
+      await waitFor(() => {
+        expect(mockUpdateStatus).toHaveBeenCalled();
+      });
+      expect(invalidateSpy).not.toHaveBeenCalled();
     });
   });
 });

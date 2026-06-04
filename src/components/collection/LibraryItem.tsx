@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { toast } from "sonner";
 import { StatusSelector } from "./StatusSelector";
@@ -62,12 +63,19 @@ export function LibraryItem({
   runtime,
   dict,
 }: Omit<LibraryItemProps, 'id' | 'publicId' | 'lang'>) {
+  const queryClient = useQueryClient();
+
   // Status update
   const [, updateStatusAction] = useActionState(
     async (_prevState: unknown, formData: FormData) => {
       const newStatus = formData.get("status") as WatchStatus;
       const result = await updateStatus(mediaId, newStatus);
       if (result.success) {
+        // A status change can move the search-results badge between bands, so
+        // evict every library-state entry (#42 D8). Rating/progress changes do
+        // not alter the badge band and so do not invalidate. Removal is handled
+        // by RemoveButton's own invalidation.
+        queryClient.invalidateQueries({ queryKey: ["library-state"] });
         toast.success(dict.statusUpdated);
       } else {
         toast.error(result.error ?? dict.error);
