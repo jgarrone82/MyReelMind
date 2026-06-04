@@ -128,13 +128,17 @@ export function mediaToCardProps(
  *
  * - title / year / posterUrl come from the real result item.
  * - catalog / hue / motif are cosmetic, derived deterministically.
- * - NO badge: search never joins `user_media`, so a library-state badge would
- *   fabricate data (#800 / #853 honest-data principle).
+ * - OPTIONAL `badge`: the caller may enrich a result with a library-state badge
+ *   (#42 Group D). The badge is still honest data — it is passed ONLY when the
+ *   caller has resolved a real `user_media` row for the requesting user (via
+ *   `useLibraryState`). Omit it and the card renders exactly as before; logged-
+ *   out or untracked results pass no badge (#800 / #853 honest-data principle).
  * - NO progress: search has no persisted progress to show.
  */
 export function mediaItemToCardProps(
   item: MediaItem,
-  lang: string
+  lang: string,
+  badge?: VHSBoxCardProps["badge"]
 ): VHSBoxCardProps {
   // motifFromType only knows the visual media types; `manga` reuses the anime
   // motif rather than introducing a new sticker without a card design for it.
@@ -148,5 +152,8 @@ export function mediaItemToCardProps(
     hue: hueFromGenre(item.genres),
     motif: motifFromType(motifType),
     href: `/${lang}/media/${item.id}`,
+    // Spread the badge only when supplied so omitting the param leaves `badge`
+    // absent (not `badge: undefined`) — preserving the exact prior shape.
+    ...(badge ? { badge } : {}),
   };
 }
