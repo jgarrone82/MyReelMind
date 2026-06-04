@@ -237,11 +237,19 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
                     // it has NO access to the client React Query cache and cannot
                     // call `queryClient.invalidateQueries(["library-state"])` the
                     // way the client call-sites (MediaDetailClient, LibraryItem,
-                    // RemoveButton) do. The search-results badge stays fresh here
-                    // via `revalidatePath` inside `addToLibrary` plus React
-                    // Query's refetch-on-remount + 5m staleTime: navigating back
-                    // to search remounts the shelf and re-runs `useLibraryState`,
-                    // which reflects the new row. No client invalidation needed.
+                    // RemoveButton) do — those DO invalidate the library-state
+                    // cache and keep the search badge fresh.
+                    //
+                    // ACCEPTED, DOCUMENTED EXCEPTION: from this server path the
+                    // search-results badge can stay STALE for up to the
+                    // library-state `staleTime` (5m) after adding here.
+                    // `revalidatePath` inside `addToLibrary` only busts Next's RSC
+                    // cache; it does NOT touch the client React Query cache. And
+                    // with `staleTime: 5m`, remounting the search shelf within the
+                    // window does NOT refetch (React Query serves the still-fresh
+                    // cached entry), so navigating back does not reliably reflect
+                    // the new row until the entry goes stale or a client call-site
+                    // invalidates it.
                     await addToLibrary(mediaId, "want_to_watch");
                   }}
                 >

@@ -182,5 +182,48 @@ describe("MediaDetailClient", () => {
       });
       expect(invalidateSpy).not.toHaveBeenCalled();
     });
+
+    // Only status/add/remove can move a search-results badge between bands; a
+    // rating change never does, so a SUCCESSFUL rating mutation must NOT
+    // invalidate the library-state cache (#42 D8 call-site inventory).
+    it("does NOT invalidate library-state after a successful rating update", async () => {
+      const user = userEvent.setup();
+      mockUpdateRating.mockResolvedValue({ success: true });
+
+      const { invalidateSpy } = renderWithClient(
+        <MediaDetailClient {...defaultProps} />
+      );
+
+      await user.click(screen.getByRole("button", { name: "Rate 8" }));
+
+      await waitFor(() => {
+        expect(mockUpdateRating).toHaveBeenCalledWith("tmdb-123", 8);
+      });
+      expect(invalidateSpy).not.toHaveBeenCalledWith({
+        queryKey: ["library-state"],
+      });
+    });
+
+    // A progress change likewise never moves the badge band, so a SUCCESSFUL
+    // progress mutation must NOT invalidate library-state.
+    it("does NOT invalidate library-state after a successful progress update", async () => {
+      const user = userEvent.setup();
+      mockUpdateProgress.mockResolvedValue({ success: true });
+
+      const { invalidateSpy } = renderWithClient(
+        <MediaDetailClient {...defaultProps} episodes={12} />
+      );
+
+      const input = screen.getByLabelText("Progress");
+      await user.clear(input);
+      await user.type(input, "5");
+
+      await waitFor(() => {
+        expect(mockUpdateProgress).toHaveBeenCalledWith("tmdb-123", 5, 12);
+      });
+      expect(invalidateSpy).not.toHaveBeenCalledWith({
+        queryKey: ["library-state"],
+      });
+    });
   });
 });

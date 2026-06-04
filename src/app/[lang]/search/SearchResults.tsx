@@ -187,7 +187,10 @@ export function SearchResults({ lang }: SearchResultsProps) {
     () => allResults.map((item) => item.id),
     [allResults]
   );
-  const { data: libraryState } = useLibraryState(resultIds, userId);
+  const { data: libraryState, isSuccess: libraryStateReady } = useLibraryState(
+    resultIds,
+    userId
+  );
 
   const hasResults = allResults.length > 0;
   const t = dict.search;
@@ -200,9 +203,18 @@ export function SearchResults({ lang }: SearchResultsProps) {
   };
 
   // Logged-out → no userId → pass `null` so the shelf renders NO badges
-  // (identical to pre-change behavior). Logged-in → the real (possibly empty)
-  // Map, where an absent id resolves to ADD.
-  const searchLibraryState = userId ? libraryState : null;
+  // (identical to pre-change behavior). Logged-in → only pass the Map once the
+  // library-state query has SETTLED successfully (`libraryStateReady`).
+  //
+  // The settled-gate is what prevents the ADD-badge flash: while the query is
+  // pending, `useLibraryState` surfaces an EMPTY placeholder Map (not null). A
+  // bare `userId ? libraryState : null` would feed that empty Map to
+  // `badgeForItem`, and `libraryState.get(id) ?? "add"` would flash ADD on
+  // EVERY card — including items that are actually IN_LIBRARY / IN_PROGRESS —
+  // for one network round-trip. Gating on `isSuccess` keeps it null until the
+  // real state resolves, so badges appear a beat later instead of flashing
+  // wrong (design D7 / honest-data).
+  const searchLibraryState = userId && libraryStateReady ? libraryState : null;
 
   // Empty-query state: the NOW SHOWING trending shelf, with honest degradation.
   if (!debouncedQuery.trim()) {

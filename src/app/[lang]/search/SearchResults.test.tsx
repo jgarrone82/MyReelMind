@@ -95,14 +95,21 @@ function baseFilters(overrides: Record<string, unknown> = {}) {
  * Build the `useLibraryState` mock return — a Map plus the UseQueryResult
  * surface the consumer reads. Defaults to an EMPTY Map so the baseline tests
  * (logged-out, no badge) are unaffected by the badge wiring.
+ *
+ * `isSuccess` defaults to `true` (settled). Pass `false` to model the PENDING
+ * window — the hook surfaces an empty placeholder Map before the real
+ * library-state lands, and the shelf must render NO badge until it settles.
  */
-function mockLibraryState(entries: Record<string, LibraryBadgeState> = {}) {
+function mockLibraryState(
+  entries: Record<string, LibraryBadgeState> = {},
+  isSuccess = true
+) {
   const map = new Map<string, LibraryBadgeState>(Object.entries(entries));
   vi.mocked(useLibraryState).mockReturnValue({
     data: map,
-    isSuccess: true,
+    isSuccess,
     isError: false,
-    isLoading: false,
+    isLoading: !isSuccess,
   } as any);
   return map;
 }
@@ -964,6 +971,71 @@ describe("SearchResults", () => {
         ["tmdb-1", "anilist-2", "tmdb-3"],
         "user-1"
       );
+      // `toHaveBeenCalledWith` alone would still pass if a per-card call also
+      // fired with a single id. Pin the shelf-level contract: EVERY invocation
+      // passes the full accumulated id list (or the empty list before results
+      // land) — never a single-id-per-card slice. A per-card implementation
+      // (3 cards → calls with ["tmdb-1"], ["anilist-2"], ["tmdb-3"]) would fail
+      // this guarantee.
+      const fullIds = ["tmdb-1", "anilist-2", "tmdb-3"];
+      for (const call of vi.mocked(useLibraryState).mock.calls) {
+        const [ids] = call;
+        expect(ids.length === 0 || ids.length === fullIds.length).toBe(true);
+      }
+    });
+
+    // Fix #1 — kill the ADD-badge flash during the library-state PENDING window.
+    // When `userId` resolves before the library-state fetch settles, the hook is
+    // enabled but pending: `placeholderData` serves an EMPTY Map (not null), so
+    // the naive `userId ? libraryState : null` would feed that empty Map to
+    // `badgeForItem`, and `libraryState.get(id) ?? "add"` would flash ADD on
+    // EVERY card (including items actually IN_LIBRARY / IN_PROGRESS) for one
+    // network round-trip. Honest-data / design D7 require NO badge until the
+    // real state resolves — identical to logged-out.
+    it("renders NO badge while library-state is pending (isSuccess false), even logged in", async () => {
+      const results = [
+        makeItem("tmdb-1", "Owned"),
+        makeItem("tmdb-2", "Active"),
+        makeItem("tmdb-3", "Untracked"),
+      ];
+      loggedInQuery(results);
+      // Pending: an empty placeholder Map, NOT yet settled. The real states
+      // (which DO exist server-side) have not arrived.
+      mockLibraryState({}, false);
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(screen.getAllByText("Owned").length).toBeGreaterThan(0);
+      });
+      // No flash of ADD (or any band) while pending.
+      expect(badgeFor("ADD")).toBeNull();
+      expect(badgeFor("IN LIBRARY")).toBeNull();
+      expect(badgeFor("IN PROGRESS")).toBeNull();
+    });
+
+    it("renders the correct per-state badges once library-state settles (isSuccess true)", async () => {
+      const results = [
+        makeItem("tmdb-1", "Owned"),
+        makeItem("tmdb-2", "Active"),
+        makeItem("tmdb-3", "Untracked"),
+      ];
+      loggedInQuery(results);
+      // Settled with the real states: tmdb-1 owned, tmdb-2 in progress, tmdb-3
+      // absent → ADD.
+      mockLibraryState(
+        { "tmdb-1": "in_library", "tmdb-2": "in_progress" },
+        true
+      );
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(badgeFor("IN LIBRARY")).not.toBeNull();
+      });
+      expect(badgeFor("IN LIBRARY")?.className).toContain("var(--vhs-phosphor)");
+      expect(badgeFor("IN PROGRESS")?.className).toContain("var(--vhs-sodium)");
+      expect(badgeFor("ADD")?.className).toContain("var(--vhs-magenta)");
     });
 
     it("passes an empty id list (no fetch) when there are zero results", () => {
