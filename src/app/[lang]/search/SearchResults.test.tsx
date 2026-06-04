@@ -6,10 +6,15 @@ import { SearchResults } from "./SearchResults";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 import { useTrending } from "@/hooks/queries/useTrending";
+import { useLibraryState } from "@/hooks/queries/useLibraryState";
+import { useAuthUserId } from "@/hooks/useAuthUserId";
+import type { LibraryBadgeState } from "@/lib/dashboard/library-state";
 
 vi.mock("@/stores/search-filters");
 vi.mock("@/hooks/queries/useSearch");
 vi.mock("@/hooks/queries/useTrending");
+vi.mock("@/hooks/queries/useLibraryState");
+vi.mock("@/hooks/useAuthUserId");
 vi.mock("@/i18n/provider", () => ({
   useDictionary: () => ({
     search: {
@@ -86,6 +91,22 @@ function baseFilters(overrides: Record<string, unknown> = {}) {
   };
 }
 
+/**
+ * Build the `useLibraryState` mock return — a Map plus the UseQueryResult
+ * surface the consumer reads. Defaults to an EMPTY Map so the baseline tests
+ * (logged-out, no badge) are unaffected by the badge wiring.
+ */
+function mockLibraryState(entries: Record<string, LibraryBadgeState> = {}) {
+  const map = new Map<string, LibraryBadgeState>(Object.entries(entries));
+  vi.mocked(useLibraryState).mockReturnValue({
+    data: map,
+    isSuccess: true,
+    isError: false,
+    isLoading: false,
+  } as any);
+  return map;
+}
+
 describe("SearchResults", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -95,6 +116,10 @@ describe("SearchResults", () => {
       data: { results: [] },
       isLoading: false,
     } as any);
+    // Default: logged out → no userId, empty library-state Map → no badges.
+    // This keeps every pre-existing test byte-for-byte identical in behavior.
+    vi.mocked(useAuthUserId).mockReturnValue(null);
+    mockLibraryState();
   });
 
   it("should render the initial search prompt when no query (not the no-results message)", () => {
@@ -827,5 +852,220 @@ describe("SearchResults", () => {
       screen.queryByText(/now showing — popular this week/i)
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Should Not Show")).not.toBeInTheDocument();
+  });
+
+  // ── Library-state badges on search results (#42 Group D, PR-D3) ─────────────
+  // The shelf enriches each result with its per-user library-state badge via a
+  // SINGLE useLibraryState call over all result ids. Honest-data: logged-out →
+  // empty Map → no badges (identical to pre-change behavior). Badge label comes
+  // from i18n; color is the design's state→hue map (D4):
+  //   in_library → phosphor, in_progress → sodium, add → magenta.
+  describe("library-state badges", () => {
+    function loggedInQuery(results = mockResults) {
+      vi.mocked(useAuthUserId).mockReturnValue("user-1");
+      vi.mocked(useSearchFilters).mockReturnValue(
+        baseFilters({ query: "alien", debouncedQuery: "alien", page: 1 })
+      );
+      vi.mocked(useSearch).mockReturnValue({
+        data: { results, totalPages: 1 },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+        refetch: vi.fn(),
+      } as any);
+    }
+
+    /** The GenreSticker badge for a given label, or null if absent. */
+    function badgeFor(label: string): HTMLElement | null {
+      return screen
+        .queryAllByText(label)
+        .find((el) => el.className.includes("vhs-kicker")) ?? null;
+    }
+
+    it("renders NO badge when logged out (empty library-state Map)", async () => {
+      // Default beforeEach: userId null, empty Map.
+      vi.mocked(useSearchFilters).mockReturnValue(
+        baseFilters({ query: "alien", debouncedQuery: "alien", page: 1 })
+      );
+      vi.mocked(useSearch).mockReturnValue({
+        data: { results: mockResults, totalPages: 1 },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+        refetch: vi.fn(),
+      } as any);
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(screen.getAllByText("Test Movie").length).toBeGreaterThan(0);
+      });
+      expect(badgeFor("ADD")).toBeNull();
+      expect(badgeFor("IN LIBRARY")).toBeNull();
+      expect(badgeFor("IN PROGRESS")).toBeNull();
+    });
+
+    it("renders an IN LIBRARY phosphor badge for an in_library result", async () => {
+      loggedInQuery();
+      mockLibraryState({ "tmdb-1": "in_library" });
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        const badge = badgeFor("IN LIBRARY");
+        expect(badge).not.toBeNull();
+        expect(badge?.className).toContain("var(--vhs-phosphor)");
+      });
+    });
+
+    it("renders an IN PROGRESS sodium badge for an in_progress result", async () => {
+      loggedInQuery();
+      mockLibraryState({ "tmdb-1": "in_progress" });
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        const badge = badgeFor("IN PROGRESS");
+        expect(badge).not.toBeNull();
+        expect(badge?.className).toContain("var(--vhs-sodium)");
+      });
+    });
+
+    it("renders an ADD magenta badge for an untracked result when logged in", async () => {
+      // Logged in but this id is NOT in the Map → ADD (the logged-in affordance).
+      loggedInQuery();
+      mockLibraryState({});
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        const badge = badgeFor("ADD");
+        expect(badge).not.toBeNull();
+        expect(badge?.className).toContain("var(--vhs-magenta)");
+      });
+    });
+
+    it("calls useLibraryState ONCE with all result ids and the userId", async () => {
+      const results = [
+        makeItem("tmdb-1", "One"),
+        makeItem("anilist-2", "Two"),
+        makeItem("tmdb-3", "Three"),
+      ];
+      loggedInQuery(results);
+      mockLibraryState({});
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(screen.getAllByText("One").length).toBeGreaterThan(0);
+      });
+      // A single shelf-level call (not one per card) over the full id list.
+      expect(useLibraryState).toHaveBeenCalledWith(
+        ["tmdb-1", "anilist-2", "tmdb-3"],
+        "user-1"
+      );
+    });
+
+    it("passes an empty id list (no fetch) when there are zero results", () => {
+      vi.mocked(useAuthUserId).mockReturnValue("user-1");
+      vi.mocked(useSearchFilters).mockReturnValue(
+        baseFilters({ query: "zxqw", debouncedQuery: "zxqw", page: 1 })
+      );
+      vi.mocked(useSearch).mockReturnValue({
+        data: { results: [], totalPages: 0 },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+        refetch: vi.fn(),
+      } as any);
+      mockLibraryState({});
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      // The hook is still CALLED (rules of hooks) but with no ids, so it no-ops
+      // (enabled-gating in the hook prevents any fetch).
+      expect(useLibraryState).toHaveBeenCalledWith([], "user-1");
+    });
+
+    // Integration smoke (T26): a logged-in page with MIXED states renders the
+    // correct per-result badge for each; logged-out renders none.
+    it("renders correct mixed-state badges across a logged-in result page", async () => {
+      const results = [
+        makeItem("tmdb-1", "Owned"),
+        makeItem("tmdb-2", "Active"),
+        makeItem("tmdb-3", "Untracked"),
+      ];
+      loggedInQuery(results);
+      mockLibraryState({
+        "tmdb-1": "in_library",
+        "tmdb-2": "in_progress",
+        // tmdb-3 absent → ADD
+      });
+
+      render(<SearchResults lang="en" />, { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(badgeFor("IN LIBRARY")).not.toBeNull();
+      });
+      expect(badgeFor("IN LIBRARY")?.className).toContain("var(--vhs-phosphor)");
+      expect(badgeFor("IN PROGRESS")?.className).toContain("var(--vhs-sodium)");
+      expect(badgeFor("ADD")?.className).toContain("var(--vhs-magenta)");
+    });
+
+    // T17: Load More append — newly accumulated results each get their correct
+    // per-result badge. The shelf enriches over the FULL accumulated id list, so
+    // a second page's ids resolve their own state on the same single hook call.
+    it("enriches newly appended Load More results with their own badges", async () => {
+      const page1 = [makeItem("tmdb-1", "Owned")];
+      const page2 = [makeItem("tmdb-2", "Active")];
+      vi.mocked(useAuthUserId).mockReturnValue("user-1");
+
+      // Page 1 settles: tmdb-1 → in_library.
+      vi.mocked(useSearchFilters).mockReturnValue(
+        baseFilters({ query: "alien", debouncedQuery: "alien", page: 1 })
+      );
+      vi.mocked(useSearch).mockReturnValue({
+        data: { results: page1, totalPages: 5 },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+        refetch: vi.fn(),
+      } as any);
+      mockLibraryState({ "tmdb-1": "in_library" });
+
+      const { rerender } = render(<SearchResults lang="en" />, {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(badgeFor("IN LIBRARY")).not.toBeNull();
+      });
+
+      // Load More → page 2 appends tmdb-2; the Map now covers BOTH ids.
+      vi.mocked(useSearchFilters).mockReturnValue(
+        baseFilters({ query: "alien", debouncedQuery: "alien", page: 2 })
+      );
+      vi.mocked(useSearch).mockReturnValue({
+        data: { results: page2, totalPages: 5 },
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+        refetch: vi.fn(),
+      } as any);
+      mockLibraryState({ "tmdb-1": "in_library", "tmdb-2": "in_progress" });
+
+      rerender(<SearchResults lang="en" />);
+
+      await waitFor(() => {
+        expect(badgeFor("IN PROGRESS")).not.toBeNull();
+      });
+      // Both accumulated pages keep their correct badges.
+      expect(badgeFor("IN LIBRARY")).not.toBeNull();
+      // The hook saw the full accumulated id set on the latest render.
+      expect(useLibraryState).toHaveBeenLastCalledWith(
+        ["tmdb-1", "tmdb-2"],
+        "user-1"
+      );
+    });
   });
 });
