@@ -60,7 +60,10 @@ export async function getLibraryStateForMediaIds(
 
   for (const publicId of publicIds) {
     const parsed = parsePublicId(publicId);
-    if (!parsed) continue; // malformed id — skip, never crash
+    // Skip malformed ids — including structurally-parsed-but-empty source ids
+    // like "tmdb-"/"anilist-" (parsePublicId returns sourceId: "" for these),
+    // which would otherwise reach the DB as inArray(sourceId, [""]).
+    if (!parsed || parsed.sourceId === "") continue;
     if (parsed.source === "tmdb") {
       tmdbIds.push(parsed.sourceId);
     } else {

@@ -75,6 +75,15 @@ describe("getLibraryStateForMediaIds", () => {
     expect(mockSelectFn).not.toHaveBeenCalled();
   });
 
+  it("returns {} without hitting the DB for empty source ids ('tmdb-'/'anilist-')", async () => {
+    // parsePublicId("tmdb-") returns { source: "tmdb", sourceId: "" } (not null),
+    // so an empty source id is structurally parsed but malformed. It must be
+    // skipped before reaching the DB — otherwise it leaks as inArray(sourceId, [""]).
+    const result = await getLibraryStateForMediaIds(userId, ["tmdb-", "anilist-"]);
+    expect(result).toEqual({});
+    expect(mockSelectFn).not.toHaveBeenCalled();
+  });
+
   it("skips one malformed id among valid ones and resolves the rest", async () => {
     mockSelectResolving([
       { source: "tmdb", sourceId: "1", status: "completed" },
@@ -107,6 +116,8 @@ describe("getLibraryStateForMediaIds", () => {
     });
     // tmdb-2 has no row -> not a key (client defaults absent to ADD)
     expect(result["tmdb-2"]).toBeUndefined();
+    // No-N+1 invariant: a mixed-source page resolves in ONE batch query.
+    expect(mockSelectFn).toHaveBeenCalledTimes(1);
   });
 
   it("returns no keys for an all-ADD page (user tracks none of the results)", async () => {
@@ -117,17 +128,44 @@ describe("getLibraryStateForMediaIds", () => {
     expect(result).toEqual({});
   });
 
-  it("only keys rows the query returned (query is filtered by userId)", async () => {
-    // The query filters by userId, so another user's rows never come back.
-    // Simulate: the requested ids include one the current user owns and one
-    // owned by someone else (absent from the rows the query returns).
-    mockSelectResolving([
-      { source: "tmdb", sourceId: "1", status: "paused" },
-    ]);
+  it("filters the query by userId (cross-user isolation)", async () => {
+    // The query MUST filter by userId, so another user's rows never come back.
+    // Capture the .where() argument and assert the userId is actually bound into
+    // the SQL expression tree (mirrors the where-capture pattern in stats.test.ts).
+    const whereMock = vi.fn().mockReturnValue(
+      thenable([{ source: "tmdb", sourceId: "1", status: "paused" }])
+    );
+    mockSelectFn.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({ where: whereMock }),
+      }),
+    });
 
     const result = await getLibraryStateForMediaIds(userId, ["tmdb-1", "tmdb-99"]);
 
     expect(result).toEqual({ "tmdb-1": "in_progress" });
     expect(result["tmdb-99"]).toBeUndefined();
+
+    // The where clause must encode the userId filter — not just copy back rows.
+    expect(whereMock).toHaveBeenCalledTimes(1);
+    const capturedWhere = whereMock.mock.calls[0][0];
+    expect(capturedWhere).toBeDefined();
+
+    // Recursively walk the captured SQL tree (circular-guarded) and assert the
+    // userId literal is bound somewhere inside the where expression.
+    const seen = new Set<unknown>();
+    let foundUserId = false;
+    const collect = (node: unknown): void => {
+      if (node == null || typeof node !== "object") return;
+      if (seen.has(node)) return;
+      seen.add(node);
+      for (const value of Object.values(node as Record<string, unknown>)) {
+        if (value === userId) foundUserId = true;
+        collect(value);
+      }
+    };
+    collect(capturedWhere);
+
+    expect(foundUserId).toBe(true);
   });
 });
