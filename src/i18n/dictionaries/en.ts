@@ -40,6 +40,11 @@ export const dictionary: Dictionary = {
       "The directory terminal lost its signal. Check the connection and search again.",
     errorRetry: "Retry search",
     nowShowingHead: "Now showing — popular this week",
+    badge: {
+      add: "ADD",
+      inLibrary: "IN LIBRARY",
+      inProgress: "IN PROGRESS",
+    },
   },
   library: {
     title: "My Library",
