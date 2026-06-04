@@ -41,6 +41,44 @@ function makeAuthClient(initialUserId: string | null) {
   };
 }
 
+/**
+ * Build a fake Supabase client whose `getUser()` returns a promise the test
+ * controls, so we can interleave a late `getUser()` resolution with an earlier
+ * auth-state-change event and assert the event wins.
+ */
+function makeDeferredAuthClient(resolvedUserId: string | null) {
+  let callback: AuthChangeCallback = () => {};
+  const unsubscribe = vi.fn();
+  let resolveGetUser!: () => void;
+
+  const getUser = vi.fn().mockReturnValue(
+    new Promise((resolve) => {
+      resolveGetUser = () =>
+        resolve({
+          data: { user: resolvedUserId ? { id: resolvedUserId } : null },
+          error: null,
+        });
+    })
+  );
+
+  const client = {
+    auth: {
+      getUser,
+      onAuthStateChange: vi.fn((cb: AuthChangeCallback) => {
+        callback = cb;
+        return { data: { subscription: { unsubscribe } } };
+      }),
+    },
+  };
+
+  return {
+    client,
+    unsubscribe,
+    fire: (event: string, session: unknown) => callback(event, session),
+    resolveGetUser: () => resolveGetUser(),
+  };
+}
+
 describe("useAuthUserId", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -96,6 +134,29 @@ describe("useAuthUserId", () => {
     });
 
     await waitFor(() => expect(result.current).toBe("u2"));
+  });
+
+  it("keeps a SIGNED_OUT auth event authoritative over a late getUser() resolution", async () => {
+    // getUser() is in-flight (slow server round-trip) and has NOT resolved yet.
+    const { client, fire, resolveGetUser } = makeDeferredAuthClient("u1");
+    vi.mocked(useAuthClient).mockReturnValue(client as never);
+
+    const { result } = renderHook(() => useAuthUserId());
+    await waitFor(() => expect(client.auth.getUser).toHaveBeenCalled());
+
+    // A SIGNED_OUT event fires WHILE getUser() is still pending.
+    act(() => {
+      fire("SIGNED_OUT", null);
+    });
+    expect(result.current).toBeNull();
+
+    // The late getUser() resolves with a still-valid user — it must NOT
+    // override the fresher sign-out.
+    await act(async () => {
+      resolveGetUser();
+    });
+
+    expect(result.current).toBeNull();
   });
 
   it("unsubscribes from auth-state changes on unmount", async () => {

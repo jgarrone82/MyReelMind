@@ -20,20 +20,26 @@ export function useAuthUserId(): string | null {
 
   useEffect(() => {
     let active = true;
+    // An auth-state-change event reflects the freshest auth truth. If one fires
+    // while the slow `getUser()` round-trip is still pending, the late
+    // resolution must NOT override it — otherwise a stale id can transiently
+    // clobber a SIGNED_OUT (breaking the "logged-out never fetches" gate).
+    let authEventSeen = false;
 
     supabase.auth
       .getUser()
       .then(({ data }) => {
-        if (active) setUserId(data.user?.id ?? null);
+        if (active && !authEventSeen) setUserId(data.user?.id ?? null);
       })
       .catch(() => {
         // A failed getUser() must not crash consumers — treat as logged out.
-        if (active) setUserId(null);
+        if (active && !authEventSeen) setUserId(null);
       });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      authEventSeen = true;
       setUserId(session?.user?.id ?? null);
     });
 

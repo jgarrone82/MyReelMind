@@ -145,6 +145,26 @@ describe("useLibraryState", () => {
     );
   });
 
+  it("keeps the returned data referentially stable across re-renders (success path)", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ states: { "tmdb-1": "in_library" } }),
+    } as never);
+    const { Wrapper } = createWrapper();
+
+    const { result, rerender } = renderHook(
+      () => useLibraryState(["tmdb-1"], userId),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.data.size).toBe(1));
+
+    const first = result.current.data;
+    rerender();
+    // Same inputs → same Map identity, so downstream memoization holds.
+    expect(result.current.data).toBe(first);
+  });
+
   it("uses a 5m staleTime", async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: true,

@@ -10,15 +10,28 @@ const EMPTY_STATE: LibraryStateResponse = { states: {} };
 
 export type LibraryStateMap = Map<string, LibraryBadgeState>;
 
+// Stable, module-level identities so the hook does not allocate a fresh Map or
+// a fresh `select` closure on every render. React Query memoizes `select`
+// output by reference, so a stable function lets the same response yield the
+// same Map identity across re-renders — which downstream memoization (PR-D3
+// wires this at the shelf level over all results) relies on.
+const selectStatesMap = (data: LibraryStateResponse): LibraryStateMap =>
+  new Map(Object.entries(data.states));
+
+// Shared stable fallback for disabled/error states. The Map is only read by
+// consumers, never mutated, so a single shared instance is safe.
+const EMPTY_MAP: LibraryStateMap = new Map();
+
 /**
  * Enrich a page of search results with their per-user library-state badge.
  *
  * Cosmetic, non-blocking, and resilient by contract:
  * - `enabled` only when there is a `userId` AND at least one id, so a logged-out
  *   user or an empty results page NEVER issues a request.
- * - the consumer ALWAYS reads a `Map` — `placeholderData` seeds an empty Map
- *   before the first response and after an error, so a failed/slow lookup
- *   degrades silently (badges drop) instead of throwing or yielding `undefined`.
+ * - the consumer ALWAYS reads a `Map`. Before the first response `placeholderData`
+ *   seeds an empty Map (status pending), and on error the `?? EMPTY_MAP` fallback
+ *   takes over (see the return below), so a failed/slow lookup degrades silently
+ *   (badges drop) instead of throwing or yielding `undefined`.
  *
  * Always call this unconditionally at the shelf level (rules of hooks); a single
  * call enriches the whole page rather than one fetch per card.
@@ -46,13 +59,21 @@ export function useLibraryState(
     // collection mutations invalidate the cache explicitly (PR-D3).
     staleTime: 1000 * 60 * 5,
     placeholderData: EMPTY_STATE,
-    select: (data) => new Map(Object.entries(data.states)),
+    select: selectStatesMap,
   });
 
-  // `select` runs over placeholderData too, so `data` is always a Map (never
-  // undefined) for both the disabled and the errored states.
+  // The consumer must ALWAYS read a Map. Two distinct paths guarantee that:
+  //  - DISABLED (logged out / no ids): the query is `pending`, so React Query
+  //    surfaces `placeholderData` (the empty state) and runs `select` over it,
+  //    yielding an empty Map.
+  //  - ERROR (fetch reject or non-ok HTTP): in React Query v5 `placeholderData`
+  //    applies ONLY while `status === "pending"`. On error it does NOT fire and
+  //    `select` does NOT run, so `query.data` is `undefined`. The `?? EMPTY_MAP`
+  //    fallback below is the REAL guard that keeps the error path a Map.
+  // `EMPTY_MAP` is a shared, never-mutated instance so disabled/error states
+  // also keep a stable identity across re-renders.
   return {
     ...query,
-    data: query.data ?? new Map(),
+    data: query.data ?? EMPTY_MAP,
   } as UseQueryResult<LibraryStateMap> & { data: LibraryStateMap };
 }
