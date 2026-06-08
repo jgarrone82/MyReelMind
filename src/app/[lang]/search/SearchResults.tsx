@@ -206,14 +206,15 @@ export function SearchResults({ lang }: SearchResultsProps) {
   // (identical to pre-change behavior). Logged-in → only pass the Map once the
   // library-state query has SETTLED successfully (`libraryStateReady`).
   //
-  // The settled-gate is what prevents the ADD-badge flash: while the query is
-  // pending, `useLibraryState` surfaces an EMPTY placeholder Map (not null). A
-  // bare `userId ? libraryState : null` would feed that empty Map to
-  // `badgeForItem`, and `libraryState.get(id) ?? "add"` would flash ADD on
-  // EVERY card — including items that are actually IN_LIBRARY / IN_PROGRESS —
-  // for one network round-trip. Gating on `isSuccess` keeps it null until the
-  // real state resolves, so badges appear a beat later instead of flashing
-  // wrong (design D7 / honest-data).
+  // The settled-gate is what prevents the ADD-badge flash. `useLibraryState` has
+  // NO placeholderData, so `isSuccess` flips true ONLY after a real successful
+  // response; while the query is pending it returns a stable EMPTY Map but
+  // reports `isSuccess === false`. A bare `userId ? libraryState : null` would
+  // feed that empty Map to `badgeForItem`, and `libraryState.get(id) ?? "add"`
+  // would flash ADD on EVERY card — including items that are actually
+  // IN_LIBRARY / IN_PROGRESS — for one network round-trip. Gating on the honest
+  // `isSuccess` keeps it null until the real state resolves, so badges appear a
+  // beat later instead of flashing wrong (design D7 / honest-data).
   const searchLibraryState = userId && libraryStateReady ? libraryState : null;
 
   // Empty-query state: the NOW SHOWING trending shelf, with honest degradation.

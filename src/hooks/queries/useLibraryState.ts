@@ -6,8 +6,6 @@ interface LibraryStateResponse {
   states: Record<string, LibraryBadgeState>;
 }
 
-const EMPTY_STATE: LibraryStateResponse = { states: {} };
-
 // ReadonlyMap (not Map) so consumers cannot mutate the shared, module-level
 // EMPTY_MAP singleton that the disabled/error paths return. Reads (`get`/`has`/
 // `size`/iteration) are all that downstream enrichment needs.
@@ -31,10 +29,15 @@ const EMPTY_MAP: LibraryStateMap = new Map();
  * Cosmetic, non-blocking, and resilient by contract:
  * - `enabled` only when there is a `userId` AND at least one id, so a logged-out
  *   user or an empty results page NEVER issues a request.
- * - the consumer ALWAYS reads a `Map`. Before the first response `placeholderData`
- *   seeds an empty Map (status pending), and on error the `?? EMPTY_MAP` fallback
- *   takes over (see the return below), so a failed/slow lookup degrades silently
- *   (badges drop) instead of throwing or yielding `undefined`.
+ * - the consumer ALWAYS reads a `Map`. There is NO `placeholderData`: the
+ *   `?? EMPTY_MAP` fallback in the return below is the SOLE source of the
+ *   "always a Map" guarantee. It covers every non-success path (disabled,
+ *   pending, error) where `query.data` is `undefined`, so a failed/slow lookup
+ *   degrades silently (badges drop) instead of throwing or yielding `undefined`.
+ * - because there is no `placeholderData`, `isSuccess` flips true ONLY after a
+ *   real successful response. The SearchResults badge gate relies on this: it
+ *   must not paint badges over an empty Map during the in-flight window, and an
+ *   honest `isSuccess` is what keeps it from doing so.
  *
  * Always call this unconditionally at the shelf level (rules of hooks); a single
  * call enriches the whole page rather than one fetch per card.
@@ -54,27 +57,29 @@ export function useLibraryState(
       });
       // The route degrades to an empty-map 200, so a non-ok response is a real
       // transport failure — throw so React Query records an error state. The
-      // placeholderData below keeps `data` an empty Map regardless.
+      // `?? EMPTY_MAP` fallback below keeps `data` an empty Map regardless.
       if (!res.ok) throw new Error("Library-state fetch failed");
       return res.json();
     },
     // Library state changes only on user mutation; 5m avoids refetch churn while
     // collection mutations invalidate the cache explicitly (PR-D3).
     staleTime: 1000 * 60 * 5,
-    placeholderData: EMPTY_STATE,
     select: selectStatesMap,
   });
 
-  // The consumer must ALWAYS read a Map. Two distinct paths guarantee that:
-  //  - DISABLED (logged out / no ids): the query is `pending`, so React Query
-  //    surfaces `placeholderData` (the empty state) and runs `select` over it,
-  //    yielding an empty Map.
-  //  - ERROR (fetch reject or non-ok HTTP): in React Query v5 `placeholderData`
-  //    applies ONLY while `status === "pending"`. On error it does NOT fire and
-  //    `select` does NOT run, so `query.data` is `undefined`. The `?? EMPTY_MAP`
-  //    fallback below is the REAL guard that keeps the error path a Map.
-  // `EMPTY_MAP` is a shared, never-mutated instance so disabled/error states
-  // also keep a stable identity across re-renders.
+  // The consumer must ALWAYS read a Map, and `query.data` is `undefined` on every
+  // non-success path. The `?? EMPTY_MAP` fallback is the SINGLE guard that covers
+  // all of them — there is no `placeholderData`, so `isSuccess` stays false (and
+  // the SearchResults gate paints no badges) until a real response lands:
+  //  - DISABLED (logged out / no ids): the query never runs, `select` never runs,
+  //    so `query.data` is `undefined` → `?? EMPTY_MAP`.
+  //  - PENDING (fetch in flight): no `placeholderData` means `query.data` is still
+  //    `undefined` and `status` is `pending` → `?? EMPTY_MAP` (status stays
+  //    pending, NOT success).
+  //  - ERROR (fetch reject or non-ok HTTP): `select` does not run, so `query.data`
+  //    is `undefined` → `?? EMPTY_MAP`.
+  // `EMPTY_MAP` is a shared, never-mutated instance so these paths also keep a
+  // stable identity across re-renders.
   return {
     ...query,
     data: query.data ?? EMPTY_MAP,

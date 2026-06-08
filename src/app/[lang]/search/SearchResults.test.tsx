@@ -986,12 +986,12 @@ describe("SearchResults", () => {
 
     // Fix #1 — kill the ADD-badge flash during the library-state PENDING window.
     // When `userId` resolves before the library-state fetch settles, the hook is
-    // enabled but pending: `placeholderData` serves an EMPTY Map (not null), so
-    // the naive `userId ? libraryState : null` would feed that empty Map to
-    // `badgeForItem`, and `libraryState.get(id) ?? "add"` would flash ADD on
-    // EVERY card (including items actually IN_LIBRARY / IN_PROGRESS) for one
-    // network round-trip. Honest-data / design D7 require NO badge until the
-    // real state resolves — identical to logged-out.
+    // enabled but pending: it returns an EMPTY Map (not null) while reporting
+    // `isSuccess === false`, so the naive `userId ? libraryState : null` would
+    // feed that empty Map to `badgeForItem`, and `libraryState.get(id) ?? "add"`
+    // would flash ADD on EVERY card (including items actually IN_LIBRARY /
+    // IN_PROGRESS) for one network round-trip. Honest-data / design D7 require NO
+    // badge until the real state resolves — identical to logged-out.
     it("renders NO badge while library-state is pending (isSuccess false), even logged in", async () => {
       const results = [
         makeItem("tmdb-1", "Owned"),
@@ -999,8 +999,9 @@ describe("SearchResults", () => {
         makeItem("tmdb-3", "Untracked"),
       ];
       loggedInQuery(results);
-      // Pending: an empty placeholder Map, NOT yet settled. The real states
-      // (which DO exist server-side) have not arrived.
+      // Pending: the hook returns the EMPTY_MAP fallback with isSuccess false,
+      // NOT yet settled. The real states (which DO exist server-side) have not
+      // arrived.
       mockLibraryState({}, false);
 
       render(<SearchResults lang="en" />, { wrapper: createWrapper() });
