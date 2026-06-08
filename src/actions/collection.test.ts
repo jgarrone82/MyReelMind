@@ -12,7 +12,7 @@ vi.mock("next/cache", () => ({
 }));
 
 vi.mock("@/lib/auth/server", () => ({
-  getSession: vi.fn(),
+  getAuthenticatedUser: vi.fn(),
 }));
 
 vi.mock("@/db", () => ({
@@ -46,7 +46,7 @@ vi.mock("@/lib/media/detail", () => ({
 }));
 
 import { revalidatePath } from "next/cache";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { db } from "@/db";
 import { fetchMediaDetail } from "@/lib/media/detail";
 
@@ -55,13 +55,13 @@ const mockMediaUuid = "media-uuid-456";
 const mockUserMediaId = "user-media-uuid-789";
 
 function mockAuthenticated() {
-  vi.mocked(getSession).mockResolvedValue({
-    user: { id: mockUserId },
-  } as unknown as Awaited<ReturnType<typeof getSession>>);
+  vi.mocked(getAuthenticatedUser).mockResolvedValue({
+    id: mockUserId,
+  } as unknown as Awaited<ReturnType<typeof getAuthenticatedUser>>);
 }
 
 function mockUnauthenticated() {
-  vi.mocked(getSession).mockResolvedValue(null);
+  vi.mocked(getAuthenticatedUser).mockResolvedValue(null);
 }
 
 function mockMediaItemFound() {

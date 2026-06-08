@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { db } from "@/db";
 import { users } from "@/db/schema/users";
 import { eq } from "drizzle-orm";
@@ -16,15 +16,15 @@ export type SettingsState = {
  * Updates the authenticated user's profile (displayName, avatarUrl, isPublic).
  *
  * Returns { success: true } on success.
- * Returns { error: "unauthorized" } when no session exists.
+ * Returns { error: "unauthorized" } when no authenticated user exists.
  * Returns { error: "name_required" | "name_too_long" | "invalid_url" } on validation failure.
  */
 export async function updateProfile(
   prevState: SettingsState | undefined,
   formData: FormData
 ): Promise<SettingsState> {
-  const session = await getSession();
-  if (!session?.user) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
     return { error: "unauthorized" };
   }
 
@@ -60,10 +60,10 @@ export async function updateProfile(
       isPublic: parsed.data.isPublic,
       updatedAt: new Date(),
     })
-    .where(eq(users.id, session.user.id));
+    .where(eq(users.id, user.id));
 
   revalidatePath("/settings");
-  revalidatePath(`/users/${session.user.id}`);
+  revalidatePath(`/users/${user.id}`);
 
   return { success: true };
 }
