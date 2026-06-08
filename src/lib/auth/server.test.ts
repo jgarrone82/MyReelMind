@@ -117,4 +117,19 @@ describe("getAuthenticatedUser", () => {
     const result = await getAuthenticatedUser();
     expect(result).toBeNull();
   });
+
+  it("revalidates via getUser and never reads the unverified getSession (#52)", async () => {
+    const getUser = vi.fn().mockResolvedValue({
+      data: { user: { id: "user-123", email: "test@example.com" } },
+      error: null,
+    });
+    const getSessionSpy = vi.fn();
+    const mockSupabase = { auth: { getUser, getSession: getSessionSpy } };
+
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
+
+    await getAuthenticatedUser();
+    expect(getUser).toHaveBeenCalledTimes(1);
+    expect(getSessionSpy).not.toHaveBeenCalled();
+  });
 });

@@ -105,6 +105,10 @@ describe("LibraryPage auth", () => {
     await LibraryPage(props);
 
     expect(getAuthenticatedUser).toHaveBeenCalled();
-    expect(db.query.userMedia.findMany).toHaveBeenCalled();
+    // Assert the query is actually filtered (a `where` clause is passed), not
+    // just that findMany ran — otherwise a dropped user scope would slip through.
+    expect(db.query.userMedia.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.anything() })
+    );
   });
 });
