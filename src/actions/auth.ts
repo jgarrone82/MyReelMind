@@ -240,9 +240,10 @@ export async function sendVerificationEmail(
 export async function resendVerificationEmail(): Promise<AuthState> {
   const supabase = await createClient();
 
-  // #52 deferral: self-scoped action — resends to the caller's own email, and
-  // the resend is enforced by Supabase against the server session. No userId
-  // drives an authorization/data-scoping decision, so getSession is acceptable.
+  // #52 deferral: no userId drives an authorization/data-scoping decision here.
+  // The email is read from the locally-decoded cookie (NOT server-revalidated),
+  // so a stale/tampered token's worst case is a misdirected verification email —
+  // no user-owned data is accessed or scoped. getSession is acceptable.
   const { data, error: sessionError } = await supabase.auth.getSession();
 
   if (sessionError || !data.session) {

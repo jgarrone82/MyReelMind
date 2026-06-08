@@ -67,9 +67,10 @@ export async function middleware(request: NextRequest) {
   // #52 deferral: this is a fast first-pass route gate. Token revalidation
   // already happens in updateSession() below (it calls getUser()), and the
   // authoritative auth checks now live in the migrated pages/routes. A naive
-  // getSession→getUser swap here would double-call getUser (own client +
-  // updateSession), risking double refresh-token rotation — left for a
-  // dedicated middleware refactor. (created via mocked createServerClient in tests)
+  // getSession→getUser swap here would add a second getUser() per request (this
+  // client + updateSession), doubling the auth-server round-trips on every
+  // navigation — left for a dedicated middleware refactor. (created via mocked
+  // createServerClient in tests)
   const {
     data: { session },
   } = await supabase.auth.getSession();
