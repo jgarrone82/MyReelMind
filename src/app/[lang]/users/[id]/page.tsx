@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { db } from "@/db";
 import { users, userMedia } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -48,8 +48,8 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
   }
 
   // Check if viewing own profile
-  const session = await getSession();
-  const isOwnProfile = session?.user?.id === userRow.id;
+  const user = await getAuthenticatedUser();
+  const isOwnProfile = user?.id === userRow.id;
 
   // Fetch user's library items (recent 10)
   const libraryItems = await db.query.userMedia.findMany({

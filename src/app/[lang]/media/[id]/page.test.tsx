@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/auth/server", () => ({
-  getSession: vi.fn(),
+  getAuthenticatedUser: vi.fn(),
 }));
 
 vi.mock("@/db", () => ({
@@ -42,7 +42,7 @@ vi.mock("@/components/collection/MediaDetailClient", () => ({
 }));
 
 import { fetchMediaDetail } from "@/lib/media/detail";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { db } from "@/db";
 
 const mockMedia = {
@@ -63,20 +63,14 @@ const mockMedia = {
 describe("MediaDetailPage", () => {
   it("should render media details when found with user session", async () => {
     vi.mocked(fetchMediaDetail).mockResolvedValue(mockMedia);
-    vi.mocked(getSession).mockResolvedValue({
-      user: {
-        id: "user-1",
-        email: "test@example.com",
-        app_metadata: {},
-        user_metadata: {},
-        aud: "authenticated",
-        created_at: "2024-01-01T00:00:00.000Z",
-      },
-      access_token: "mock-token",
-      refresh_token: "mock-refresh",
-      expires_in: 3600,
-      token_type: "bearer",
-    } as unknown as Awaited<ReturnType<typeof getSession>>);
+    vi.mocked(getAuthenticatedUser).mockResolvedValue({
+      id: "user-1",
+      email: "test@example.com",
+      app_metadata: {},
+      user_metadata: {},
+      aud: "authenticated",
+      created_at: "2024-01-01T00:00:00.000Z",
+    } as unknown as Awaited<ReturnType<typeof getAuthenticatedUser>>);
     vi.mocked(db.query.mediaItems.findFirst).mockResolvedValue({
       id: "media-uuid-1",
       source: "tmdb",
@@ -126,7 +120,7 @@ describe("MediaDetailPage", () => {
 
   it("should render without collection controls when not authenticated", async () => {
     vi.mocked(fetchMediaDetail).mockResolvedValue(mockMedia);
-    vi.mocked(getSession).mockResolvedValue(null);
+    vi.mocked(getAuthenticatedUser).mockResolvedValue(null);
 
     const page = await MediaDetailPage({
       params: Promise.resolve({ lang: "en", id: "tmdb-123" }),
@@ -140,7 +134,7 @@ describe("MediaDetailPage", () => {
 
   it("should call notFound when media is missing", async () => {
     vi.mocked(fetchMediaDetail).mockResolvedValue(null);
-    vi.mocked(getSession).mockResolvedValue(null);
+    vi.mocked(getAuthenticatedUser).mockResolvedValue(null);
 
     await expect(
       MediaDetailPage({

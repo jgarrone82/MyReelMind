@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { eq } from "drizzle-orm";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import type { Dictionary } from "@/i18n/types";
@@ -73,12 +73,12 @@ function detailHref(item: UserMediaWithMedia, lang: string): string | undefined 
 /**
  * Data-fetching body of the dashboard. Lives behind a <Suspense> boundary in
  * page.tsx so its awaits stream the DashboardSkeleton fallback. The home route
- * `/[lang]` is NOT in middleware.ts protectedRoutes, so a null session is
+ * `/[lang]` is NOT in middleware.ts protectedRoutes, so a null user is
  * expected here — it falls through to the empty state below.
  */
 export async function DashboardContent({ lang, dict }: DashboardContentProps) {
-  const session = await getSession();
-  const userId = session?.user.id;
+  const user = await getAuthenticatedUser();
+  const userId = user?.id;
 
   const empty: DashboardCounts = { inProgress: 0, toWatch: 0, totalLogged: 0 };
 
@@ -115,10 +115,10 @@ export async function DashboardContent({ lang, dict }: DashboardContentProps) {
 
   const isEmpty = counts.totalLogged === 0;
 
-  // Member identity. Name/email come from the session; createdAt + displayName
-  // come from the users row (the session does not carry them).
+  // Member identity. Name/email come from the revalidated user; createdAt +
+  // displayName come from the users row (the user object does not carry them).
   const memberName =
-    userRow?.displayName ?? session?.user.email ?? "Member";
+    userRow?.displayName ?? user?.email ?? "Member";
   const memberSince = userRow?.createdAt
     ? formatMemberSince(new Date(userRow.createdAt), lang)
     : "—";
