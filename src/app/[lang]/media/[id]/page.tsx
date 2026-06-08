@@ -10,7 +10,7 @@ import { eq, and } from "drizzle-orm";
 import { getDictionary, type Locale } from "@/i18n";
 import { MediaDetailClient } from "@/components/collection/MediaDetailClient";
 import type { WatchStatus } from "@/components/collection/StatusSelector";
-import { addToLibrary } from "@/actions/collection";
+import { AddToLibraryButton } from "@/components/collection/AddToLibraryButton";
 import { MembersOnlyPanel } from "@/components/vhs";
 import type { SourceBadgeColor } from "@/components/vhs";
 import { UnfoldedVHS } from "./_components/UnfoldedVHS";
@@ -230,33 +230,10 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
               headline={dict.media.detail.addToLibraryHeadline}
               body={dict.media.detail.addToLibraryBody}
               primary={
-                <form
-                  action={async () => {
-                    "use server";
-                    // #42 D8: this is a SERVER-COMPONENT inline server action, so
-                    // it has NO access to the client React Query cache and cannot
-                    // call `queryClient.invalidateQueries(["library-state"])` the
-                    // way the client call-sites (MediaDetailClient, LibraryItem,
-                    // RemoveButton) do — those DO invalidate the library-state
-                    // cache and keep the search badge fresh.
-                    //
-                    // ACCEPTED, DOCUMENTED EXCEPTION: from this server path the
-                    // search-results badge can stay STALE for up to the
-                    // library-state `staleTime` (5m) after adding here.
-                    // `revalidatePath` inside `addToLibrary` only busts Next's RSC
-                    // cache; it does NOT touch the client React Query cache. And
-                    // with `staleTime: 5m`, remounting the search shelf within the
-                    // window does NOT refetch (React Query serves the still-fresh
-                    // cached entry), so navigating back does not reliably reflect
-                    // the new row until the entry goes stale or a client call-site
-                    // invalidates it.
-                    await addToLibrary(mediaId, "want_to_watch");
-                  }}
-                >
-                  <button type="submit" className="vhs-btn vhs-aberrate">
-                    {dict.media.detail.addToLibraryCta}
-                  </button>
-                </form>
+                <AddToLibraryButton
+                  mediaId={mediaId}
+                  label={dict.media.detail.addToLibraryCta}
+                />
               }
             />
           )
