@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { updateProfile } from "./settings";
 
 vi.mock("@/lib/auth/server", () => ({
-  getSession: vi.fn(),
+  getAuthenticatedUser: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -25,15 +25,15 @@ vi.mock("@/db", () => ({
   },
 }));
 
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
 
-type Session = Awaited<ReturnType<typeof getSession>>;
+type AuthenticatedUser = Awaited<ReturnType<typeof getAuthenticatedUser>>;
 
 const mockSession = (userId: string | null) => {
-  vi.mocked(getSession).mockResolvedValue(
+  vi.mocked(getAuthenticatedUser).mockResolvedValue(
     userId
-      ? ({ user: { id: userId, email: "test@example.com" } } as unknown as Session)
+      ? ({ id: userId, email: "test@example.com" } as unknown as AuthenticatedUser)
       : null
   );
 };

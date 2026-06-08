@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Suspense, isValidElement } from "react";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import {
   getTotalWatched,
   getTotalHours,
@@ -29,12 +29,12 @@ import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
  *     boundary whose fallback is the DashboardSkeleton (D1: skeleton streams
  *     during fetch, scoped to the dashboard, not a [lang]/loading.tsx).
  *
- * Seams mocked: @/lib/auth/server (session), @/lib/dashboard/stats (data),
- * @/db (users.findFirst), getDictionary (deterministic copy).
+ * Seams mocked: @/lib/auth/server (authenticated user), @/lib/dashboard/stats
+ * (data), @/db (users.findFirst), getDictionary (deterministic copy).
  */
 
 vi.mock("@/lib/auth/server", () => ({
-  getSession: vi.fn(),
+  getAuthenticatedUser: vi.fn(),
 }));
 
 vi.mock("@/lib/dashboard/stats", () => ({
@@ -177,8 +177,8 @@ describe("DashboardContent (data + branch logic)", () => {
     usersFindFirst.mockResolvedValue(undefined);
   });
 
-  it("renders the empty (STORE CLOSED) state on a null session", async () => {
-    vi.mocked(getSession).mockResolvedValue(null);
+  it("renders the empty (STORE CLOSED) state on a null user", async () => {
+    vi.mocked(getAuthenticatedUser).mockResolvedValue(null);
 
     render(await DashboardContent({ lang: "en", dict: DICT }));
 
@@ -192,8 +192,9 @@ describe("DashboardContent (data + branch logic)", () => {
   });
 
   it("renders the empty state when an authenticated user has zero logged items", async () => {
-    vi.mocked(getSession).mockResolvedValue({
-      user: { id: "user-123", email: "test@example.com" },
+    vi.mocked(getAuthenticatedUser).mockResolvedValue({
+      id: "user-123",
+      email: "test@example.com",
     } as never);
     vi.mocked(getDashboardCounts).mockResolvedValue(EMPTY_COUNTS);
 
@@ -209,8 +210,9 @@ describe("DashboardContent (data + branch logic)", () => {
   });
 
   it("renders the member card and shelves when the user has logged items", async () => {
-    vi.mocked(getSession).mockResolvedValue({
-      user: { id: "user-789", email: "member@example.com" },
+    vi.mocked(getAuthenticatedUser).mockResolvedValue({
+      id: "user-789",
+      email: "member@example.com",
     } as never);
     vi.mocked(getTotalWatched).mockResolvedValue(42);
     vi.mocked(getTotalHours).mockResolvedValue(150.5);

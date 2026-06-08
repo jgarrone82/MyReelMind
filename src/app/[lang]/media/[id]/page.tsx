@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { fetchMediaDetail } from "@/lib/media/detail";
 import { db } from "@/db";
 import { mediaItems, userMedia } from "@/db/schema";
@@ -66,10 +66,10 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
     notFound();
   }
 
-  const session = await getSession();
+  const user = await getAuthenticatedUser();
   let userEntry = null;
 
-  if (session) {
+  if (user) {
     const mediaItemRecord = await db.query.mediaItems.findFirst({
       where: and(
         eq(mediaItems.source, media.source),
@@ -85,7 +85,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
     if (mediaItemRecord) {
       userEntry = await db.query.userMedia.findFirst({
         where: and(
-          eq(userMedia.userId, session.user.id),
+          eq(userMedia.userId, user.id),
           eq(userMedia.mediaItemId, mediaItemRecord.id),
         ),
       });
@@ -195,7 +195,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
       </section>
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {session ? (
+        {user ? (
           userEntry ? (
             <div className="mx-auto w-full max-w-[1200px] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-ground-2)] p-6 shadow-[8px_8px_0_rgba(0,0,0,0.85)] sm:p-8">
               <MediaDetailClient

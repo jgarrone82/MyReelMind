@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import VerifyEmailPage from "./page";
 
 vi.mock("@/lib/auth/server", () => ({
-  getSession: vi.fn(),
+  getAuthenticatedUser: vi.fn(),
 }));
 
 vi.mock("@/components/auth/VerifyEmailForm", () => ({
@@ -18,11 +18,11 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 
 describe("VerifyEmailPage", () => {
-  it("should redirect to login if no session", async () => {
-    vi.mocked(getSession).mockResolvedValue(null);
+  it("should redirect to login if not authenticated", async () => {
+    vi.mocked(getAuthenticatedUser).mockResolvedValue(null);
 
     const params = Promise.resolve({ lang: "en" });
     await expect(VerifyEmailPage({ params })).rejects.toThrow(
@@ -31,8 +31,8 @@ describe("VerifyEmailPage", () => {
   });
 
   it("should redirect to dashboard if email is confirmed", async () => {
-    vi.mocked(getSession).mockResolvedValue({
-      user: { id: "1", email: "test@example.com", email_confirmed_at: "2024-01-01" },
+    vi.mocked(getAuthenticatedUser).mockResolvedValue({
+      id: "1", email: "test@example.com", email_confirmed_at: "2024-01-01",
     } as any);
 
     const params = Promise.resolve({ lang: "en" });
@@ -42,8 +42,8 @@ describe("VerifyEmailPage", () => {
   });
 
   it("should render VerifyEmailForm with user email", async () => {
-    vi.mocked(getSession).mockResolvedValue({
-      user: { id: "1", email: "test@example.com", email_confirmed_at: null },
+    vi.mocked(getAuthenticatedUser).mockResolvedValue({
+      id: "1", email: "test@example.com", email_confirmed_at: null,
     } as any);
 
     const params = Promise.resolve({ lang: "en" });

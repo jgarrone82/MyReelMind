@@ -2,26 +2,26 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "./route";
 
 vi.mock("@/lib/auth/server", () => ({
-  getSession: vi.fn(),
+  getAuthenticatedUser: vi.fn(),
 }));
 
 vi.mock("@/lib/dashboard/library-state", () => ({
   getLibraryStateForMediaIds: vi.fn(),
 }));
 
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { getLibraryStateForMediaIds } from "@/lib/dashboard/library-state";
 
 const mockUserId = "user-uuid-123";
 
 function mockAuthenticated() {
-  vi.mocked(getSession).mockResolvedValue({
-    user: { id: mockUserId },
-  } as unknown as Awaited<ReturnType<typeof getSession>>);
+  vi.mocked(getAuthenticatedUser).mockResolvedValue({
+    id: mockUserId,
+  } as unknown as Awaited<ReturnType<typeof getAuthenticatedUser>>);
 }
 
 function mockUnauthenticated() {
-  vi.mocked(getSession).mockResolvedValue(null);
+  vi.mocked(getAuthenticatedUser).mockResolvedValue(null);
 }
 
 function postReq(body: unknown) {

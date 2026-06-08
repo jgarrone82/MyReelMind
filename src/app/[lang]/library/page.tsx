@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { getDictionary, type Locale } from "@/i18n";
 import { db } from "@/db";
 import { userMedia, mediaItems } from "@/db/schema";
@@ -31,12 +31,12 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
   const { lang } = await params;
   const { status: statusParam, page: pageParam, type: typeParam } = await searchParams;
 
-  const session = await getSession();
-  if (!session) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
     redirect(`/${lang}/login`);
   }
 
-  const userId = session.user.id;
+  const userId = user.id;
   const dict = await getDictionary(lang as Locale);
 
   // Parse pagination params

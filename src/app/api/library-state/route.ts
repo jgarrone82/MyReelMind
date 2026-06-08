@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { getLibraryStateForMediaIds } from "@/lib/dashboard/library-state";
 
 // Cap the id list so a malicious/oversized body can't fan out into an unbounded
@@ -14,7 +14,7 @@ const MAX_IDS = 200;
  * Response: `200 { states: Record<publicId, "add"|"in_progress"|"in_library"> }`.
  *
  * This endpoint degrades cosmetics, it does NOT gate access — so:
- * - logged out (no session) -> `200 { states: {} }` (NOT 401; never error search)
+ * - logged out (no authenticated user) -> `200 { states: {} }` (NOT 401; never error search)
  * - lookup throws -> `200 { states: {} }` (mirror /api/trending honest degrade;
  *   the client hook throws on !res.ok, so a 500 body would never be read and
  *   would trigger a React Query retry storm)
@@ -42,14 +42,14 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const session = await getSession();
-  if (!session) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
     // Logged out is a normal empty-map case, not an error.
     return NextResponse.json({ states: {} }, { status: 200 });
   }
 
   try {
-    const states = await getLibraryStateForMediaIds(session.user.id, ids);
+    const states = await getLibraryStateForMediaIds(user.id, ids);
     return NextResponse.json({ states }, { status: 200 });
   } catch {
     // Honest degradation: badges drop silently, search never breaks.

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { db } from "@/db";
 import { mediaItems, userMedia } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -43,8 +43,8 @@ export async function addToLibrary(
   initialStatus: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const session = await getSession();
-    if (!session) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -53,7 +53,7 @@ export async function addToLibrary(
       return { success: false, error: "Media not found" };
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     await db
       .insert(userMedia)
@@ -85,8 +85,8 @@ export async function updateStatus(
   newStatus: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const session = await getSession();
-    if (!session) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -95,7 +95,7 @@ export async function updateStatus(
       return { success: false, error: "Media not found" };
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     const existing = await db.query.userMedia.findFirst({
       where: and(eq(userMedia.userId, userId), eq(userMedia.mediaItemId, mediaItemId)),
@@ -131,8 +131,8 @@ export async function updateRating(
       return { success: false, error: "Rating must be between 1 and 10" };
     }
 
-    const session = await getSession();
-    if (!session) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -141,7 +141,7 @@ export async function updateRating(
       return { success: false, error: "Media not found" };
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     const existing = await db.query.userMedia.findFirst({
       where: and(eq(userMedia.userId, userId), eq(userMedia.mediaItemId, mediaItemId)),
@@ -172,8 +172,8 @@ export async function removeFromLibrary(
   mediaId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const session = await getSession();
-    if (!session) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -182,7 +182,7 @@ export async function removeFromLibrary(
       return { success: false, error: "Media not found" };
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     const existing = await db.query.userMedia.findFirst({
       where: and(eq(userMedia.userId, userId), eq(userMedia.mediaItemId, mediaItemId)),
@@ -213,8 +213,8 @@ export async function updateProgress(
       return { success: false, error: "Progress must be non-negative" };
     }
 
-    const session = await getSession();
-    if (!session) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -223,7 +223,7 @@ export async function updateProgress(
       return { success: false, error: "Media not found" };
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     const existing = await db.query.userMedia.findFirst({
       where: and(eq(userMedia.userId, userId), eq(userMedia.mediaItemId, mediaItemId)),

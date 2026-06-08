@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { db } from "@/db";
 import { users } from "@/db/schema/users";
 import { eq } from "drizzle-orm";
@@ -22,8 +22,8 @@ export async function generateMetadata({ params }: SettingsPageProps): Promise<M
 export default async function SettingsPage({ params }: SettingsPageProps) {
   const { lang } = await params;
 
-  const session = await getSession();
-  if (!session?.user) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
     redirect(`/${lang}/login`);
   }
 
@@ -31,7 +31,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
   // Fetch user profile
   const userRow = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
+    where: eq(users.id, user.id),
   });
 
   if (!userRow) {
@@ -43,7 +43,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
       <h1 className="mb-8 text-2xl font-bold text-gray-900">{dict.settings.title}</h1>
 
       <SettingsForm
-        userId={session.user.id}
+        userId={user.id}
         dict={dict}
         initialValues={{
           displayName: userRow.displayName ?? "",

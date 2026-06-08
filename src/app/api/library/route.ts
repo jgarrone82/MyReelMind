@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/lib/auth/server";
 import { db } from "@/db";
 import { userMedia } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -12,8 +12,8 @@ type WatchStatus = (typeof VALID_STATUSES)[number];
 type MediaType = (typeof VALID_TYPES)[number];
 
 export async function GET(request: Request) {
-  const session = await getSession();
-  if (!session) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   const limit = limitParam ? Math.min(MAX_LIMIT, Math.max(1, parseInt(limitParam, 10))) : 20;
   const offset = (page - 1) * limit;
 
-  const userId = session.user.id;
+  const userId = user.id;
 
   // Build query conditions
   const whereClause = statusParam
