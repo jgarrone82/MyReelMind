@@ -64,7 +64,12 @@ export async function middleware(request: NextRequest) {
   // Extract locale from pathname
   const locale = pathname.split("/")[1];
 
-  // Get session from supabase client (created via mocked createServerClient in tests)
+  // #52 deferral: this is a fast first-pass route gate. Token revalidation
+  // already happens in updateSession() below (it calls getUser()), and the
+  // authoritative auth checks now live in the migrated pages/routes. A naive
+  // getSession→getUser swap here would double-call getUser (own client +
+  // updateSession), risking double refresh-token rotation — left for a
+  // dedicated middleware refactor. (created via mocked createServerClient in tests)
   const {
     data: { session },
   } = await supabase.auth.getSession();
