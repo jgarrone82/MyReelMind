@@ -14,6 +14,10 @@ export default async function ResetPasswordPage({
   const dictionary = await getDictionary(lang as Locale);
   const t = dictionary.auth.passwordReset;
   const supabase = await createClient();
+  // #52 deferral: password-RECOVERY flow gate, not a data-scoping decision. The
+  // recovery session itself is the proof the email token was verified, and the
+  // password update is enforced server-side on submit. getSession stays here on
+  // purpose — migrating to getUser() risks the special recovery session.
   const {
     data: { session },
   } = await supabase.auth.getSession();
