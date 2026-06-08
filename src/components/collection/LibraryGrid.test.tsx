@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { LibraryGrid } from "./LibraryGrid";
 import { mockDictionary as dict } from "@tests/fixtures/mockDictionary";
 
@@ -9,6 +11,17 @@ vi.mock("@/actions/collection", () => ({
   updateProgress: vi.fn(),
   removeFromLibrary: vi.fn(),
 }));
+
+// LibraryGrid renders LibraryItem, which reads `useQueryClient()` to invalidate
+// library-state after a successful mutation (#42 D8). Provide a client.
+function renderWithClient(ui: ReactNode) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+}
 
 const baseItems = [
   {
@@ -86,7 +99,7 @@ describe("LibraryGrid", () => {
   });
 
   it("should render all items", () => {
-    render(<LibraryGrid items={baseItems} {...baseProps} />);
+    renderWithClient(<LibraryGrid items={baseItems} {...baseProps} />);
     expect(screen.getByText("Test Movie 1")).toBeInTheDocument();
     expect(screen.getByText("Test Anime")).toBeInTheDocument();
   });
@@ -97,7 +110,7 @@ describe("LibraryGrid", () => {
   });
 
   it("should render with correct number of items", () => {
-    render(<LibraryGrid items={baseItems} {...baseProps} />);
+    renderWithClient(<LibraryGrid items={baseItems} {...baseProps} />);
     expect(screen.getByText("Test Movie 1")).toBeInTheDocument();
     expect(screen.getByText("Test Anime")).toBeInTheDocument();
   });

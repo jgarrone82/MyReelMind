@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { StatusSelector } from "@/components/collection/StatusSelector";
 import { RatingInput } from "@/components/collection/RatingInput";
@@ -49,11 +50,19 @@ export function MediaDetailClient({
   type,
   dict,
 }: MediaDetailClientProps) {
+  const queryClient = useQueryClient();
+
   const [, updateStatusAction] = useActionState(
     async (_prevState: unknown, formData: FormData) => {
       const newStatus = formData.get("status") as WatchStatus;
       const result = await updateStatus(mediaId, newStatus);
       if (result.success) {
+        // A status change can move the search-results badge between bands
+        // (e.g. want_to_watch → watching = IN LIBRARY → IN PROGRESS), so evict
+        // every library-state entry; the prefix predicate covers all id-set
+        // variants. Rating/progress changes never alter the badge band, so they
+        // do not invalidate (#42 D8 call-site inventory).
+        queryClient.invalidateQueries({ queryKey: ["library-state"] });
         toast.success(dict.statusUpdated);
       } else {
         toast.error(result.error ?? "Failed to update status");

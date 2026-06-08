@@ -79,6 +79,46 @@ describe("useLibraryState", () => {
     expect(result.current.data.has("tmdb-99")).toBe(false);
   });
 
+  it("is NOT successful while the fetch is in flight, and exposes an empty Map during the pending window", async () => {
+    // A deferred promise lets us hold the query in `pending` so we can assert the
+    // in-flight contract before resolving. Regression guard: with `placeholderData`
+    // set, React Query v5 reports `status === "success"` while still pending, which
+    // would feed an EMPTY Map to the SearchResults badge gate and flash ADD on every
+    // card. The hook must keep `isSuccess === false` until a real response arrives.
+    let resolveFetch!: (value: {
+      ok: boolean;
+      json: () => Promise<{ states: Record<string, string> }>;
+    }) => void;
+    const fetchPromise = new Promise<{
+      ok: boolean;
+      json: () => Promise<{ states: Record<string, string> }>;
+    }>((resolve) => {
+      resolveFetch = resolve;
+    });
+    vi.mocked(fetch).mockReturnValue(fetchPromise as never);
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useLibraryState(["tmdb-1"], userId), {
+      wrapper: Wrapper,
+    });
+
+    // In flight: still pending, NOT success, and the data is the stable empty Map.
+    await waitFor(() => expect(result.current.isPending).toBe(true));
+    expect(result.current.isSuccess).toBe(false);
+    expect(result.current.data).toBeInstanceOf(Map);
+    expect(result.current.data.size).toBe(0);
+
+    // Resolve with real states → now success, and the Map reflects the response.
+    resolveFetch({
+      ok: true,
+      json: async () => ({ states: { "tmdb-1": "in_library" } }),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data.size).toBe(1);
+    expect(result.current.data.get("tmdb-1")).toBe("in_library");
+  });
+
   it("returns an empty Map when the server reports no tracked states", async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: true,

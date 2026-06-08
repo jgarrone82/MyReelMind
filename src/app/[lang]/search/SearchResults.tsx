@@ -4,22 +4,83 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchFilters } from "@/stores/search-filters";
 import { useSearch } from "@/hooks/queries/useSearch";
 import { useTrending } from "@/hooks/queries/useTrending";
+import { useLibraryState } from "@/hooks/queries/useLibraryState";
+import { useAuthUserId } from "@/hooks/useAuthUserId";
 import { VHSBoxCard } from "@/components/vhs";
+import type { GenreStickerHue, VHSBoxCardProps } from "@/components/vhs";
 import { TapeSkeleton } from "@/components/search/TapeSkeleton";
 import { mediaItemToCardProps } from "@/lib/media/vhs-cosmetics";
 import { useDictionary } from "@/i18n/provider";
 import type { MediaItem } from "@/lib/api/merge";
+import type { LibraryBadgeState } from "@/lib/dashboard/library-state";
 
 interface SearchResultsProps {
   lang?: string;
 }
 
-/** A grid of VHS box cards laid out on the directory shelf. */
-function ResultsShelf({ items, lang }: { items: MediaItem[]; lang?: string }) {
+/**
+ * Design D4 state→hue map. All three neon hues paint deep-ink text and are
+ * WCAG-AA verified (issue #45). `add` is the logged-in call-to-action.
+ */
+const STATE_BADGE_HUE: Record<LibraryBadgeState, GenreStickerHue> = {
+  in_library: "phosphor",
+  in_progress: "sodium",
+  add: "magenta",
+};
+
+/** i18n labels keyed by badge state. */
+type BadgeLabels = Record<LibraryBadgeState, string>;
+
+/** Per-card badge prop, or undefined when no badge should render. */
+type CardBadge = VHSBoxCardProps["badge"];
+
+/**
+ * Resolve a single result's badge from the (read-only) library-state Map.
+ *
+ * Honest-data: a logged-out user has no `userId`, so the shelf passes
+ * `libraryState = null` and EVERY result resolves to `undefined` (no badge) —
+ * byte-for-byte the pre-change output. When logged in, an id absent from the
+ * Map means ADD (the default for a tracked-but-not-owned result).
+ */
+function badgeForItem(
+  item: MediaItem,
+  libraryState: ReadonlyMap<string, LibraryBadgeState> | null,
+  labels: BadgeLabels
+): CardBadge {
+  if (!libraryState) return undefined;
+  const state = libraryState.get(item.id) ?? "add";
+  return { label: labels[state], color: STATE_BADGE_HUE[state] };
+}
+
+/**
+ * A grid of VHS box cards laid out on the directory shelf.
+ *
+ * `libraryState` is supplied only for the search-results shelf (logged-in);
+ * the trending/NOW-SHOWING shelf passes `null` so it never renders badges
+ * (badges are a search-results affordance only — design D7).
+ */
+function ResultsShelf({
+  items,
+  lang,
+  libraryState,
+  badgeLabels,
+}: {
+  items: MediaItem[];
+  lang?: string;
+  libraryState: ReadonlyMap<string, LibraryBadgeState> | null;
+  badgeLabels: BadgeLabels;
+}) {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       {items.map((item) => (
-        <VHSBoxCard key={item.id} {...mediaItemToCardProps(item, lang ?? "en")} />
+        <VHSBoxCard
+          key={item.id}
+          {...mediaItemToCardProps(
+            item,
+            lang ?? "en",
+            badgeForItem(item, libraryState, badgeLabels)
+          )}
+        />
       ))}
     </div>
   );
@@ -114,8 +175,47 @@ export function SearchResults({ lang }: SearchResultsProps) {
     return flattened;
   }, [resultsByPage]);
 
+  // Library-state badge enrichment (#42 Group D). Both hooks are called
+  // UNCONDITIONALLY (rules of hooks) and gate to a no-op when logged-out/empty:
+  // `useAuthUserId` returns null when logged out, and `useLibraryState` is
+  // enabled only when there is a userId AND at least one id — so a logged-out
+  // user or a zero-result page never issues a request. A SINGLE shelf-level call
+  // enriches the whole page (no per-card fetch). The id list is derived from the
+  // accumulated results, so Load More pages resolve their own badges too.
+  const userId = useAuthUserId();
+  const resultIds = useMemo(
+    () => allResults.map((item) => item.id),
+    [allResults]
+  );
+  const { data: libraryState, isSuccess: libraryStateReady } = useLibraryState(
+    resultIds,
+    userId
+  );
+
   const hasResults = allResults.length > 0;
   const t = dict.search;
+
+  // Badge labels resolved once from the dictionary; shared by every card.
+  const badgeLabels: BadgeLabels = {
+    add: t.badge.add,
+    in_library: t.badge.inLibrary,
+    in_progress: t.badge.inProgress,
+  };
+
+  // Logged-out → no userId → pass `null` so the shelf renders NO badges
+  // (identical to pre-change behavior). Logged-in → only pass the Map once the
+  // library-state query has SETTLED successfully (`libraryStateReady`).
+  //
+  // The settled-gate is what prevents the ADD-badge flash. `useLibraryState` has
+  // NO placeholderData, so `isSuccess` flips true ONLY after a real successful
+  // response; while the query is pending it returns a stable EMPTY Map but
+  // reports `isSuccess === false`. A bare `userId ? libraryState : null` would
+  // feed that empty Map to `badgeForItem`, and `libraryState.get(id) ?? "add"`
+  // would flash ADD on EVERY card — including items that are actually
+  // IN_LIBRARY / IN_PROGRESS — for one network round-trip. Gating on the honest
+  // `isSuccess` keeps it null until the real state resolves, so badges appear a
+  // beat later instead of flashing wrong (design D7 / honest-data).
+  const searchLibraryState = userId && libraryStateReady ? libraryState : null;
 
   // Empty-query state: the NOW SHOWING trending shelf, with honest degradation.
   if (!debouncedQuery.trim()) {
@@ -132,7 +232,13 @@ export function SearchResults({ lang }: SearchResultsProps) {
           <h2 className="vhs-display text-[1.4rem] text-[var(--vhs-cream)]">
             {t.nowShowingHead}
           </h2>
-          <ResultsShelf items={trendingItems} lang={lang} />
+          {/* Trending shelf never shows library badges (design D7): pass null. */}
+          <ResultsShelf
+            items={trendingItems}
+            lang={lang}
+            libraryState={null}
+            badgeLabels={badgeLabels}
+          />
         </div>
       );
     }
@@ -288,7 +394,12 @@ export function SearchResults({ lang }: SearchResultsProps) {
         </div>
       </div>
 
-      <ResultsShelf items={allResults} lang={lang} />
+      <ResultsShelf
+        items={allResults}
+        lang={lang}
+        libraryState={searchLibraryState}
+        badgeLabels={badgeLabels}
+      />
 
       {/* Load-More failure: keep the on-screen results, surface a NON-destructive
           inline error + retry instead of replacing the grid. */}

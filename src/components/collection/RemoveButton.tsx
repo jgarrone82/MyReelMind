@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { removeFromLibrary } from "@/actions/collection";
 
@@ -17,10 +18,14 @@ interface RemoveButtonProps {
 
 export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const queryClient = useQueryClient();
   const [, formAction, isPending] = useActionState(
     async (_prevState: unknown, _formData: FormData) => {
       const result = await removeFromLibrary(mediaId);
       if (result.success) {
+        // Removal moves the search-results badge back to ADD; evict every
+        // library-state entry so it refreshes without a reload (#42 D8).
+        queryClient.invalidateQueries({ queryKey: ["library-state"] });
         if (onSuccess) {
           onSuccess();
         }

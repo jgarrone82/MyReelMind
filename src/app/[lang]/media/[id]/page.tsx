@@ -10,7 +10,7 @@ import { eq, and } from "drizzle-orm";
 import { getDictionary, type Locale } from "@/i18n";
 import { MediaDetailClient } from "@/components/collection/MediaDetailClient";
 import type { WatchStatus } from "@/components/collection/StatusSelector";
-import { addToLibrary } from "@/actions/collection";
+import { AddToLibraryButton } from "@/components/collection/AddToLibraryButton";
 import { MembersOnlyPanel } from "@/components/vhs";
 import type { SourceBadgeColor } from "@/components/vhs";
 import { UnfoldedVHS } from "./_components/UnfoldedVHS";
@@ -230,16 +230,10 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
               headline={dict.media.detail.addToLibraryHeadline}
               body={dict.media.detail.addToLibraryBody}
               primary={
-                <form
-                  action={async () => {
-                    "use server";
-                    await addToLibrary(mediaId, "want_to_watch");
-                  }}
-                >
-                  <button type="submit" className="vhs-btn vhs-aberrate">
-                    {dict.media.detail.addToLibraryCta}
-                  </button>
-                </form>
+                <AddToLibraryButton
+                  mediaId={mediaId}
+                  label={dict.media.detail.addToLibraryCta}
+                />
               }
             />
           )

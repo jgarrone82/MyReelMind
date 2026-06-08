@@ -39,6 +39,10 @@ export function useAuthUserId(): string | null {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Guard against a setState-after-unmount: `unsubscribe()` does not always
+      // synchronously stop an in-flight/queued event, so a late callback after
+      // cleanup must be a no-op rather than touching unmounted state.
+      if (!active) return;
       authEventSeen = true;
       setUserId(session?.user?.id ?? null);
     });

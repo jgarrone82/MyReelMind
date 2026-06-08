@@ -38,6 +38,13 @@ export interface Dictionary {
     errorBody: string;
     errorRetry: string;
     nowShowingHead: string;
+    // Library-state badges on search results (#42 Group D). Three observable
+    // states map onto the 5-status user_media enum (see mapStatusToBadge).
+    badge: {
+      add: string;
+      inLibrary: string;
+      inProgress: string;
+    };
   };
   library: {
     title: string;
