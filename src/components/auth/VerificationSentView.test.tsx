@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { VerificationSentView } from "./VerificationSentView";
 import { mockDictionary as mockDict } from "@tests/fixtures/mockDictionary";
@@ -7,7 +7,21 @@ vi.mock("@/actions/auth", () => ({
   sendVerificationEmail: vi.fn(),
 }));
 
+// Drives the resend-success state: the component reads its state from
+// React's useActionState, so override it to return { success: true } while
+// preserving every other React export the component relies on.
+const useActionStateMock = vi.hoisted(() => vi.fn());
+vi.mock("react", async () => {
+  const actual = await vi.importActual<typeof import("react")>("react");
+  return { ...actual, useActionState: useActionStateMock };
+});
+
 describe("VerificationSentView", () => {
+  beforeEach(() => {
+    // Default: initial (null) action state, matching useActionState's seed.
+    useActionStateMock.mockReturnValue([null, vi.fn()]);
+  });
+
   it("should render heading with title", () => {
     render(<VerificationSentView email="test@example.com" dict={mockDict} lang="en" />);
 
@@ -46,5 +60,19 @@ describe("VerificationSentView", () => {
 
     // Simulate success state
     expect(screen.queryByText(/email sent!/i)).not.toBeInTheDocument();
+  });
+
+  it("should render the sent subtitle", () => {
+    render(<VerificationSentView email="test@example.com" dict={mockDict} lang="en" />);
+
+    expect(screen.getByText(/rewind and resend below/i)).toBeInTheDocument();
+  });
+
+  it("should render the resend-success live region when the action succeeds", () => {
+    useActionStateMock.mockReturnValue([{ success: true }, vi.fn()]);
+
+    render(<VerificationSentView email="test@example.com" dict={mockDict} lang="en" />);
+
+    expect(screen.getByRole("status")).toBeInTheDocument();
   });
 });

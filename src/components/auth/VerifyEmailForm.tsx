@@ -20,7 +20,7 @@ export function VerifyEmailForm({ email, dict, lang }: VerifyEmailFormProps) {
     <div className="flex flex-col gap-4">
       <div className="text-center">
         <h1
-          className="vhs-display vhs-aberrate m-0 text-[clamp(1.4rem,4.5vw,1.9rem)] text-[var(--vhs-cream)]"
+          className="vhs-display vhs-aberrate m-0 text-[clamp(1.7rem,5vw,2.3rem)] text-[var(--vhs-cream)]"
           style={{
             textShadow:
               "-1.5px 0 0 var(--vhs-magenta), 1.5px 0 0 var(--vhs-phosphor), 2px 2px 0 var(--vhs-ground)",
@@ -28,6 +28,9 @@ export function VerifyEmailForm({ email, dict, lang }: VerifyEmailFormProps) {
         >
           {t.verifyTitle}
         </h1>
+        <div className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+          <span aria-hidden>▸</span> {t.verifySubtitle}
+        </div>
         <p className="vhs-mono mt-1.5 text-[0.8rem] leading-relaxed text-[var(--vhs-cream-dim)]">
           {t.verifyDescription}
         </p>
@@ -44,7 +47,10 @@ export function VerifyEmailForm({ email, dict, lang }: VerifyEmailFormProps) {
       </form>
 
       {state?.success && (
-        <div className="border-2 border-[var(--vhs-ground)] bg-[var(--vhs-acid)] px-3 py-2.5 shadow-[3px_3px_0_var(--vhs-ground)]">
+        <div
+          role="status"
+          className="border-2 border-[var(--vhs-ground)] bg-[var(--vhs-acid)] px-3 py-2.5 shadow-[3px_3px_0_var(--vhs-ground)]"
+        >
           <p className="vhs-mono text-[0.8rem] text-[var(--vhs-ground)]">
             {t.resendSuccess}
           </p>

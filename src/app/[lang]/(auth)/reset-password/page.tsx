@@ -29,10 +29,7 @@ export default async function ResetPasswordPage({
       <main className="vhs-scanlines vhs-crt relative flex min-h-screen flex-col items-center justify-center bg-[var(--vhs-ground)] px-4 py-12 text-[var(--vhs-cream)]">
         <div className="w-full max-w-[440px]">
           <div className="mb-4 text-center">
-            <span
-              aria-hidden
-              className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]"
-            >
+            <span className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]">
               {t.kicker}
             </span>
           </div>
@@ -49,7 +46,7 @@ export default async function ResetPasswordPage({
                 {t.headline}
               </h1>
               <p className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
-                ▸ {t.subtitle}
+                <span aria-hidden>▸</span> {t.subtitle}
               </p>
             </div>
 
@@ -94,10 +91,7 @@ export default async function ResetPasswordPage({
     <main className="vhs-scanlines vhs-crt relative flex min-h-screen flex-col items-center justify-center bg-[var(--vhs-ground)] px-4 py-12 text-[var(--vhs-cream)]">
       <div className="w-full max-w-[440px]">
         <div className="mb-4 text-center">
-          <span
-            aria-hidden
-            className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]"
-          >
+          <span className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]">
             {t.kicker}
           </span>
         </div>
@@ -114,7 +108,7 @@ export default async function ResetPasswordPage({
               {t.headline}
             </h1>
             <p className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
-              ▸ {t.subtitle}
+              <span aria-hidden>▸</span> {t.subtitle}
             </p>
           </div>
 

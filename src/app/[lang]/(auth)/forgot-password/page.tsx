@@ -18,10 +18,7 @@ export default async function ForgotPasswordPage({
       <div className="w-full max-w-[440px]">
         {/* Recovery desk sticker */}
         <div className="mb-4 text-center">
-          <span
-            aria-hidden
-            className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]"
-          >
+          <span className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]">
             {t.kicker}
           </span>
         </div>
@@ -38,7 +35,7 @@ export default async function ForgotPasswordPage({
               {t.headline}
             </h1>
             <p className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
-              ▸ {t.subtitle}
+              <span aria-hidden>▸</span> {t.subtitle}
             </p>
           </div>
 
