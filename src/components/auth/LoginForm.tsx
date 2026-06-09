@@ -35,7 +35,7 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
   // Cassette-field input chrome. Phosphor focus ring/glow by default, tape-red
   // border while an error is present.
   const inputBase =
-    "vhs-mono mt-1 block w-full rounded-[2px] border-2 bg-[var(--vhs-ground-2)] px-3 py-2.5 text-[var(--vhs-cream)] placeholder:text-[var(--vhs-cream-dim)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--vhs-phosphor)] focus:ring-offset-0 focus:shadow-[0_0_0_1px_var(--vhs-phosphor),0_0_14px_rgba(74,255,240,0.35)]";
+    "vhs-mono mt-1 block w-full rounded-[2px] border-2 bg-[var(--vhs-ground-2)] px-3 py-2.5 text-[var(--vhs-cream)] placeholder:text-[var(--vhs-cream-dim)]/60 focus-visible:outline-none focus:ring-2 focus:ring-[var(--vhs-phosphor)] focus:ring-offset-0 focus:shadow-[0_0_0_1px_var(--vhs-phosphor),0_0_14px_rgba(74,255,240,0.35)]";
   const inputBorder = hasError
     ? "border-[var(--vhs-error)] focus:border-[var(--vhs-error)]"
     : "border-[var(--vhs-ground-3)] focus:border-[var(--vhs-phosphor)]";
@@ -105,7 +105,7 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
             aria-pressed={showPassword}
             aria-controls="password"
             aria-label={`${showPassword ? t.hidePassword : t.showPassword} ${t.passwordLabel}`}
-            className="vhs-kicker rounded-[2px] p-0 text-[0.7rem] tracking-[0.14em] text-[var(--vhs-phosphor)] hover:text-[var(--vhs-cream)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)]"
+            className="vhs-kicker rounded-[2px] p-0 text-[0.7rem] tracking-[0.14em] text-[var(--vhs-phosphor)] hover:text-[var(--vhs-cream)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)]"
           >
             {showPassword ? t.hidePassword : t.showPassword}
           </button>
