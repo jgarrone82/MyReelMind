@@ -12,6 +12,11 @@ export const dictionary: Dictionary = {
     dashboard: "Dashboard",
     settings: "Settings",
   },
+  brand: {
+    name: "MyReelMind",
+    sub: "RENTAL · EST 1985",
+    openLabel: "Open",
+  },
   search: {
     placeholder: "Search movies or anime...",
     noResults: "No results found",
@@ -186,9 +191,6 @@ export const dictionary: Dictionary = {
     errorNameLength: "Display name must be 50 characters or less",
     errorInvalidUrl: "Invalid avatar URL",
     errorUnauthorized: "You must be signed in",
-    themeSystem: "System theme",
-    themeLight: "Light theme",
-    themeDark: "Dark theme",
     avatarUpload: "Upload Avatar",
     avatarCrop: "Crop Avatar",
     avatarCancel: "Cancel",
