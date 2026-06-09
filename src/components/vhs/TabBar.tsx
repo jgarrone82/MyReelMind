@@ -41,7 +41,7 @@ export function TabBar({
     <nav
       aria-label="Primary"
       className={cn(
-        "fixed bottom-[18px] left-1/2 z-50 grid -translate-x-1/2 grid-cols-5 gap-2 border-2 border-[var(--vhs-ground)] bg-[var(--vhs-ground-2)] p-[10px]",
+        "fixed bottom-[18px] left-1/2 z-50 grid -translate-x-1/2 grid-cols-4 gap-2 border-2 border-[var(--vhs-ground)] bg-[var(--vhs-ground-2)] p-[10px]",
         "shadow-[6px_6px_0_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur",
         "w-[min(720px,calc(100vw-32px))]",
         className,
