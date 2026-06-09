@@ -300,6 +300,15 @@ export interface Dictionary {
       passwordUpdated: string;
       noSession: string;
       requestNewReset: string;
+      // VHS back-half restyle (Group B): rich hero copy mirroring login/signup
+      kicker: string;
+      headline: string;
+      subtitle: string;
+      finePrint: string;
+      errorHeadline: string;
+      loadingTape: string;
+      // Lives here for proximity; used by the verification-sent no-email fallback
+      noEmailProvided: string;
     };
     emailVerification: {
       title: string;
@@ -316,6 +325,14 @@ export interface Dictionary {
       verifyEmail: string;
       notYourEmail: string;
       emailConfirmed: string;
+      // VHS back-half restyle (Group B): rich hero copy mirroring login/signup
+      subtitle: string;
+      finePrint: string;
+      errorHeadline: string;
+      loadingTape: string;
+      // Distinct page kickers: verify-email vs verification-sent
+      verifyKicker: string;
+      sentKicker: string;
     };
   };
 }
