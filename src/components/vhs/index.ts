@@ -36,6 +36,8 @@ export type { VhsHeaderProps } from "./Header";
 export { TabBar } from "./TabBar";
 export type { TabBarProps, TabItem, TabAccent } from "./TabBar";
 
+export { AppTabBar } from "./AppTabBar";
+
 export { MembersOnlyPanel } from "./MembersOnlyPanel";
 export type { MembersOnlyPanelProps } from "./MembersOnlyPanel";
 

@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export interface VhsHeaderProps extends React.HTMLAttributes<HTMLElement> {
@@ -51,9 +52,13 @@ export function VhsHeader({
             </>
           );
           return brandHref ? (
-            <a href={brandHref} className="flex items-center gap-[10px]">
+            <Link
+              href={brandHref}
+              aria-label={brand.name}
+              className="flex items-center gap-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
+            >
               {wordmark}
-            </a>
+            </Link>
           ) : (
             <div className="flex items-center gap-[10px]">{wordmark}</div>
           );

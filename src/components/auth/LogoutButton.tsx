@@ -16,7 +16,7 @@ export function LogoutButton({ dict }: LogoutButtonProps) {
       <button
         type="submit"
         disabled={pending}
-        className="px-3 py-1 text-sm text-[var(--vhs-error)] hover:text-[var(--vhs-error)]/80 disabled:opacity-50 min-h-[44px] focus-visible:outline-none focus-visible:outline-[var(--vhs-phosphor)] focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2"
+        className="px-3 py-1 text-sm text-[var(--vhs-error)] hover:text-[var(--vhs-error)]/80 disabled:opacity-50 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
       >
         {pending ? dict.common.loading : dict.auth.logout}
       </button>
