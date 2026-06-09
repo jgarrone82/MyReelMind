@@ -8,7 +8,7 @@ interface OAuthButtonsProps {
 }
 
 const OAUTH_CARD_CLASS =
-  "vhs-kicker flex w-full items-center gap-3 rounded-[2px] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-paper)] px-4 py-3 text-left text-[0.95rem] tracking-[0.06em] text-[var(--vhs-ground)] shadow-[3px_3px_0_var(--vhs-ground)] transition-transform duration-100 ease-[cubic-bezier(0.3,0,0.7,1)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_5px_0_var(--vhs-ground)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]";
+  "vhs-kicker flex w-full items-center gap-3 rounded-[2px] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-paper)] px-4 py-3 text-left text-[0.95rem] tracking-[0.06em] text-[var(--vhs-ground)] shadow-[3px_3px_0_var(--vhs-ground)] transition-transform duration-100 ease-[cubic-bezier(0.3,0,0.7,1)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_5px_0_var(--vhs-ground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]";
 
 function GoogleMark() {
   return (

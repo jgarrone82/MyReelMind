@@ -289,24 +289,28 @@ export interface Dictionary {
       description: string;
       email: string;
       submit: string;
-      loading: string;
       success: string;
       successDescription: string;
       backToLogin: string;
       newPassword: string;
       confirmPassword: string;
       updatePassword: string;
-      updatingPassword: string;
       passwordUpdated: string;
       noSession: string;
       requestNewReset: string;
+      // VHS back-half restyle (Group B): rich hero copy mirroring login/signup
+      kicker: string;
+      headline: string;
+      subtitle: string;
+      finePrint: string;
+      errorHeadline: string;
+      loadingTape: string;
     };
     emailVerification: {
       title: string;
       description: string;
       checkInbox: string;
       resendButton: string;
-      resendLoading: string;
       resendSuccess: string;
       resendError: string;
       backToLogin: string;
@@ -316,6 +320,18 @@ export interface Dictionary {
       verifyEmail: string;
       notYourEmail: string;
       emailConfirmed: string;
+      // VHS back-half restyle (Group B): rich hero copy mirroring login/signup
+      // Distinct per-page subtitles: verify-email vs verification-sent
+      verifySubtitle: string;
+      sentSubtitle: string;
+      finePrint: string;
+      errorHeadline: string;
+      loadingTape: string;
+      // Distinct page kickers: verify-email vs verification-sent
+      verifyKicker: string;
+      sentKicker: string;
+      // Used by the verification-sent no-email fallback
+      noEmailProvided: string;
     };
   };
 }
