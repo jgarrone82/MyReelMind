@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 export type { Dictionary } from "./types";
 export type Locale = "es" | "en";
 
@@ -46,20 +48,22 @@ export function deepMerge<T extends Record<string, unknown>>(
   return result as T;
 }
 
-export async function getDictionary(locale: Locale): Promise<import("./types").Dictionary> {
-  const targetMod = await (dictionaries[locale] ?? dictionaries.es)();
-  const fallbackMod = dictionaries.es;
+export const getDictionary = cache(
+  async (locale: Locale): Promise<import("./types").Dictionary> => {
+    const targetMod = await (dictionaries[locale] ?? dictionaries.es)();
+    const fallbackMod = dictionaries.es;
 
-  if (locale === "es") {
-    return targetMod.dictionary;
+    if (locale === "es") {
+      return targetMod.dictionary;
+    }
+
+    const fallback = await fallbackMod();
+    return deepMerge(
+      targetMod.dictionary as unknown as Record<string, unknown>,
+      fallback.dictionary as unknown as Record<string, unknown>
+    ) as unknown as import("./types").Dictionary;
   }
-
-  const fallback = await fallbackMod();
-  return deepMerge(
-    targetMod.dictionary as unknown as Record<string, unknown>,
-    fallback.dictionary as unknown as Record<string, unknown>
-  ) as unknown as import("./types").Dictionary;
-}
+);
 
 export const defaultLocale: Locale = "es";
 export const locales: Locale[] = ["es", "en"];

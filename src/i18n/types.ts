@@ -10,6 +10,11 @@ export interface Dictionary {
     dashboard: string;
     settings: string;
   };
+  brand: {
+    name: string;
+    sub: string;
+    openLabel: string;
+  };
   search: {
     placeholder: string;
     noResults: string;
@@ -184,9 +189,6 @@ export interface Dictionary {
     errorNameLength: string;
     errorInvalidUrl: string;
     errorUnauthorized: string;
-    themeSystem: string;
-    themeLight: string;
-    themeDark: string;
     avatarUpload: string;
     avatarCrop: string;
     avatarCancel: string;

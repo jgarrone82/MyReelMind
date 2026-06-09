@@ -12,6 +12,11 @@ export const dictionary: Dictionary = {
     dashboard: "Panel",
     settings: "Ajustes",
   },
+  brand: {
+    name: "MyReelMind",
+    sub: "VIDEOCLUB · DESDE 1985",
+    openLabel: "Abierto",
+  },
   search: {
     placeholder: "Buscar películas o anime...",
     noResults: "No se encontraron resultados",
@@ -186,9 +191,6 @@ export const dictionary: Dictionary = {
     errorNameLength: "El nombre debe tener 50 caracteres o menos",
     errorInvalidUrl: "URL de avatar inválida",
     errorUnauthorized: "Debés iniciar sesión",
-    themeSystem: "Tema del sistema",
-    themeLight: "Tema claro",
-    themeDark: "Tema oscuro",
     avatarUpload: "Subir avatar",
     avatarCrop: "Recortar avatar",
     avatarCancel: "Cancelar",

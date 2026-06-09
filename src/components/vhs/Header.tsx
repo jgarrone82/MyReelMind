@@ -1,10 +1,12 @@
 import * as React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export interface VhsHeaderProps extends React.HTMLAttributes<HTMLElement> {
   brand: { name: string; sub?: string };
   openLabel?: string;
   guestLabel?: string;
+  brandHref?: string;
   actions?: React.ReactNode;
 }
 
@@ -12,6 +14,7 @@ export function VhsHeader({
   brand,
   openLabel,
   guestLabel,
+  brandHref,
   actions,
   className,
   ...props
@@ -25,26 +28,41 @@ export function VhsHeader({
       {...props}
     >
       <div className="flex flex-wrap items-baseline gap-4">
-        <div className="flex items-center gap-[10px]">
-          <div
-            className="vhs-display grid h-[38px] w-[38px] place-items-center rotate-[-3deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-magenta)] text-2xl text-[var(--vhs-cream)] shadow-[3px_3px_0_var(--vhs-ground)]"
-            aria-hidden
-          >
-            M
-          </div>
-          <div>
-            <div
-              className="vhs-display text-[1.55rem] leading-[0.95] text-[var(--vhs-cream)]"
-            >
-              {brand.name}
-            </div>
-            {brand.sub ? (
-              <div className="vhs-mono text-[0.7rem] tracking-wider text-[var(--vhs-cream-dim)]">
-                {brand.sub}
+        {(() => {
+          const wordmark = (
+            <>
+              <div
+                className="vhs-display grid h-[38px] w-[38px] place-items-center rotate-[-3deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-magenta)] text-2xl text-[var(--vhs-cream)] shadow-[3px_3px_0_var(--vhs-ground)]"
+                aria-hidden
+              >
+                M
               </div>
-            ) : null}
-          </div>
-        </div>
+              <div>
+                <div
+                  className="vhs-display text-[1.55rem] leading-[0.95] text-[var(--vhs-cream)]"
+                >
+                  {brand.name}
+                </div>
+                {brand.sub ? (
+                  <div className="vhs-mono text-[0.7rem] tracking-wider text-[var(--vhs-cream-dim)]">
+                    {brand.sub}
+                  </div>
+                ) : null}
+              </div>
+            </>
+          );
+          return brandHref ? (
+            <Link
+              href={brandHref}
+              aria-label={brand.name}
+              className="flex items-center gap-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
+            >
+              {wordmark}
+            </Link>
+          ) : (
+            <div className="flex items-center gap-[10px]">{wordmark}</div>
+          );
+        })()}
         {openLabel ? (
           <span className="vhs-kicker ml-1 border-[1.5px] border-[var(--vhs-acid)] px-[10px] py-[3px] text-[0.78rem] text-[var(--vhs-acid)]">
             ● {openLabel}
