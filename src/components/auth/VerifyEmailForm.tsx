@@ -17,34 +17,64 @@ export function VerifyEmailForm({ email, dict, lang }: VerifyEmailFormProps) {
   const [state, action] = useActionState(resendVerificationEmail, null);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-center text-2xl font-bold">{t.verifyTitle}</h1>
-      <p className="text-center text-gray-600">{t.verifyDescription}</p>
+    <div className="flex flex-col gap-4">
+      <div className="text-center">
+        <h1
+          className="vhs-display vhs-aberrate m-0 text-[clamp(1.4rem,4.5vw,1.9rem)] text-[var(--vhs-cream)]"
+          style={{
+            textShadow:
+              "-1.5px 0 0 var(--vhs-magenta), 1.5px 0 0 var(--vhs-phosphor), 2px 2px 0 var(--vhs-ground)",
+          }}
+        >
+          {t.verifyTitle}
+        </h1>
+        <p className="vhs-mono mt-1.5 text-[0.8rem] leading-relaxed text-[var(--vhs-cream-dim)]">
+          {t.verifyDescription}
+        </p>
+      </div>
 
-      <div className="rounded-md bg-blue-50 p-4">
-        <p className="text-sm text-blue-700">
+      <div className="border-2 border-[var(--vhs-ground)] bg-[var(--vhs-acid)] px-3 py-2.5 shadow-[3px_3px_0_var(--vhs-ground)]">
+        <p className="vhs-mono text-[0.8rem] text-[var(--vhs-ground)]">
           {t.verifyEmail}: <strong>{email}</strong>
         </p>
       </div>
 
-      <form action={action} className="space-y-4">
+      <form action={action} className="flex flex-col gap-4">
         <ResendButton t={t} />
       </form>
 
       {state?.success && (
-        <div className="rounded-md bg-green-50 p-4">
-          <p className="text-sm text-green-700">{t.resendSuccess}</p>
+        <div className="border-2 border-[var(--vhs-ground)] bg-[var(--vhs-acid)] px-3 py-2.5 shadow-[3px_3px_0_var(--vhs-ground)]">
+          <p className="vhs-mono text-[0.8rem] text-[var(--vhs-ground)]">
+            {t.resendSuccess}
+          </p>
         </div>
       )}
 
       {state?.error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <p className="text-sm text-red-700" role="alert">{state.error}</p>
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 border-2 border-[var(--vhs-ground)] bg-[var(--vhs-error)] px-3 py-2.5 text-[var(--vhs-ground)] shadow-[3px_3px_0_var(--vhs-ground)]"
+        >
+          <span aria-hidden className="vhs-display text-[1.2rem] leading-none">
+            ⚠
+          </span>
+          <div>
+            <div className="vhs-kicker text-[0.78rem] tracking-[0.16em]">
+              {t.errorHeadline}
+            </div>
+            <p className="vhs-mono mt-0.5 text-[0.78rem] leading-snug">
+              {state.error}
+            </p>
+          </div>
         </div>
       )}
 
       <div className="text-center">
-        <Link href={`/${lang}/dashboard`} className="text-sm text-blue-600 hover:text-blue-800">
+        <Link
+          href={`/${lang}/dashboard`}
+          className="vhs-mono text-[0.8rem] text-[var(--vhs-acid)] underline decoration-[var(--vhs-acid)] underline-offset-2 hover:text-[var(--vhs-cream)]"
+        >
           {t.goToDashboard}
         </Link>
       </div>
@@ -52,15 +82,26 @@ export function VerifyEmailForm({ email, dict, lang }: VerifyEmailFormProps) {
   );
 }
 
-function ResendButton({ t }: { t: Pick<Dictionary["auth"]["emailVerification"], "resendButton" | "resendLoading"> }) {
+function ResendButton({
+  t,
+}: {
+  t: Pick<Dictionary["auth"]["emailVerification"], "resendButton" | "loadingTape">;
+}) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       disabled={pending}
-      className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+      aria-busy={pending}
+      className="vhs-btn vhs-aberrate w-full justify-center disabled:opacity-85"
     >
-      {pending ? t.resendLoading : t.resendButton}
+      {pending && (
+        <span
+          aria-hidden
+          className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[var(--vhs-cream)] border-t-transparent"
+        />
+      )}
+      <span>{pending ? t.loadingTape : t.resendButton}</span>
     </button>
   );
 }
