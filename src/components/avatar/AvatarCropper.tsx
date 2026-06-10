@@ -134,16 +134,16 @@ export function AvatarCropper({ imageSrc, onCropComplete, onCancel, open, dict }
               step="0.1"
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
-              className="w-full accent-[var(--vhs-magenta)]"
+              className="w-full accent-[var(--vhs-magenta)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
             />
           </div>
         </div>
 
-        <DialogFooter className="border-t-2 border-[var(--vhs-ground-3)] bg-transparent">
-          <Button variant="outline" onClick={handleCancel} className="vhs-btn vhs-btn--secondary">
+        <DialogFooter className="rounded-b-[2px] border-t-2 border-[var(--vhs-ground-3)] bg-transparent">
+          <Button variant="outline" onClick={handleCancel} className="vhs-btn vhs-btn--secondary h-auto focus-visible:ring-0">
             {dict.cancel}
           </Button>
-          <Button onClick={handleConfirm} className="vhs-btn">
+          <Button onClick={handleConfirm} className="vhs-btn h-auto focus-visible:ring-0">
             {dict.confirm}
           </Button>
         </DialogFooter>

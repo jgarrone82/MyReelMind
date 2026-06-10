@@ -118,6 +118,22 @@ describe("AvatarCropper", () => {
     expect(confirm).toHaveClass("vhs-btn");
     expect(confirm.className).not.toMatch(/vhs-btn--secondary/);
 
+    // Both footer buttons release the primitive's h-8 clamp so .vhs-btn vertical
+    // rhythm is restored, and suppress the primitive's ring box-shadow so only the
+    // .vhs-btn:focus-visible phosphor outline shows (no double focus indicator).
+    expect(cancel).toHaveClass("h-auto", "focus-visible:ring-0");
+    expect(confirm).toHaveClass("h-auto", "focus-visible:ring-0");
+
+    // Zoom range input carries the shared R4 phosphor focus ring
+    const zoomInput = screen.getByLabelText("Zoom");
+    expect(zoomInput.className).toMatch(/focus-visible:ring-\[var\(--vhs-phosphor\)\]/);
+    expect(zoomInput.className).toMatch(/focus-visible:ring-2/);
+    expect(zoomInput.className).toMatch(/focus-visible:ring-offset-\[var\(--vhs-ground\)\]/);
+
+    // Footer radius is clamped to the 2px panel radius (no rounded-b-xl poke-out)
+    const footer = document.querySelector('[data-slot="dialog-footer"]');
+    expect(footer?.className).toMatch(/rounded-b-\[2px\]/);
+
     // Zoom label must drop the shadcn text-muted-foreground token (R5)
     const zoomLabel = screen.getByText("Zoom");
     expect(zoomLabel.className).not.toMatch(/text-muted-foreground/);

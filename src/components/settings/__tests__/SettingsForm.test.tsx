@@ -166,6 +166,11 @@ describe("SettingsForm - Avatar Upload", () => {
 
     const input = screen.getByLabelText(/avatar/i);
     expect(input).toHaveAttribute("type", "file");
+
+    // File input carries the shared R4 phosphor focus ring (keyboard a11y)
+    expect(input.className).toMatch(/focus-visible:ring-\[var\(--vhs-phosphor\)\]/);
+    expect(input.className).toMatch(/focus-visible:ring-2/);
+    expect(input.className).toMatch(/focus-visible:ring-offset-\[var\(--vhs-ground\)\]/);
   });
 
   it("should show error for invalid file type", async () => {

@@ -150,7 +150,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
             accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
             disabled={isUploading}
-            className="vhs-mono mt-1.5 block w-full text-sm text-[var(--vhs-cream-dim)] file:mr-4 file:rounded-[2px] file:border-2 file:border-[var(--vhs-ground-3)] file:bg-[var(--vhs-ground-2)] file:px-4 file:py-2 file:text-sm file:font-semibold file:uppercase file:tracking-[0.14em] file:text-[var(--vhs-cream)] hover:file:border-[var(--vhs-phosphor)]"
+            className="vhs-mono mt-1.5 block w-full text-sm text-[var(--vhs-cream-dim)] file:mr-4 file:rounded-[2px] file:border-2 file:border-[var(--vhs-ground-3)] file:bg-[var(--vhs-ground-2)] file:px-4 file:py-2 file:text-sm file:font-semibold file:uppercase file:tracking-[0.14em] file:text-[var(--vhs-cream)] hover:file:border-[var(--vhs-phosphor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
           />
           {/* Avatar preview */}
           <div className="mt-2">
