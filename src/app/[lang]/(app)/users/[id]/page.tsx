@@ -38,10 +38,16 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
   // Private profile
   if (!userRow.isPublic) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        <div className="rounded-md bg-gray-50 p-6 text-center">
-          <h2 className="text-xl font-semibold text-gray-900">{dict.profile.privateTitle}</h2>
-          <p className="mt-2 text-gray-600">{dict.profile.privateMessage}</p>
+      <main className="vhs-scanlines vhs-crt relative min-h-screen bg-[var(--vhs-ground)] px-4 py-8 text-[var(--vhs-cream)] sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl">
+          <div className="border-2 border-[var(--vhs-ground-3)] bg-[var(--vhs-ground-2)] p-6 text-center shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
+            <h2 className="vhs-display m-0 text-[clamp(1.4rem,4vw,1.9rem)] text-[var(--vhs-cream)]">
+              {dict.profile.privateTitle}
+            </h2>
+            <p className="vhs-mono mt-3 text-[0.82rem] text-[var(--vhs-cream-dim)]">
+              {dict.profile.privateMessage}
+            </p>
+          </div>
         </div>
       </main>
     );
@@ -92,68 +98,85 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
   }));
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <PublicProfileCard
-        user={{
-          id: userRow.id,
-          displayName: userRow.displayName,
-          avatarUrl: userRow.avatarUrl,
-        }}
-        stats={stats}
-        dict={{
-          items: dict.profile.items,
-          completed: dict.profile.completed,
-          watching: dict.profile.watching,
-        }}
-      />
-
-      {isOwnProfile && (
-        <div className="mt-6 text-center">
-          <Link
-            href={`/${lang}/settings`}
-            className="text-sm text-blue-600 hover:text-blue-800"
-          >
-            {dict.profile.editSettings}
-          </Link>
+    <main className="vhs-scanlines vhs-crt relative min-h-screen bg-[var(--vhs-ground)] px-4 py-8 text-[var(--vhs-cream)] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-8">
+          {/* Member-card sticker */}
+          <span className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]">
+            {dict.profile.kicker}
+          </span>
+          <div className="vhs-mono mt-3 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+            <span aria-hidden>▸</span> {dict.profile.subtitle}
+          </div>
         </div>
-      )}
 
-      {/* Recent activity */}
-      {formattedItems.length > 0 ? (
-        <section className="mt-8">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">
-            {dict.profile.recentActivity}
-          </h3>
-          <ul className="space-y-3">
-            {formattedItems.map((item) => (
-              <li key={item.id} className="flex items-center gap-3 rounded-md border p-3">
-                {item.mediaItem?.posterPath ? (
-                  <Image
-                    src={item.mediaItem.posterPath}
-                    alt={item.mediaItem.title ?? ""}
-                    width={32}
-                    height={48}
-                    className="h-12 w-8 rounded object-cover"
-                  />
-                ) : (
-                  <div className="h-12 w-8 rounded bg-gray-200" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-medium text-gray-900">
-                    {item.mediaItem?.title ?? "Unknown"}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {dict.media.status[item.status]}
-                    {item.rating ? ` · ${item.rating}/10` : ""}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : (
-        <p className="mt-8 text-center text-gray-500">{dict.profile.emptyLibrary}</p>
-      )}
+        <PublicProfileCard
+          user={{
+            id: userRow.id,
+            displayName: userRow.displayName,
+            avatarUrl: userRow.avatarUrl,
+          }}
+          stats={stats}
+          dict={{
+            items: dict.profile.items,
+            completed: dict.profile.completed,
+            watching: dict.profile.watching,
+          }}
+        />
+
+        {isOwnProfile && (
+          <div className="mt-6 text-center">
+            <Link
+              href={`/${lang}/settings`}
+              className="vhs-mono text-[0.78rem] tracking-[0.08em] text-[var(--vhs-phosphor)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
+            >
+              {dict.profile.editSettings}
+            </Link>
+          </div>
+        )}
+
+        {/* Recent activity */}
+        {formattedItems.length > 0 ? (
+          <section className="mt-8">
+            <h3 className="vhs-kicker mb-4 text-[0.85rem] tracking-[0.14em] text-[var(--vhs-cream)]">
+              {dict.profile.recentActivity}
+            </h3>
+            <ul className="space-y-3">
+              {formattedItems.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-center gap-3 border-2 border-[var(--vhs-ground-3)] bg-[var(--vhs-ground-2)] p-3 shadow-[3px_3px_0_rgba(0,0,0,0.8)]"
+                >
+                  {item.mediaItem?.posterPath ? (
+                    <Image
+                      src={item.mediaItem.posterPath}
+                      alt={item.mediaItem.title ?? ""}
+                      width={32}
+                      height={48}
+                      className="h-12 w-8 rounded-[2px] object-cover"
+                    />
+                  ) : (
+                    <div className="h-12 w-8 rounded-[2px] bg-[var(--vhs-ground-3)]" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="vhs-display truncate text-sm text-[var(--vhs-cream)]">
+                      {item.mediaItem?.title ?? "Unknown"}
+                    </p>
+                    <p className="vhs-mono text-xs text-[var(--vhs-cream-dim)]">
+                      {dict.media.status[item.status]}
+                      {item.rating ? ` · ${item.rating}/10` : ""}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : (
+          <p className="vhs-mono mt-8 text-center text-[var(--vhs-cream-dim)]">
+            {dict.profile.emptyLibrary}
+          </p>
+        )}
+      </div>
     </main>
   );
 }
