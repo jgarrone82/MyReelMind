@@ -91,9 +91,19 @@ export function AvatarCropper({ imageSrc, onCropComplete, onCancel, open, dict }
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleCancel()}>
-      <DialogContent className="sm:max-w-md">
+      {/*
+        VHS theming is applied ONLY via call-site className/props passed to the
+        shared shadcn Dialog/Button primitives (issue #51, R7/R27). The shared
+        components under src/components/ui are never edited. twMerge resolves the
+        primitive's default bg/text/ring/radius in favor of these VHS overrides;
+        the built-in close (X) button stays as-is — a contained-but-functional
+        modal is accepted rather than touching the shared primitive (D4).
+      */}
+      <DialogContent className="rounded-[2px] border-2 border-[var(--vhs-ground-3)] bg-[var(--vhs-ground-2)] text-[var(--vhs-cream)] ring-0 sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{dict.cropAvatar}</DialogTitle>
+          <DialogTitle className="vhs-kicker text-[var(--vhs-cream)]">
+            {dict.cropAvatar}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-4">
@@ -110,7 +120,12 @@ export function AvatarCropper({ imageSrc, onCropComplete, onCancel, open, dict }
           </div>
 
           <div className="flex w-full flex-col gap-1">
-            <label htmlFor="zoom-slider" className="text-sm text-muted-foreground">Zoom</label>
+            <label
+              htmlFor="zoom-slider"
+              className="vhs-kicker text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+            >
+              Zoom
+            </label>
             <input
               id="zoom-slider"
               type="range"
@@ -119,16 +134,16 @@ export function AvatarCropper({ imageSrc, onCropComplete, onCancel, open, dict }
               step="0.1"
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-[var(--vhs-magenta)]"
             />
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>
+        <DialogFooter className="border-t-2 border-[var(--vhs-ground-3)] bg-transparent">
+          <Button variant="outline" onClick={handleCancel} className="vhs-btn vhs-btn--secondary">
             {dict.cancel}
           </Button>
-          <Button onClick={handleConfirm}>
+          <Button onClick={handleConfirm} className="vhs-btn">
             {dict.confirm}
           </Button>
         </DialogFooter>
