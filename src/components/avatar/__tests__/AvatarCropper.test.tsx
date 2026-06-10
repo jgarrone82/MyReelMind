@@ -86,6 +86,59 @@ describe("AvatarCropper", () => {
     expect(screen.getByRole("button", { name: "Confirm" })).toBeInTheDocument();
   });
 
+  it("should theme the modal via call-site classes only (VHS ground panel, kicker title, VHS footer buttons)", () => {
+    render(
+      <AvatarCropper
+        open={true}
+        imageSrc={originalImageSrc}
+        onCropComplete={vi.fn()}
+        onCancel={vi.fn()}
+        dict={{
+          cropAvatar: "Crop Avatar",
+          cancel: "Cancel",
+          confirm: "Confirm",
+        }}
+      />
+    );
+
+    // Dialog panel gets the VHS ground treatment via call-site className (R27/S14)
+    const content = document.querySelector('[data-slot="dialog-content"]');
+    expect(content).not.toBeNull();
+    expect(content?.className).toMatch(/bg-\[var\(--vhs-ground-2\)\]/);
+    expect(content?.className).toMatch(/border-\[var\(--vhs-ground-3\)\]/);
+
+    // Title uses the VHS kicker treatment
+    const title = document.querySelector('[data-slot="dialog-title"]');
+    expect(title?.className).toMatch(/vhs-kicker/);
+
+    // Footer cancel button uses the VHS secondary treatment; confirm uses .vhs-btn (R3 deep-ink on magenta)
+    const cancel = screen.getByRole("button", { name: "Cancel" });
+    const confirm = screen.getByRole("button", { name: "Confirm" });
+    expect(cancel).toHaveClass("vhs-btn", "vhs-btn--secondary");
+    expect(confirm).toHaveClass("vhs-btn");
+    expect(confirm.className).not.toMatch(/vhs-btn--secondary/);
+
+    // Both footer buttons release the primitive's h-8 clamp so .vhs-btn vertical
+    // rhythm is restored, and suppress the primitive's ring box-shadow so only the
+    // .vhs-btn:focus-visible phosphor outline shows (no double focus indicator).
+    expect(cancel).toHaveClass("h-auto", "focus-visible:ring-0");
+    expect(confirm).toHaveClass("h-auto", "focus-visible:ring-0");
+
+    // Zoom range input carries the shared R4 phosphor focus ring
+    const zoomInput = screen.getByLabelText("Zoom");
+    expect(zoomInput.className).toMatch(/focus-visible:ring-\[var\(--vhs-phosphor\)\]/);
+    expect(zoomInput.className).toMatch(/focus-visible:ring-2/);
+    expect(zoomInput.className).toMatch(/focus-visible:ring-offset-\[var\(--vhs-ground\)\]/);
+
+    // Footer radius is clamped to the 2px panel radius (no rounded-b-xl poke-out)
+    const footer = document.querySelector('[data-slot="dialog-footer"]');
+    expect(footer?.className).toMatch(/rounded-b-\[2px\]/);
+
+    // Zoom label must drop the shadcn text-muted-foreground token (R5)
+    const zoomLabel = screen.getByText("Zoom");
+    expect(zoomLabel.className).not.toMatch(/text-muted-foreground/);
+  });
+
   it("should call onCropComplete with Blob when Confirm is clicked after crop area set", async () => {
     const onCropComplete = vi.fn();
     const onCancel = vi.fn();

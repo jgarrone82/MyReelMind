@@ -116,7 +116,10 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
       <form action={action} className="space-y-6 max-w-md mx-auto">
         {/* Display Name */}
         <div>
-          <label htmlFor="displayName" className="block text-sm font-medium text-secondary">
+          <label
+            htmlFor="displayName"
+            className="vhs-kicker block text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+          >
             {s.displayName}
           </label>
           <input
@@ -127,13 +130,16 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
             minLength={1}
             maxLength={50}
             defaultValue={initialValues.displayName}
-            className="mt-1 block w-full rounded-md border border-input bg-primary px-3 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+            className="vhs-input mt-1.5"
           />
         </div>
 
         {/* Avatar Upload */}
         <div>
-          <label htmlFor="avatarUrl" className="block text-sm font-medium text-secondary">
+          <label
+            htmlFor="avatarUrl"
+            className="vhs-kicker block text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+          >
             {s.avatarUrl}
           </label>
           <input
@@ -144,7 +150,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
             accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
             disabled={isUploading}
-            className="mt-1 block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20"
+            className="vhs-mono mt-1.5 block w-full text-sm text-[var(--vhs-cream-dim)] file:mr-4 file:rounded-[2px] file:border-2 file:border-[var(--vhs-ground-3)] file:bg-[var(--vhs-ground-2)] file:px-4 file:py-2 file:text-sm file:font-semibold file:uppercase file:tracking-[0.14em] file:text-[var(--vhs-cream)] hover:file:border-[var(--vhs-phosphor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
           />
           {/* Avatar preview */}
           <div className="mt-2">
@@ -160,7 +166,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
           </div>
           {/* Upload error */}
           {uploadError && (
-            <p role="alert" className="mt-1 text-sm text-error">
+            <p role="alert" className="vhs-mono mt-1 text-sm text-[var(--vhs-error)]">
               {uploadError}
             </p>
           )}
@@ -172,7 +178,9 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
 
         {/* Public profile toggle */}
         <div>
-          <p className="text-sm font-medium text-secondary mb-2">{s.privacy}</p>
+          <p className="vhs-kicker mb-2 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]">
+            {s.privacy}
+          </p>
           <div className="flex items-center gap-2">
             <input
               id="isPublic"
@@ -180,9 +188,9 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
               type="checkbox"
               value="true"
               defaultChecked={initialValues.isPublic}
-              className="h-4 w-4 rounded border-input text-accent focus:ring-accent"
+              className="h-4 w-4 rounded-[2px] border-2 border-[var(--vhs-ground-3)] accent-[var(--vhs-magenta)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
             />
-            <label htmlFor="isPublic" className="text-sm text-secondary">
+            <label htmlFor="isPublic" className="vhs-mono text-sm text-[var(--vhs-cream)]">
               {s.publicProfile}
             </label>
           </div>
@@ -190,7 +198,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
 
         {/* Error message */}
         {state?.error && (
-          <p role="alert" className="text-sm text-error">
+          <p role="alert" className="vhs-mono text-sm text-[var(--vhs-error)]">
             {errorMessage(state.error, dict)}
           </p>
         )}
@@ -218,7 +226,7 @@ function SubmitButton({ dict }: { dict: Dictionary }) {
     <button
       type="submit"
       disabled={pending}
-      className="w-full rounded-md bg-accent px-4 py-2 text-white hover:bg-accent/90 disabled:bg-muted disabled:text-muted-foreground"
+      className="vhs-btn w-full justify-center disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? dict.common.loading : dict.settings.save}
     </button>

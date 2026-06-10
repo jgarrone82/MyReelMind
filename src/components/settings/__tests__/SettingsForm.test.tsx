@@ -121,6 +121,36 @@ describe("SettingsForm - Avatar Upload", () => {
     mockOnCancel = null;
   });
 
+  it("should adopt VHS field/button treatment with no residual shadcn chrome", () => {
+    render(
+      <SettingsForm
+        userId="test-user-123"
+        dict={mockDict as any}
+        initialValues={{
+          displayName: "John",
+          avatarUrl: null,
+          isPublic: true,
+        }}
+      />
+    );
+
+    // Display-name text input consumes the shared .vhs-input utility (S15/R26)
+    const displayName = screen.getByLabelText("Display Name");
+    expect(displayName).toHaveClass("vhs-input");
+    // Dead/residual shadcn field chrome must be gone (R5/S13)
+    expect(displayName.className).not.toMatch(/border-input|bg-primary|focus:ring-accent/);
+
+    // Submit button uses the shared .vhs-btn (R26) — no bg-accent / text-white
+    const submit = screen.getByRole("button", { name: "Save Changes" });
+    expect(submit).toHaveClass("vhs-btn");
+    expect(submit.className).not.toMatch(/bg-accent|text-white|disabled:bg-muted/);
+
+    // Field labels use the VHS kicker treatment, not the shadcn text-secondary token
+    const label = screen.getByText("Display Name");
+    expect(label).toHaveClass("vhs-kicker");
+    expect(label.className).not.toMatch(/text-secondary/);
+  });
+
   it("should render avatar file input field", () => {
     render(
       <SettingsForm
@@ -136,6 +166,11 @@ describe("SettingsForm - Avatar Upload", () => {
 
     const input = screen.getByLabelText(/avatar/i);
     expect(input).toHaveAttribute("type", "file");
+
+    // File input carries the shared R4 phosphor focus ring (keyboard a11y)
+    expect(input.className).toMatch(/focus-visible:ring-\[var\(--vhs-phosphor\)\]/);
+    expect(input.className).toMatch(/focus-visible:ring-2/);
+    expect(input.className).toMatch(/focus-visible:ring-offset-\[var\(--vhs-ground\)\]/);
   });
 
   it("should show error for invalid file type", async () => {

@@ -183,6 +183,8 @@ export const dictionary: Dictionary = {
   },
   settings: {
     title: "Settings",
+    kicker: "Member Desk",
+    subtitle: "Update your card and clubhouse profile",
     displayName: "Display Name",
     avatarUrl: "Avatar URL",
     privacy: "Privacy",

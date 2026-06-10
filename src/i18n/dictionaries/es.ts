@@ -183,6 +183,8 @@ export const dictionary: Dictionary = {
   },
   settings: {
     title: "Ajustes",
+    kicker: "Mostrador del socio",
+    subtitle: "Actualizá tu credencial y tu perfil del club",
     displayName: "Nombre visible",
     avatarUrl: "URL del avatar",
     privacy: "Privacidad",
