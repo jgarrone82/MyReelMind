@@ -101,6 +101,18 @@ describe("getDictionary", () => {
     }
   });
 
+  it("should define profile.kicker and profile.subtitle in both locales", async () => {
+    const enDict = await getDictionary("en");
+    const esDict = await getDictionary("es");
+
+    for (const dict of [enDict, esDict]) {
+      expect(typeof dict.profile.kicker).toBe("string");
+      expect(dict.profile.kicker.length).toBeGreaterThan(0);
+      expect(typeof dict.profile.subtitle).toBe("string");
+      expect(dict.profile.subtitle.length).toBeGreaterThan(0);
+    }
+  });
+
   it("should define search.nowShowingHead in both locales", async () => {
     const enDict = await getDictionary("en");
     const esDict = await getDictionary("es");
