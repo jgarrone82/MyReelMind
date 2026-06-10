@@ -211,6 +211,8 @@ export interface Dictionary {
     editSettings: string;
     emptyLibrary: string;
     recentActivity: string;
+    kicker: string;
+    subtitle: string;
   };
   auth: {
     login: {

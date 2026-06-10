@@ -213,6 +213,8 @@ export const dictionary: Dictionary = {
     editSettings: "Editar ajustes",
     emptyLibrary: "No hay elementos en tu biblioteca",
     recentActivity: "Actividad reciente",
+    kicker: "Ficha de socio",
+    subtitle: "Historial de navegación y registro de alquileres",
   },
   auth: {
     login: {
