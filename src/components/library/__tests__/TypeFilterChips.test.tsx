@@ -28,10 +28,43 @@ describe("TypeFilterChips", () => {
     expect(screen.getByText("Anime")).toBeInTheDocument();
   });
 
-  it("should highlight the active chip", () => {
+  it("should highlight the active chip with aria-current and the AA magenta band", () => {
     render(<TypeFilterChips {...baseProps} currentType="movie" />);
     const movieChip = screen.getByText("Movies").closest("a");
-    expect(movieChip).toHaveClass("bg-accent", "text-accent-foreground");
+    expect(movieChip?.getAttribute("aria-current")).toBe("page");
+    // WCAG AA (#48): active chips pair deep-ink on magenta, never cream-on-magenta.
+    expect(movieChip?.className).toContain("bg-[var(--vhs-magenta)]");
+    expect(movieChip?.className).toContain("text-[var(--vhs-ground)]");
+    const allChip = screen.getByText("All Types").closest("a");
+    expect(allChip?.getAttribute("aria-current")).toBeNull();
+  });
+
+  it("should keep every chip a link (no buttons)", () => {
+    render(<TypeFilterChips {...baseProps} />);
+    for (const label of ["All Types", "Movies", "TV Shows", "Anime"]) {
+      expect(screen.getByText(label).closest("a")).toBeTruthy();
+    }
+    expect(document.querySelectorAll("button")).toHaveLength(0);
+  });
+
+  it("should not retain shadcn pill chrome on any chip", () => {
+    render(<TypeFilterChips {...baseProps} currentType="movie" />);
+    for (const label of ["All Types", "Movies", "TV Shows", "Anime"]) {
+      const cls = screen.getByText(label).closest("a")?.className ?? "";
+      expect(cls).not.toContain("rounded-full");
+      expect(cls).not.toContain("bg-accent");
+      expect(cls).not.toContain("bg-muted");
+    }
+  });
+
+  it("should pair focus-visible outline-none with the phosphor ring on each chip", () => {
+    render(<TypeFilterChips {...baseProps} />);
+    for (const label of ["All Types", "Movies", "TV Shows", "Anime"]) {
+      const cls = screen.getByText(label).closest("a")?.className ?? "";
+      expect(cls).toContain("focus-visible:outline-none");
+      expect(cls).toContain("focus-visible:ring-2");
+      expect(cls).toContain("focus-visible:ring-[var(--vhs-phosphor)]");
+    }
   });
 
   it("should preserve status param in links", () => {
