@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { userMedia, mediaItems } from "@/db/schema";
 import { eq, and, desc, count } from "drizzle-orm";
 import { LibraryGrid } from "@/components/collection/LibraryGrid";
+import { TapeSkeleton } from "@/components/search/TapeSkeleton";
 
 const VALID_STATUSES = ["want_to_watch", "watching", "completed", "paused", "dropped"] as const;
 const VALID_TYPES = ["movie", "tv", "anime"] as const;
@@ -119,87 +120,128 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
       : null;
 
   return (
-    <Suspense fallback={<div className="p-8">{dict.common.loading}</div>}>
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">{dict.library.title}</h1>
-          <span className="text-sm text-muted-foreground">
-            {totalItems} {dict.library.collection}
-          </span>
-        </div>
-
-        {/* Status filter tabs */}
-        <nav className="mb-6 flex gap-2 border-b border-border">
-          {statusFilters.map((filter) => (
-            <Link
-              key={filter.key}
-              href={
-                filter.key === "all"
-                  ? `/${lang}/library`
-                  : `/${lang}/library?status=${filter.key}`
-              }
-              className={`border-b-2 px-4 py-2 text-sm font-medium ${
-                (statusParam ?? "all") === filter.key
-                  ? "border-accent text-accent"
-                  : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
-              }`}
-            >
-              {filter.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Library grid or empty state */}
-        {formattedItems.length > 0 ? (
-          <LibraryGrid
-            items={formattedItems}
-            lang={lang}
-            totalItems={totalItems}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            statusParam={statusParam}
-            typeParam={resolvedTypeParam}
-            dict={{
-              remove: dict.library.remove,
-              removeConfirm: dict.library.removeConfirm,
-              cancel: dict.common.cancel,
-              noEpisodes: dict.library.noEpisodes,
-              statusUpdated: dict.library.statusUpdated,
-              ratingUpdated: dict.library.ratingUpdated,
-              progressUpdated: dict.library.progressUpdated,
-              removed: dict.library.removed,
-              error: dict.common.error,
-              status: dict.media.status,
-              statusLabel: dict.library.status,
-              rating: dict.library.rating,
-              yourRating: dict.library.yourRating,
-              notRated: dict.library.notRated,
-              clear: dict.common.cancel,
-              progress: dict.library.progress,
-              episode: dict.media.episode,
-              chapter: dict.media.chapter,
-              of: dict.media.of,
-              previous: dict.library.previous,
-              next: dict.library.next,
-              page: dict.library.page,
-              totalItems: dict.library.totalItems,
-              allTypes: dict.library.allTypes,
-              filterMovie: dict.library.filterMovie,
-              filterTv: dict.library.filterTv,
-              filterAnime: dict.library.filterAnime,
-            }}
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-lg text-muted-foreground">{dict.library.empty}</p>
-            <Link
-              href={`/${lang}/search`}
-              className="mt-4 text-accent hover:text-accent/80"
-            >
-              {dict.dashboard.ctaSearch}
-            </Link>
+    <Suspense
+      fallback={
+        <main className="vhs-scanlines vhs-crt relative min-h-screen bg-[var(--vhs-ground)] px-4 py-8 text-[var(--vhs-cream)] sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <p role="status" className="sr-only">
+              {dict.common.loading}
+            </p>
+            <TapeSkeleton count={8} />
           </div>
-        )}
+        </main>
+      }
+    >
+      <main className="vhs-scanlines vhs-crt relative min-h-screen bg-[var(--vhs-ground)] px-4 py-8 text-[var(--vhs-cream)] sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8">
+            {/* Membership desk sticker */}
+            <span className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]">
+              {dict.library.kicker}
+            </span>
+            <div className="mt-3 flex items-center justify-between">
+              <h1 className="vhs-display m-0 text-[clamp(1.7rem,5vw,2.3rem)] text-[var(--vhs-cream)]">
+                {dict.library.title}
+              </h1>
+              <span className="vhs-kicker text-[0.78rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]">
+                {totalItems} {dict.library.collection}
+              </span>
+            </div>
+            <div className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+              <span aria-hidden>▸</span> {dict.library.subtitle}
+            </div>
+          </div>
+
+          {/* Status filter tabs — canonical VHS chip pattern */}
+          <nav className="mb-6 flex flex-wrap gap-3">
+            {statusFilters.map((filter) => {
+              const isActive = (statusParam ?? "all") === filter.key;
+              return (
+                <Link
+                  key={filter.key}
+                  href={
+                    filter.key === "all"
+                      ? `/${lang}/library`
+                      : `/${lang}/library?status=${filter.key}`
+                  }
+                  aria-current={isActive ? "page" : undefined}
+                  className={`vhs-kicker inline-flex items-center gap-2 border-2 border-[var(--vhs-ground)] px-3.5 py-1.5 text-[0.78rem] tracking-[0.14em] shadow-[2px_2px_0_rgba(0,0,0,0.8)] transition-transform duration-[90ms] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)] ${
+                    isActive
+                      ? // WCAG AA (#48): deep-ink on neon magenta = 5.58:1; cream-on-magenta
+                        // (2.98:1) failed for this small selected-chip label.
+                        "bg-[var(--vhs-magenta)] text-[var(--vhs-ground)]"
+                      : "bg-[var(--vhs-ground-2)] text-[var(--vhs-cream-dim)] hover:text-[var(--vhs-cream)]"
+                  }`}
+                >
+                  {/* Channel LED — decorative tuner indicator, lit when active. */}
+                  <span
+                    aria-hidden="true"
+                    className={`h-2 w-2 rounded-full ${
+                      isActive
+                        ? "bg-[var(--vhs-phosphor)] shadow-[0_0_6px_var(--vhs-phosphor)]"
+                        : "bg-[var(--vhs-ground-3)]"
+                    }`}
+                  />
+                  {filter.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Library grid or empty state */}
+          {formattedItems.length > 0 ? (
+            <LibraryGrid
+              items={formattedItems}
+              lang={lang}
+              totalItems={totalItems}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              statusParam={statusParam}
+              typeParam={resolvedTypeParam}
+              dict={{
+                remove: dict.library.remove,
+                removeConfirm: dict.library.removeConfirm,
+                cancel: dict.common.cancel,
+                noEpisodes: dict.library.noEpisodes,
+                statusUpdated: dict.library.statusUpdated,
+                ratingUpdated: dict.library.ratingUpdated,
+                progressUpdated: dict.library.progressUpdated,
+                removed: dict.library.removed,
+                error: dict.common.error,
+                status: dict.media.status,
+                statusLabel: dict.library.status,
+                rating: dict.library.rating,
+                yourRating: dict.library.yourRating,
+                notRated: dict.library.notRated,
+                clear: dict.common.cancel,
+                progress: dict.library.progress,
+                episode: dict.media.episode,
+                chapter: dict.media.chapter,
+                of: dict.media.of,
+                previous: dict.library.previous,
+                next: dict.library.next,
+                page: dict.library.page,
+                totalItems: dict.library.totalItems,
+                allTypes: dict.library.allTypes,
+                filterMovie: dict.library.filterMovie,
+                filterTv: dict.library.filterTv,
+                filterAnime: dict.library.filterAnime,
+              }}
+            />
+          ) : (
+            <div className="mx-auto my-16 max-w-md border-2 border-[var(--vhs-ground-3)] bg-[var(--vhs-ground-2)] px-6 py-12 text-center shadow-[4px_4px_0_rgba(0,0,0,0.6)]">
+              <p className="vhs-kicker text-lg text-[var(--vhs-cream)]">
+                {dict.library.empty}
+              </p>
+              <Link
+                href={`/${lang}/search`}
+                className="vhs-btn vhs-btn--ghost mt-4 text-[var(--vhs-phosphor)] hover:text-[var(--vhs-magenta)]"
+              >
+                {dict.dashboard.ctaSearch} <span aria-hidden>→</span>
+              </Link>
+            </div>
+          )}
+        </div>
       </main>
     </Suspense>
   );

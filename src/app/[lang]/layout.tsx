@@ -57,7 +57,24 @@ export default async function LocaleLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${vhsFontVariables} bg-[var(--vhs-ground)] text-[var(--vhs-cream)] antialiased`}
       >
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-right"
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: "var(--vhs-ground-2)",
+              color: "var(--vhs-cream)",
+              border: "2px solid var(--vhs-ground-3)",
+              borderRadius: "2px",
+              fontFamily: "var(--vhs-font-mono)",
+              boxShadow: "3px 3px 0 rgba(0, 0, 0, 0.8)",
+            },
+            classNames: {
+              success: "vhs-toast--success",
+              error: "vhs-toast--error",
+            },
+          }}
+        />
         <Providers>
           <AuthProvider>
             <DictionaryProvider dictionary={dict}>

@@ -53,6 +53,8 @@ export const dictionary: Dictionary = {
   },
   library: {
     title: "My Library",
+    kicker: "Member Collection",
+    subtitle: "Your rented & queued tapes",
     empty: "Your library is empty",
     added: "Added to library",
     removed: "Removed from library",

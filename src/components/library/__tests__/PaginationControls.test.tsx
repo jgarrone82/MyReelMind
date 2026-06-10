@@ -53,6 +53,39 @@ describe("PaginationControls", () => {
     expect(nextLink?.className).toContain("pointer-events-none");
   });
 
+  it("should keep aria-disabled and pointer-events-none on boundary controls", () => {
+    render(<PaginationControls {...baseProps} currentPage={1} totalPages={1} />);
+
+    for (const label of ["Previous", "Next"]) {
+      const link = screen.getByText(label).closest("a");
+      expect(link?.getAttribute("aria-disabled")).toBe("true");
+      expect(link?.className).toContain("pointer-events-none");
+      expect(link?.getAttribute("tabindex")).toBe("-1");
+    }
+  });
+
+  it("should not retain shadcn grey surfaces on the controls", () => {
+    const { container } = render(<PaginationControls {...baseProps} />);
+
+    for (const cls of ["bg-muted", "bg-accent", "text-muted-foreground"]) {
+      expect(
+        container.querySelector(`[class*="${cls}"]`),
+        `residual shadcn class ${cls} found in PaginationControls`
+      ).toBeNull();
+    }
+  });
+
+  it("should pair focus-visible outline-none with the phosphor ring on both controls", () => {
+    render(<PaginationControls {...baseProps} />);
+
+    for (const label of ["Previous", "Next"]) {
+      const cls = screen.getByText(label).closest("a")?.className ?? "";
+      expect(cls).toContain("focus-visible:outline-none");
+      expect(cls).toContain("focus-visible:ring-2");
+      expect(cls).toContain("focus-visible:ring-[var(--vhs-phosphor)]");
+    }
+  });
+
   it("should preserve status and type params in links", () => {
     render(
       <PaginationControls

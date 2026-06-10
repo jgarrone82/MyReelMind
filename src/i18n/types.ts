@@ -53,6 +53,8 @@ export interface Dictionary {
   };
   library: {
     title: string;
+    kicker: string;
+    subtitle: string;
     empty: string;
     added: string;
     removed: string;
