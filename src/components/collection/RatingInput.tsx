@@ -21,7 +21,7 @@ export function RatingInput({ rating, onChange, disabled, dict }: RatingInputPro
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-foreground">
+        <span className="vhs-mono text-sm text-[var(--vhs-cream)]">
           {rating !== null ? `${labels.rated} ${rating} / 10` : labels.notRated}
         </span>
         {rating !== null && (
@@ -30,7 +30,7 @@ export function RatingInput({ rating, onChange, disabled, dict }: RatingInputPro
             onClick={() => onChange(null)}
             disabled={disabled}
             aria-label="Clear rating"
-            className="text-sm text-error hover:text-error/70 disabled:cursor-not-allowed disabled:text-muted-foreground"
+            className="vhs-mono text-sm text-[var(--vhs-error)] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {labels.clear}
           </button>
@@ -50,11 +50,13 @@ export function RatingInput({ rating, onChange, disabled, dict }: RatingInputPro
             disabled={disabled}
             aria-label={`Rate ${value}`}
             aria-pressed={rating === value}
-            className={`h-9 w-9 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 min-h-[44px] min-w-[44px] flex items-center justify-center ${
+            className={`vhs-mono flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[2px] border-2 border-[var(--vhs-ground-3)] text-sm transition-colors duration-[90ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)] ${
               rating === value
-                ? "bg-accent text-primary-foreground"
-                : "bg-muted text-foreground hover:bg-muted/80"
-            } disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground`}
+                ? // WCAG AA (#48): deep-ink on neon magenta = 5.58:1; cream-on-magenta
+                  // (2.98:1) failed AA for this small selected toggle.
+                  "bg-[var(--vhs-magenta)] text-[var(--vhs-ground)]"
+                : "bg-[var(--vhs-ground-2)] text-[var(--vhs-cream-dim)] hover:text-[var(--vhs-cream)]"
+            } disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {value}
           </button>

@@ -70,13 +70,18 @@ describe("RemoveButton", () => {
     expect(onSuccess).toHaveBeenCalled();
   });
 
+  // GUARD (committed before the C2 VHS restyle, S2): the destructive-treatment
+  // restyle MUST NOT add, remove, reorder, or rename the #42 D8 invalidation.
+  // The exact object-form call `invalidateQueries({ queryKey: ["library-state"] })`
+  // AND the onSuccess callback must both survive verbatim.
   describe("library-state invalidation (#42 D8)", () => {
     it("invalidates the library-state cache after a successful removal", async () => {
       const user = userEvent.setup();
       mockRemoveFromLibrary.mockResolvedValue({ success: true });
+      const onSuccess = vi.fn();
 
       const { invalidateSpy } = renderWithClient(
-        <RemoveButton mediaId="tmdb-1" dict={dict} />
+        <RemoveButton mediaId="tmdb-1" dict={dict} onSuccess={onSuccess} />
       );
 
       await user.click(screen.getByRole("button", { name: "Remove" }));
@@ -87,6 +92,24 @@ describe("RemoveButton", () => {
           queryKey: ["library-state"],
         });
       });
+      // S2: onSuccess fires on the same success path as the invalidation.
+      expect(onSuccess).toHaveBeenCalled();
+    });
+
+    it("styles the cancel button with the compact VHS modifier, not dead Tailwind px/py (JD C2)", async () => {
+      const user = userEvent.setup();
+      renderWithClient(<RemoveButton mediaId="tmdb-1" dict={dict} />);
+
+      await user.click(screen.getByRole("button", { name: "Remove" }));
+
+      const cancel = screen.getByRole("button", { name: "Cancel" });
+      expect(cancel).toHaveClass("vhs-btn");
+      expect(cancel).toHaveClass("vhs-btn--secondary");
+      expect(cancel).toHaveClass("vhs-btn--compact");
+      // px-3/py-1 are dead under the custom-layer cascade (.vhs-btn padding
+      // wins) — they must be dropped, not carried as a lie.
+      expect(cancel.className).not.toMatch(/\bpx-3\b/);
+      expect(cancel.className).not.toMatch(/\bpy-1\b/);
     });
 
     it("does NOT invalidate when the removal fails", async () => {

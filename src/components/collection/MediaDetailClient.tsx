@@ -143,8 +143,10 @@ export function MediaDetailClient({
   };
 
   return (
-    <div className="mt-8 space-y-4 rounded-lg border border-gray-200 p-4">
-      <h2 className="text-lg font-semibold text-gray-900">{dict.collection}</h2>
+    <div className="mt-8 space-y-4 rounded-[2px] border-2 border-[var(--vhs-ground-3)] bg-[var(--vhs-ground-2)] p-4 shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
+      <h2 className="vhs-kicker text-base tracking-[0.14em] text-[var(--vhs-cream)]">
+        {dict.collection}
+      </h2>
       <form action={updateStatusAction}>
         <input type="hidden" name="mediaId" value={mediaId} />
         <StatusSelector

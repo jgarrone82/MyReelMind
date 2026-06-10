@@ -40,13 +40,18 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
   if (showConfirm) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-secondary">{dict.removeConfirm}</span>
+        <span className="vhs-mono text-sm text-[var(--vhs-cream-dim)]">
+          {dict.removeConfirm}
+        </span>
         <form action={formAction}>
           <input type="hidden" name="mediaId" value={mediaId} />
+          {/* Destructive confirm (D5): error red + cream clears AA — the #48
+              magenta-specific deep-ink rule does not apply to the error token.
+              Magenta-on-ground is reserved for selected/active toggles. */}
           <button
             type="submit"
             disabled={isPending}
-            className="rounded bg-error px-3 py-1 text-sm text-white hover:bg-error/80 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            className="vhs-mono rounded-[2px] border-2 border-[var(--vhs-error)] bg-[var(--vhs-error)] px-3 py-1 text-sm text-[var(--vhs-cream)] hover:opacity-90 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
           >
             {isPending ? "..." : dict.remove}
           </button>
@@ -54,7 +59,7 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
         <button
           type="button"
           onClick={() => setShowConfirm(false)}
-          className="rounded bg-muted px-3 py-1 text-sm text-primary hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          className="vhs-btn vhs-btn--secondary vhs-btn--compact"
         >
           {dict.cancel ?? "Cancel"}
         </button>
@@ -66,7 +71,7 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
     <button
       type="button"
       onClick={() => setShowConfirm(true)}
-      className="rounded text-error hover:text-error/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+      className="vhs-mono rounded-[2px] text-sm text-[var(--vhs-error)] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
       aria-label={dict.remove}
     >
       {dict.remove}

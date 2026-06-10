@@ -308,7 +308,22 @@ body {
   }
   .vhs-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--vhs-sodium); }
   .vhs-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--vhs-sodium); }
-  .vhs-btn:focus-visible { outline: 2px solid var(--vhs-phosphor); outline-offset: 2px; }
+  /* The phosphor outline + outline-offset leaves the gap transparent, so the
+     focus ring blends into whatever sits behind the button. Painting a
+     ground-colored band in that gap gives every .vhs-btn a synthetic
+     ring-offset (R4 parity) without a per-instance Tailwind ring — which the
+     custom-layer cascade would defeat anyway. */
+  .vhs-btn:focus-visible { outline: 2px solid var(--vhs-phosphor); outline-offset: 2px; box-shadow: 0 0 0 2px var(--vhs-ground); }
+  /* Primary buttons carry a sodium depth shadow at rest (3px 3px 0 sodium).
+     The ground-band rule above sets box-shadow outright, which would CLOBBER
+     that depth on keyboard focus — and because the base transitions box-shadow
+     (90ms), it would visibly animate away on Tab and back on blur. Stack the
+     sodium depth with the ground band so primaries keep their depth on focus.
+     Scoped to exclude --secondary/--ghost (box-shadow:none at rest): they must
+     NOT gain a sodium shadow that only appears while focused. */
+  .vhs-btn:not(.vhs-btn--secondary):not(.vhs-btn--ghost):focus-visible {
+    box-shadow: 3px 3px 0 var(--vhs-sodium), 0 0 0 2px var(--vhs-ground);
+  }
 
   .vhs-btn--secondary {
     background: transparent;
@@ -337,6 +352,15 @@ body {
     color: var(--vhs-magenta);
     transform: none;
     box-shadow: none;
+  }
+
+  /* Compact sizing for inline/secondary buttons (e.g. the collection remove
+     confirm's Cancel). Declared AFTER .vhs-btn so it overrides the base
+     padding — call-site Tailwind px/py would be dead under the custom-layer
+     cascade, so the size lives here as a modifier. */
+  .vhs-btn--compact {
+    padding: 6px 12px 5px;
+    font-size: 0.8rem;
   }
 
   /* Shared VHS form-field treatment (issue #51). Single source for the field
@@ -372,6 +396,14 @@ body {
   .vhs-input[aria-invalid="true"]:focus-visible {
     outline-color: var(--vhs-error);
     border-color: var(--vhs-error);
+  }
+
+  /* Fixed inline width for compact numeric fields (e.g. the progress tracker
+     episode/chapter input). Declared AFTER .vhs-input so it overrides the base
+     width:100% — a call-site Tailwind w-24 would be dead under the
+     custom-layer cascade. */
+  .vhs-input--inline {
+    width: 6rem;
   }
 
   .vhs-select {

@@ -41,7 +41,10 @@ export function ProgressTracker({
 
   return (
     <div className="space-y-1">
-      <label htmlFor="progress-input" className="block text-sm font-medium text-primary">
+      <label
+        htmlFor="progress-input"
+        className="vhs-kicker block text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+      >
         {dict?.progress ?? "Progress"}
       </label>
       <div className="flex items-center gap-3">
@@ -54,9 +57,9 @@ export function ProgressTracker({
           max={total ?? undefined}
           disabled={disabled}
           aria-label="Progress"
-          className="w-24 rounded-md border border-primary px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:bg-muted"
+          className="vhs-input vhs-input--inline text-sm"
         />
-        <span className="text-sm text-secondary">
+        <span className="vhs-mono text-sm text-[var(--vhs-cream-dim)]">
           {total !== null
             ? `${unit} ${progress} ${ofLabel} ${total}`
             : `${unit} ${progress}`}

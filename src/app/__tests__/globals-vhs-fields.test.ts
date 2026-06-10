@@ -76,6 +76,69 @@ describe("globals.css VHS field utilities", () => {
     });
   });
 
+  describe(".vhs-btn--compact (collection controls, JD C2)", () => {
+    it("defines compact padding so the cancel button does not need dead Tailwind px/py", () => {
+      const b = block(".vhs-btn--compact");
+      expect(b).toContain("padding: 6px 12px 5px");
+    });
+
+    it("is declared AFTER its .vhs-btn base AND its --secondary/--ghost variants so it survives the custom-layer cascade", () => {
+      // Tailwind v4 emits generated utilities at the @import position (top of
+      // file); the hand-authored @layer utilities block comes later. Within
+      // that block, equal-specificity rules resolve by source order, so a
+      // modifier MUST sit after .vhs-btn AND after the --secondary/--ghost
+      // variants (which a compact secondary/ghost button also carries) to
+      // override their padding.
+      const compactIdx = css.indexOf(".vhs-btn--compact");
+      expect(compactIdx).toBeGreaterThan(css.indexOf(".vhs-btn {"));
+      expect(compactIdx).toBeGreaterThan(css.indexOf(".vhs-btn--secondary {"));
+      expect(compactIdx).toBeGreaterThan(css.indexOf(".vhs-btn--ghost {"));
+    });
+  });
+
+  describe(".vhs-input--inline (progress tracker, JD C2)", () => {
+    it("defines a fixed inline width so the input does not need dead w-24", () => {
+      const b = block(".vhs-input--inline");
+      expect(b).toContain("width: 6rem");
+    });
+
+    it("is declared AFTER its .vhs-input base so it survives the custom-layer cascade", () => {
+      expect(css.indexOf(".vhs-input--inline")).toBeGreaterThan(
+        css.indexOf(".vhs-input {")
+      );
+    });
+  });
+
+  describe(".vhs-btn:focus-visible synthetic ground offset (JD C2, R4 parity)", () => {
+    it("paints a ground-colored band so the phosphor outline reads as a ring on every .vhs-btn", () => {
+      const b = block(".vhs-btn:focus-visible");
+      expect(b).toContain("outline: 2px solid var(--vhs-phosphor)");
+      expect(b).toContain("box-shadow: 0 0 0 2px var(--vhs-ground)");
+    });
+
+    it("retains the sodium depth shadow on focus for primary buttons (JD C2 Round 2, box-shadow regression guard)", () => {
+      // The base .vhs-btn carries `box-shadow: 3px 3px 0 var(--vhs-sodium)`.
+      // The synthetic ground band on .vhs-btn:focus-visible (0 0 0 2px ground)
+      // REPLACES box-shadow, so on keyboard focus a primary button would lose
+      // its signature sodium depth — and animate it away (transition:
+      // box-shadow 90ms). A primary-scoped focus rule must STACK the sodium
+      // shadow with the ground band so the depth survives focus. The selector
+      // excludes --secondary/--ghost (box-shadow:none at rest) so they do NOT
+      // gain a focus-only sodium shadow. Matched with a raw regex because the
+      // block() helper does not escape the parens in :not(...).
+      const primaryFocus = css.match(
+        /\.vhs-btn:not\(\.vhs-btn--secondary\):not\(\.vhs-btn--ghost\):focus-visible[^{}]*\{([^}]+)\}/
+      );
+      expect(
+        primaryFocus,
+        "expected primary-scoped .vhs-btn focus-visible rule in globals.css"
+      ).toBeTruthy();
+      const b = primaryFocus![1];
+      expect(b).toContain("3px 3px 0 var(--vhs-sodium)");
+      expect(b).toContain("0 0 0 2px var(--vhs-ground)");
+    });
+  });
+
   describe("toast accent helpers (sonner classNames)", () => {
     it("defines a sodium accent for success toasts, !important to beat sonner's inline border", () => {
       const b = block(".vhs-toast--success");

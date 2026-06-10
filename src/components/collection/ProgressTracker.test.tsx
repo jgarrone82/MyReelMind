@@ -65,4 +65,44 @@ describe("ProgressTracker", () => {
 
     expect(screen.getByText(/chapter 10 of 50/i)).toBeInTheDocument();
   });
+
+  // VHS restyle (R21/S8/S15): the number input adopts the shared .vhs-input
+  // utility (composed with its w-24 width) and drops the shadcn field chrome,
+  // while keeping its id, spinbutton role, aria-label, and min/max bounds.
+  describe("VHS treatment (R21/S8/S15)", () => {
+    it("adopts the shared .vhs-input utility on the number input", () => {
+      render(<ProgressTracker progress={5} total={12} onChange={() => {}} />);
+
+      const input = screen.getByRole("spinbutton", { name: /progress/i });
+      expect(input).toHaveClass("vhs-input");
+    });
+
+    it("drops the shadcn field chrome from the input", () => {
+      render(<ProgressTracker progress={5} total={12} onChange={() => {}} />);
+
+      const input = screen.getByRole("spinbutton", { name: /progress/i });
+      expect(input.className).not.toMatch(/border-primary/);
+      expect(input.className).not.toMatch(/bg-muted/);
+    });
+
+    it("sizes the input with the inline VHS modifier, not dead w-24 (JD C2)", () => {
+      render(<ProgressTracker progress={5} total={12} onChange={() => {}} />);
+
+      const input = screen.getByRole("spinbutton", { name: /progress/i });
+      expect(input).toHaveClass("vhs-input--inline");
+      // w-24 is dead under the custom-layer cascade (.vhs-input width:100%
+      // wins) — it must be dropped, not carried as a lie.
+      expect(input.className).not.toMatch(/\bw-24\b/);
+    });
+
+    it("preserves the spinbutton id, role, and min/max bounds", () => {
+      render(<ProgressTracker progress={5} total={12} onChange={() => {}} />);
+
+      const input = screen.getByRole("spinbutton", { name: /progress/i });
+      expect(input).toHaveAttribute("id", "progress-input");
+      expect(input).toHaveAttribute("type", "number");
+      expect(input).toHaveAttribute("min", "0");
+      expect(input).toHaveAttribute("max", "12");
+    });
+  });
 });
