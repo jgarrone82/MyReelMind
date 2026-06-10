@@ -76,6 +76,44 @@ describe("globals.css VHS field utilities", () => {
     });
   });
 
+  describe(".vhs-btn--compact (collection controls, JD C2)", () => {
+    it("defines compact padding so the cancel button does not need dead Tailwind px/py", () => {
+      const b = block(".vhs-btn--compact");
+      expect(b).toContain("padding: 6px 12px 5px");
+    });
+
+    it("is declared AFTER its .vhs-btn base so it survives the custom-layer cascade", () => {
+      // Tailwind v4 emits generated utilities at the @import position (top of
+      // file); the hand-authored @layer utilities block comes later. Within
+      // that block, equal-specificity rules resolve by source order, so a
+      // modifier MUST sit after .vhs-btn to override its padding.
+      expect(css.indexOf(".vhs-btn--compact")).toBeGreaterThan(
+        css.indexOf(".vhs-btn {")
+      );
+    });
+  });
+
+  describe(".vhs-input--inline (progress tracker, JD C2)", () => {
+    it("defines a fixed inline width so the input does not need dead w-24", () => {
+      const b = block(".vhs-input--inline");
+      expect(b).toContain("width: 6rem");
+    });
+
+    it("is declared AFTER its .vhs-input base so it survives the custom-layer cascade", () => {
+      expect(css.indexOf(".vhs-input--inline")).toBeGreaterThan(
+        css.indexOf(".vhs-input {")
+      );
+    });
+  });
+
+  describe(".vhs-btn:focus-visible synthetic ground offset (JD C2, R4 parity)", () => {
+    it("paints a ground-colored band so the phosphor outline reads as a ring on every .vhs-btn", () => {
+      const b = block(".vhs-btn:focus-visible");
+      expect(b).toContain("outline: 2px solid var(--vhs-phosphor)");
+      expect(b).toContain("box-shadow: 0 0 0 2px var(--vhs-ground)");
+    });
+  });
+
   describe("toast accent helpers (sonner classNames)", () => {
     it("defines a sodium accent for success toasts, !important to beat sonner's inline border", () => {
       const b = block(".vhs-toast--success");

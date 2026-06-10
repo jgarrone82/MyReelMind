@@ -235,7 +235,7 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
               </p>
               <Link
                 href={`/${lang}/search`}
-                className="vhs-btn vhs-btn--ghost mt-4 text-[var(--vhs-phosphor)] hover:text-[var(--vhs-magenta)]"
+                className="vhs-btn vhs-btn--ghost mt-4"
               >
                 {dict.dashboard.ctaSearch} <span aria-hidden>→</span>
               </Link>

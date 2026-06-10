@@ -96,6 +96,22 @@ describe("RemoveButton", () => {
       expect(onSuccess).toHaveBeenCalled();
     });
 
+    it("styles the cancel button with the compact VHS modifier, not dead Tailwind px/py (JD C2)", async () => {
+      const user = userEvent.setup();
+      renderWithClient(<RemoveButton mediaId="tmdb-1" dict={dict} />);
+
+      await user.click(screen.getByRole("button", { name: "Remove" }));
+
+      const cancel = screen.getByRole("button", { name: "Cancel" });
+      expect(cancel).toHaveClass("vhs-btn");
+      expect(cancel).toHaveClass("vhs-btn--secondary");
+      expect(cancel).toHaveClass("vhs-btn--compact");
+      // px-3/py-1 are dead under the custom-layer cascade (.vhs-btn padding
+      // wins) — they must be dropped, not carried as a lie.
+      expect(cancel.className).not.toMatch(/\bpx-3\b/);
+      expect(cancel.className).not.toMatch(/\bpy-1\b/);
+    });
+
     it("does NOT invalidate when the removal fails", async () => {
       const user = userEvent.setup();
       mockRemoveFromLibrary.mockResolvedValue({ success: false, error: "nope" });

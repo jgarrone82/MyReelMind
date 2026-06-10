@@ -85,6 +85,16 @@ describe("ProgressTracker", () => {
       expect(input.className).not.toMatch(/bg-muted/);
     });
 
+    it("sizes the input with the inline VHS modifier, not dead w-24 (JD C2)", () => {
+      render(<ProgressTracker progress={5} total={12} onChange={() => {}} />);
+
+      const input = screen.getByRole("spinbutton", { name: /progress/i });
+      expect(input).toHaveClass("vhs-input--inline");
+      // w-24 is dead under the custom-layer cascade (.vhs-input width:100%
+      // wins) — it must be dropped, not carried as a lie.
+      expect(input.className).not.toMatch(/\bw-24\b/);
+    });
+
     it("preserves the spinbutton id, role, and min/max bounds", () => {
       render(<ProgressTracker progress={5} total={12} onChange={() => {}} />);
 
