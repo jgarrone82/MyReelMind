@@ -77,6 +77,18 @@ describe("getDictionary", () => {
     checkKeys(esDict as unknown as Record<string, unknown>, dict as unknown as Record<string, unknown>);
   });
 
+  it("should define library.kicker and library.subtitle in both locales", async () => {
+    const enDict = await getDictionary("en");
+    const esDict = await getDictionary("es");
+
+    for (const dict of [enDict, esDict]) {
+      expect(typeof dict.library.kicker).toBe("string");
+      expect(dict.library.kicker.length).toBeGreaterThan(0);
+      expect(typeof dict.library.subtitle).toBe("string");
+      expect(dict.library.subtitle.length).toBeGreaterThan(0);
+    }
+  });
+
   it("should define search.nowShowingHead in both locales", async () => {
     const enDict = await getDictionary("en");
     const esDict = await getDictionary("es");

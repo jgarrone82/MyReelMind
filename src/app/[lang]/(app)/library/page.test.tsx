@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
 import LibraryPage from "./page";
 
 vi.mock("@/lib/auth/server", () => ({
@@ -36,6 +37,8 @@ vi.mock("@/i18n", async () => {
     getDictionary: vi.fn(async () => ({
       library: {
         title: "Library",
+        kicker: "Member Collection",
+        subtitle: "Your rented & queued tapes",
         collection: "items",
         filterAll: "All",
         filterWatching: "Watching",
@@ -110,5 +113,90 @@ describe("LibraryPage auth", () => {
     expect(db.query.userMedia.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expect.anything() })
     );
+  });
+});
+
+describe("LibraryPage VHS chrome (issue #51)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    countWhere.mockResolvedValue([{ count: 0 }]);
+    vi.mocked(db.query.userMedia.findMany).mockResolvedValue([] as never);
+    vi.mocked(getAuthenticatedUser).mockResolvedValue({
+      id: "user-123",
+    } as unknown as Awaited<ReturnType<typeof getAuthenticatedUser>>);
+  });
+
+  it("renders a tape-skeleton grid as the Suspense fallback, hidden from AT", async () => {
+    const tree = (await LibraryPage(props)) as React.ReactElement<{
+      fallback: React.ReactElement;
+    }>;
+    const { container } = render(tree.props.fallback);
+
+    const skeletons = container.querySelectorAll(".tape-skeleton");
+    expect(skeletons.length).toBeGreaterThan(0);
+    expect(
+      skeletons[0].closest("[aria-hidden]"),
+      "decorative skeleton grid must be aria-hidden"
+    ).toBeTruthy();
+  });
+
+  it("renders the empty state as a framed VHS panel with the search CTA intact", async () => {
+    const tree = await LibraryPage(props);
+    render(tree as React.ReactElement);
+
+    const emptyText = screen.getByText("Empty");
+    expect(
+      emptyText.closest('[class*="border-2"]'),
+      "empty state must sit inside a framed panel, not a bare block"
+    ).toBeTruthy();
+
+    const cta = screen.getByText(/Search/).closest("a");
+    expect(cta?.getAttribute("href")).toBe("/en/search");
+  });
+
+  it("renders the decorative kicker and subtitle from i18n keys", async () => {
+    const tree = await LibraryPage(props);
+    render(tree as React.ReactElement);
+
+    expect(screen.getByText("Member Collection")).toBeInTheDocument();
+    expect(screen.getByText(/Your rented & queued tapes/)).toBeInTheDocument();
+  });
+
+  it("preserves every status filter href and marks the active tab", async () => {
+    const tree = await LibraryPage({
+      params: Promise.resolve({ lang: "en" }),
+      searchParams: Promise.resolve({ status: "watching" }),
+    });
+    render(tree as React.ReactElement);
+
+    expect(screen.getByText("All").closest("a")?.getAttribute("href")).toBe(
+      "/en/library"
+    );
+    for (const [label, key] of [
+      ["Watching", "watching"],
+      ["Completed", "completed"],
+      ["Dropped", "dropped"],
+      ["Planned", "want_to_watch"],
+    ] as const) {
+      expect(screen.getByText(label).closest("a")?.getAttribute("href")).toBe(
+        `/en/library?status=${key}`
+      );
+    }
+
+    const active = screen.getByText("Watching").closest("a");
+    expect(active?.getAttribute("aria-current")).toBe("page");
+    expect(screen.getByText("All").closest("a")?.getAttribute("aria-current")).toBeNull();
+  });
+
+  it("retains no shadcn grey/semantic-token chrome on the page shell", async () => {
+    const tree = await LibraryPage(props);
+    const { container } = render(tree as React.ReactElement);
+
+    for (const cls of ["bg-accent", "bg-muted", "text-muted-foreground"]) {
+      expect(
+        container.querySelector(`[class*="${cls}"]`),
+        `residual shadcn class ${cls} found on library page shell`
+      ).toBeNull();
+    }
   });
 });
