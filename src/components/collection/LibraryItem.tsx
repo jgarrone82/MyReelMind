@@ -135,7 +135,7 @@ export function LibraryItem({
   };
 
   return (
-    <div className="flex gap-4 rounded-lg border p-4">
+    <div className="flex gap-4 rounded-[2px] border-2 border-[var(--vhs-ground-3)] bg-[var(--vhs-ground-2)] p-4 shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
       {/* Poster */}
       {posterPath && (
         <Image
@@ -143,13 +143,13 @@ export function LibraryItem({
           alt={title ?? "Media poster"}
           width={96}
           height={144}
-          className="h-24 w-16 flex-shrink-0 rounded object-cover"
+          className="h-24 w-16 flex-shrink-0 rounded-[2px] object-cover"
         />
       )}
 
       {/* Info and controls */}
       <div className="flex flex-1 flex-col gap-2">
-        <h3 className="font-medium">{title}</h3>
+        <h3 className="vhs-display text-lg text-[var(--vhs-cream)]">{title}</h3>
 
         <div className="flex flex-wrap gap-4">
           {/* Status */}
