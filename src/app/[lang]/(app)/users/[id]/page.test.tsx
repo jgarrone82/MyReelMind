@@ -123,7 +123,12 @@ describe("PublicProfilePage owner check", () => {
 
     const link = screen.getByText("Edit settings");
     expect(link.className).not.toContain("text-blue-600");
-    expect(link.className).toContain("var(--vhs-phosphor)");
+    expect(link.className).toContain("focus-visible:ring-2");
+    expect(link.className).toContain("focus-visible:ring-[var(--vhs-phosphor)]");
+    expect(link.className).toContain("focus-visible:ring-offset-2");
+    expect(link.className).toContain(
+      "focus-visible:ring-offset-[var(--vhs-ground)]"
+    );
   });
 });
 
