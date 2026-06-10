@@ -41,4 +41,33 @@ describe("[lang] root layout", () => {
   it("does not reference ThemeToggle", () => {
     expect(content).not.toContain("ThemeToggle");
   });
+
+  describe("Toaster VHS dark theme (issue #51)", () => {
+    it("mounts exactly one Toaster", () => {
+      expect(content.match(/<Toaster/g)).toHaveLength(1);
+    });
+
+    it("sets theme dark to avoid sonner's default light surface", () => {
+      expect(content).toMatch(/<Toaster[\s\S]*?theme="dark"/);
+    });
+
+    it("keeps position top-right", () => {
+      expect(content).toMatch(/<Toaster[\s\S]*?position="top-right"/);
+    });
+
+    it("styles toasts with the VHS ground-2 surface and cream text", () => {
+      expect(content).toContain('background: "var(--vhs-ground-2)"');
+      expect(content).toContain('color: "var(--vhs-cream)"');
+    });
+
+    it("borders toasts with ground-3 and uses the VHS mono font", () => {
+      expect(content).toContain('border: "2px solid var(--vhs-ground-3)"');
+      expect(content).toContain('fontFamily: "var(--vhs-font-mono)"');
+    });
+
+    it("wires the sodium/error accent classes for success and error toasts", () => {
+      expect(content).toContain('success: "vhs-toast--success"');
+      expect(content).toContain('error: "vhs-toast--error"');
+    });
+  });
 });
