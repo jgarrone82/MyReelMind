@@ -314,6 +314,16 @@ body {
      ring-offset (R4 parity) without a per-instance Tailwind ring — which the
      custom-layer cascade would defeat anyway. */
   .vhs-btn:focus-visible { outline: 2px solid var(--vhs-phosphor); outline-offset: 2px; box-shadow: 0 0 0 2px var(--vhs-ground); }
+  /* Primary buttons carry a sodium depth shadow at rest (3px 3px 0 sodium).
+     The ground-band rule above sets box-shadow outright, which would CLOBBER
+     that depth on keyboard focus — and because the base transitions box-shadow
+     (90ms), it would visibly animate away on Tab and back on blur. Stack the
+     sodium depth with the ground band so primaries keep their depth on focus.
+     Scoped to exclude --secondary/--ghost (box-shadow:none at rest): they must
+     NOT gain a sodium shadow that only appears while focused. */
+  .vhs-btn:not(.vhs-btn--secondary):not(.vhs-btn--ghost):focus-visible {
+    box-shadow: 3px 3px 0 var(--vhs-sodium), 0 0 0 2px var(--vhs-ground);
+  }
 
   .vhs-btn--secondary {
     background: transparent;
