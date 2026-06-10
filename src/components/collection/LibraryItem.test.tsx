@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 import { LibraryItem } from "./LibraryItem";
 import { updateStatus, updateRating, updateProgress } from "@/actions/collection";
 
@@ -100,6 +101,10 @@ describe("LibraryItem", () => {
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
+  // GUARD (committed before the C2 VHS restyle, S3): the cosmetic restyle MUST
+  // NOT add, remove, reorder, or rename the #42 D8 invalidation. The exact
+  // object-form call `invalidateQueries({ queryKey: ["library-state"] })` on a
+  // successful status mutation — and the success toast — must survive verbatim.
   describe("library-state invalidation (#42 D8)", () => {
     it("invalidates the library-state cache after a successful status update", async () => {
       const user = userEvent.setup();
@@ -117,6 +122,8 @@ describe("LibraryItem", () => {
           queryKey: ["library-state"],
         });
       });
+      // S3: the success toast still shows after the badge-affecting mutation.
+      expect(toast.success).toHaveBeenCalledWith(baseProps.dict.statusUpdated);
     });
 
     it("does NOT invalidate when the status update fails", async () => {

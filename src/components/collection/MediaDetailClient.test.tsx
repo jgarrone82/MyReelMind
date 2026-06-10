@@ -149,6 +149,10 @@ describe("MediaDetailClient", () => {
     });
   });
 
+  // GUARD (committed before the C2 VHS restyle, S1): the cosmetic restyle MUST
+  // NOT add, remove, reorder, or rename the #42 D8 invalidation. The exact
+  // object-form call `invalidateQueries({ queryKey: ["library-state"] })` on a
+  // successful status mutation must survive verbatim through the panel restyle.
   describe("library-state invalidation (#42 D8)", () => {
     it("invalidates the library-state cache after a successful status update", async () => {
       const user = userEvent.setup();
