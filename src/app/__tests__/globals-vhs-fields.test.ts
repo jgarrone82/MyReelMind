@@ -75,4 +75,16 @@ describe("globals.css VHS field utilities", () => {
       expect(b).toContain("cursor: not-allowed");
     });
   });
+
+  describe("toast accent helpers (sonner classNames)", () => {
+    it("defines a sodium accent for success toasts", () => {
+      const b = block(".vhs-toast--success");
+      expect(b).toContain("border-left: 3px solid var(--vhs-sodium)");
+    });
+
+    it("defines an error accent for error toasts", () => {
+      const b = block(".vhs-toast--error");
+      expect(b).toContain("border-left: 3px solid var(--vhs-error)");
+    });
+  });
 });

@@ -397,6 +397,12 @@ body {
   }
   .vhs-select:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  /* Toast accents for sonner classNames (issue #51). !important is required
+     because sonner applies toastOptions.style as an inline `border` shorthand,
+     which would otherwise override the per-type accent class. */
+  .vhs-toast--success { border-left: 3px solid var(--vhs-sodium) !important; }
+  .vhs-toast--error { border-left: 3px solid var(--vhs-error) !important; }
+
   /* Tape skeletons — decorative loading placeholder mimicking a VHS box card
      (search-directory §7). Purely cosmetic; mark the container aria-hidden. */
   .tape-skeleton {
