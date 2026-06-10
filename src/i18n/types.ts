@@ -181,6 +181,8 @@ export interface Dictionary {
   };
   settings: {
     title: string;
+    kicker: string;
+    subtitle: string;
     displayName: string;
     avatarUrl: string;
     privacy: string;

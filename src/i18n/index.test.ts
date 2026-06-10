@@ -89,6 +89,18 @@ describe("getDictionary", () => {
     }
   });
 
+  it("should define settings.kicker and settings.subtitle in both locales", async () => {
+    const enDict = await getDictionary("en");
+    const esDict = await getDictionary("es");
+
+    for (const dict of [enDict, esDict]) {
+      expect(typeof dict.settings.kicker).toBe("string");
+      expect(dict.settings.kicker.length).toBeGreaterThan(0);
+      expect(typeof dict.settings.subtitle).toBe("string");
+      expect(dict.settings.subtitle.length).toBeGreaterThan(0);
+    }
+  });
+
   it("should define search.nowShowingHead in both locales", async () => {
     const enDict = await getDictionary("en");
     const esDict = await getDictionary("es");
