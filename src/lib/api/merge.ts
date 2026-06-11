@@ -112,14 +112,3 @@ export function normalizeAniListResults(media: AniListMedia[] | null): MediaItem
     return result;
   });
 }
-
-export function mergeSearchResults(
-  tmdbResponse: TmdbSearchResponse | null,
-  aniListMedia: AniListMedia[] | null
-): MediaItem[] {
-  const tmdbResults = normalizeTmdbResults(tmdbResponse);
-  const aniListResults = normalizeAniListResults(aniListMedia);
-
-  // Simple concatenation - could be enhanced with deduplication logic later
-  return [...tmdbResults, ...aniListResults];
-}
