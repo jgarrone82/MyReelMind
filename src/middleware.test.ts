@@ -81,8 +81,8 @@ describe("middleware", () => {
   });
 
   describe("auth gate - protected routes", () => {
-    it("should redirect /dashboard to login when no session", async () => {
-      const req = createRequest("/es/dashboard");
+    it("should redirect /settings to login when no session", async () => {
+      const req = createRequest("/es/settings");
       const res = await middleware(req);
       expect(res.status).toBe(307);
       expect(res.headers.get("location")).toBe("http://localhost:3000/es/login");
@@ -97,7 +97,7 @@ describe("middleware", () => {
   });
 
   describe("auth gate - auth routes with session", () => {
-    it("should redirect /login to dashboard when session exists", async () => {
+    it("should redirect /login to home when session exists", async () => {
       vi.mocked(createServerClient).mockReturnValue({
         auth: {
           getSession: vi.fn().mockResolvedValue({
@@ -114,10 +114,10 @@ describe("middleware", () => {
       const req = createRequest("/es/login");
       const res = await middleware(req);
       expect(res.status).toBe(307);
-      expect(res.headers.get("location")).toBe("http://localhost:3000/es/dashboard");
+      expect(res.headers.get("location")).toBe("http://localhost:3000/es");
     });
 
-    it("should redirect /signup to dashboard when session exists", async () => {
+    it("should redirect /signup to home when session exists", async () => {
       vi.mocked(createServerClient).mockReturnValue({
         auth: {
           getSession: vi.fn().mockResolvedValue({
@@ -134,7 +134,7 @@ describe("middleware", () => {
       const req = createRequest("/es/signup");
       const res = await middleware(req);
       expect(res.status).toBe(307);
-      expect(res.headers.get("location")).toBe("http://localhost:3000/es/dashboard");
+      expect(res.headers.get("location")).toBe("http://localhost:3000/es");
     });
   });
 

@@ -23,9 +23,9 @@ export default async function VerifyEmailPage({
     redirect(`/${lang}/login`);
   }
 
-  // If email is already confirmed, redirect to dashboard
+  // If email is already confirmed, redirect to the home dashboard at /{lang}
   if (user.email_confirmed_at) {
-    redirect(`/${lang}/dashboard`);
+    redirect(`/${lang}`);
   }
 
   const t = dictionary.auth.emailVerification;

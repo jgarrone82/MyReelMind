@@ -78,7 +78,7 @@ export function VerifyEmailForm({ email, dict, lang }: VerifyEmailFormProps) {
 
       <div className="text-center">
         <Link
-          href={`/${lang}/dashboard`}
+          href={`/${lang}`}
           className="vhs-mono text-[0.8rem] text-[var(--vhs-acid)] underline decoration-[var(--vhs-acid)] underline-offset-2 hover:text-[var(--vhs-cream)]"
         >
           {t.goToDashboard}

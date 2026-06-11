@@ -44,7 +44,7 @@ export async function signIn(
   await ensureUserProfile(data.user);
 
   revalidatePath("/");
-  redirect("/dashboard");
+  redirect("/");
 }
 
 /**
@@ -86,9 +86,11 @@ export async function signUp(
 
   revalidatePath("/");
 
-  // If email is already confirmed (OAuth or auto-confirm config), go to dashboard
+  // If email is already confirmed (OAuth or auto-confirm config), go to the
+  // home dashboard. Middleware redirects bare "/" to the default-locale root
+  // (/${defaultLocale}); it does not preserve the request's current locale.
   if (data.user.email_confirmed_at) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   // Otherwise redirect to verification-sent page

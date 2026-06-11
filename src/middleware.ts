@@ -4,7 +4,7 @@ import { locales, defaultLocale } from "@/i18n";
 import { createServerClient } from "@supabase/ssr";
 import { ensureUserProfile } from "@/lib/auth/profile-sync";
 
-const protectedRoutes = ["/dashboard", "/library", "/verify-email", "/settings"];
+const protectedRoutes = ["/library", "/verify-email", "/settings"];
 const authRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
 export async function middleware(request: NextRequest) {
@@ -97,10 +97,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Auth route with session → redirect to dashboard
+  // Auth route with session → redirect to the home dashboard at /{locale}
   if (isAuthRoute && session) {
-    const dashboardUrl = new URL(`/${locale}/dashboard`, request.url);
-    return NextResponse.redirect(dashboardUrl);
+    const homeUrl = new URL(`/${locale}`, request.url);
+    return NextResponse.redirect(homeUrl);
   }
 
   return supabaseResponse;
