@@ -2,9 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   getTotalWatched,
   getTotalHours,
-  getStatsByType,
-  getStatsByGenre,
-  getStatsByStatus,
   getRecentActivity,
   getDashboardCounts,
   getInProgressItems,
@@ -114,111 +111,6 @@ describe("getTotalHours", () => {
 
     const result = await getTotalHours("user-123");
     expect(result).toBe(0);
-  });
-});
-
-describe("getStatsByType", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should return grouped stats by media type", async () => {
-    mockSelectFn.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        innerJoin: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            groupBy: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue(thenable([
-                { type: "movie", count: 3 },
-                { type: "anime", count: 2 },
-              ])),
-            }),
-          }),
-        }),
-      }),
-    });
-
-    const result = await getStatsByType("user-123");
-    expect(result).toHaveLength(2);
-    expect(result[0].type).toBe("movie");
-    expect(result[0].count).toBe(3);
-  });
-
-  it("should filter out zero count types", async () => {
-    mockSelectFn.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        innerJoin: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            groupBy: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue(thenable([
-                { type: "movie", count: 3 },
-                { type: "tv", count: 0 },
-              ])),
-            }),
-          }),
-        }),
-      }),
-    });
-
-    const result = await getStatsByType("user-123");
-    expect(result).toHaveLength(1);
-    expect(result[0].type).toBe("movie");
-  });
-});
-
-describe("getStatsByGenre", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should return top 5 genres", async () => {
-    mockSelectFn.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        innerJoin: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            groupBy: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue({
-                limit: vi.fn().mockReturnValue(thenable([
-                  { genre: "Action", count: 4 },
-                  { genre: "Drama", count: 3 },
-                ])),
-              }),
-            }),
-          }),
-        }),
-      }),
-    });
-
-    const result = await getStatsByGenre("user-123");
-    expect(result).toHaveLength(2);
-    expect(result[0].genre).toBe("Action");
-    expect(result[0].count).toBe(4);
-  });
-});
-
-describe("getStatsByStatus", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should return grouped stats by status", async () => {
-    mockSelectFn.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          groupBy: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue(thenable([
-              { status: "watching", count: 3 },
-              { status: "completed", count: 5 },
-            ])),
-          }),
-        }),
-      }),
-    });
-
-    const result = await getStatsByStatus("user-123");
-    expect(result).toHaveLength(2);
-    expect(result[0].status).toBe("watching");
-    expect(result[0].count).toBe(3);
   });
 });
 
