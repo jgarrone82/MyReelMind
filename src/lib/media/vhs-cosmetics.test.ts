@@ -104,6 +104,34 @@ describe("vhs-cosmetics", () => {
       expect(padded).toBe("74000");
       expect(full).toBe("MRM-74000-A");
     });
+
+    // D3 dedup guard (R8/S8): the media detail route consumed a LOCAL
+    // deriveCatalog that padded with `.padStart(5,"0")` but did NOT call
+    // `.slice(-5)`. This export adds `.slice(-5)`, which only diverges from the
+    // local impl for ids whose digit count exceeds 5. The detail route only
+    // ever receives the COMPOSITE PUBLIC id (`tmdb-603` / `anilist-21`), whose
+    // numeric part is small, so `.slice(-5)` is a provable no-op across that
+    // domain and the export is output-identical to the deleted local impl.
+    // This pins that input domain so the dedup is PROVEN behavior-preserving.
+    it("is output-identical to the deleted page-local impl for the public-id domain", () => {
+      expect(deriveCatalog("tmdb-603")).toEqual({
+        full: "MRM-00603-A",
+        padded: "00603",
+        sub: "00603",
+      });
+      expect(deriveCatalog("anilist-21")).toEqual({
+        full: "MRM-00021-A",
+        padded: "00021",
+        sub: "00021",
+      });
+      // For the public-id domain (digits ≤ 5) the export's extra `.slice(-5)`
+      // is identity, so it matches the local `.padStart(5,"0")`-only result.
+      for (const id of ["tmdb-603", "anilist-21", "tmdb-12345", "anilist-1"]) {
+        const numeric = id.replace(/\D/g, "");
+        const localPadded = numeric.padStart(5, "0"); // the deleted local impl
+        expect(deriveCatalog(id).padded).toBe(localPadded);
+      }
+    });
   });
 
   describe("deriveUpc", () => {
