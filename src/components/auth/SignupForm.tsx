@@ -76,7 +76,7 @@ export function SignupForm({ lang, dict }: SignupFormProps) {
     <form action={action} className="flex flex-col gap-4">
       {/* Form-number stamp — decorative carbon-copy detail from the prototype. */}
       <div className="flex items-center justify-between border-b-2 border-[var(--vhs-ground-3)] pb-2.5">
-        <span className="vhs-kicker text-[0.7rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]">
+        <span className="vhs-kicker text-[0.7rem] text-[var(--vhs-cream-dim)]">
           {t.formNo}
         </span>
         <span
@@ -97,7 +97,7 @@ export function SignupForm({ lang, dict }: SignupFormProps) {
             ⚠
           </span>
           <div>
-            <div className="vhs-kicker text-[0.78rem] tracking-[0.16em]">
+            <div className="vhs-kicker text-[0.78rem]">
               {t.errorHeadline}
             </div>
             <p className="vhs-mono mt-0.5 text-[0.78rem] leading-snug">
@@ -116,7 +116,7 @@ export function SignupForm({ lang, dict }: SignupFormProps) {
           <span className="vhs-kicker text-[0.8rem]">{t.emailLabel}</span>
           <span
             aria-hidden
-            className="vhs-mono text-[0.6rem] uppercase tracking-[0.1em] text-[var(--vhs-cream-dim)]/60"
+            className="vhs-mono text-[0.6rem] uppercase text-[var(--vhs-cream-dim)]/60"
           >
             {t.emailRequired}
           </span>
@@ -149,7 +149,7 @@ export function SignupForm({ lang, dict }: SignupFormProps) {
             aria-pressed={showPassword}
             aria-controls="password"
             aria-label={`${showPassword ? t.hidePassword : t.showPassword} ${t.passwordLabel}`}
-            className="vhs-kicker rounded-[2px] p-0 text-[0.7rem] tracking-[0.14em] text-[var(--vhs-phosphor)] hover:text-[var(--vhs-cream)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)]"
+            className="vhs-kicker rounded-[2px] p-0 text-[0.7rem] text-[var(--vhs-phosphor)] hover:text-[var(--vhs-cream)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)]"
           >
             {showPassword ? t.hidePassword : t.showPassword}
           </button>
@@ -172,7 +172,7 @@ export function SignupForm({ lang, dict }: SignupFormProps) {
           {/* Caption for the strength meter, styled like the VHS field labels. */}
           <span
             id="signup-strength-caption"
-            className="vhs-kicker text-[0.6rem] uppercase tracking-[0.1em] text-[var(--vhs-cream-dim)]/60"
+            className="vhs-kicker text-[0.6rem] uppercase text-[var(--vhs-cream-dim)]/60"
           >
             {t.strengthLabel}
           </span>
@@ -219,7 +219,7 @@ export function SignupForm({ lang, dict }: SignupFormProps) {
             aria-pressed={showConfirm}
             aria-controls="confirmPassword"
             aria-label={`${showConfirm ? t.hidePassword : t.showPassword} ${t.confirmLabel}`}
-            className="vhs-kicker rounded-[2px] p-0 text-[0.7rem] tracking-[0.14em] text-[var(--vhs-phosphor)] hover:text-[var(--vhs-cream)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)]"
+            className="vhs-kicker rounded-[2px] p-0 text-[0.7rem] text-[var(--vhs-phosphor)] hover:text-[var(--vhs-cream)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)]"
           >
             {showConfirm ? t.hidePassword : t.showPassword}
           </button>
