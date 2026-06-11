@@ -35,7 +35,7 @@ export function AddToLibraryButton({ mediaId, label }: AddToLibraryButtonProps) 
       <button
         type="submit"
         disabled={isPending}
-        className="vhs-btn vhs-aberrate disabled:opacity-50"
+        className="vhs-btn vhs-focus vhs-aberrate disabled:opacity-50"
       >
         {isPending ? "..." : label}
       </button>

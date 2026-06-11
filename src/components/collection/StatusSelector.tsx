@@ -41,7 +41,7 @@ export function StatusSelector({ status, onChange, disabled, dict }: StatusSelec
         onChange={(e) => onChange(e.target.value as WatchStatus)}
         disabled={disabled}
         aria-label="Watch status"
-        className="vhs-select text-sm"
+        className="vhs-select vhs-focus text-sm"
       >
         {(Object.keys(labels).filter(k => k !== 'label') as WatchStatus[]).map((key) => (
           <option key={key} value={key}>

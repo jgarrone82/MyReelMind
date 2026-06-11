@@ -290,7 +290,7 @@ function SubmitButton({
       type="submit"
       disabled={pending}
       aria-busy={pending}
-      className="vhs-btn vhs-aberrate mt-1 w-full justify-center disabled:opacity-85"
+      className="vhs-btn vhs-focus vhs-aberrate mt-1 w-full justify-center disabled:opacity-85"
     >
       {pending && (
         <span

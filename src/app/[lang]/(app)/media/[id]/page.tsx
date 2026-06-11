@@ -231,7 +231,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
             primary={
               <Link
                 href={`/${lang}/login`}
-                className="vhs-btn vhs-aberrate"
+                className="vhs-btn vhs-focus vhs-aberrate"
               >
                 {dict.media.detail.signInPrimary}
               </Link>
@@ -239,7 +239,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
             secondary={
               <Link
                 href={`/${lang}/signup`}
-                className="vhs-btn vhs-btn--secondary"
+                className="vhs-btn vhs-focus vhs-btn--secondary"
               >
                 {dict.media.detail.signInSecondary}
               </Link>

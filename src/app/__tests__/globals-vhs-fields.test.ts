@@ -35,9 +35,14 @@ describe("globals.css VHS field utilities", () => {
       expect(b).toContain("border: 2px solid var(--vhs-ground-3)");
     });
 
-    it("defines a phosphor focus-visible outline", () => {
+    it("keeps the phosphor border on focus (the outline now lives on the shared .vhs-focus utility — issue #51 D3)", () => {
+      // D3 extracted the duplicated `outline: 2px solid var(--vhs-phosphor)` into
+      // the shared `.vhs-focus:focus-visible` utility. `.vhs-input:focus-visible`
+      // keeps only its per-element extra (the phosphor border-color); the outline
+      // is asserted on `.vhs-focus` below.
       const b = block(".vhs-input:focus-visible");
-      expect(b).toContain("outline: 2px solid var(--vhs-phosphor)");
+      expect(b).toContain("border-color: var(--vhs-phosphor)");
+      expect(b).not.toContain("outline:");
     });
 
     it("defines a dim placeholder state", () => {
@@ -65,14 +70,51 @@ describe("globals.css VHS field utilities", () => {
       expect(b).toContain("border: 2px solid var(--vhs-ground-3)");
     });
 
-    it("defines a phosphor focus-visible outline", () => {
+    it("keeps the phosphor border on focus (the outline now lives on the shared .vhs-focus utility — issue #51 D3)", () => {
       const b = block(".vhs-select:focus-visible");
-      expect(b).toContain("outline: 2px solid var(--vhs-phosphor)");
+      expect(b).toContain("border-color: var(--vhs-phosphor)");
+      expect(b).not.toContain("outline:");
     });
 
     it("defines a disabled state", () => {
       const b = block(".vhs-select:disabled");
       expect(b).toContain("cursor: not-allowed");
+    });
+  });
+
+  describe(".vhs-focus shared focus ring (issue #51 D3)", () => {
+    it("is the single source of the phosphor outline + offset", () => {
+      const b = block(".vhs-focus:focus-visible");
+      expect(b).toContain("outline: 2px solid var(--vhs-phosphor)");
+      expect(b).toContain("outline-offset: 2px");
+    });
+
+    it("touches outline ONLY — never box-shadow — so the .vhs-btn depth stack survives", () => {
+      const b = block(".vhs-focus:focus-visible");
+      expect(b).not.toContain("box-shadow");
+    });
+
+    it("is declared BEFORE the btn/input/select rules so their later extras win at equal specificity (load-bearing order)", () => {
+      const focusIdx = css.indexOf(".vhs-focus:focus-visible");
+      expect(focusIdx).toBeGreaterThan(-1);
+      // Earlier in source order than .vhs-btn and the field rules.
+      expect(focusIdx).toBeLessThan(css.indexOf(".vhs-btn {"));
+      expect(focusIdx).toBeLessThan(css.indexOf(".vhs-input {"));
+      expect(focusIdx).toBeLessThan(css.indexOf(".vhs-select {"));
+    });
+
+    it("is declared BEFORE the aria-invalid error-color override so the error outline still wins", () => {
+      const focusIdx = css.indexOf(".vhs-focus:focus-visible");
+      const ariaInvalidFocusIdx = css.indexOf(
+        '.vhs-input[aria-invalid="true"]:focus-visible'
+      );
+      expect(ariaInvalidFocusIdx).toBeGreaterThan(-1);
+      expect(focusIdx).toBeLessThan(ariaInvalidFocusIdx);
+      // The override patches outline-color (longhand) to the error token; it is
+      // later in source AND higher specificity (class + attribute + pseudo), so
+      // it wins over the .vhs-focus outline shorthand.
+      const override = block('.vhs-input[aria-invalid="true"]:focus-visible');
+      expect(override).toContain("outline-color: var(--vhs-error)");
     });
   });
 
@@ -110,9 +152,14 @@ describe("globals.css VHS field utilities", () => {
   });
 
   describe(".vhs-btn:focus-visible synthetic ground offset (JD C2, R4 parity)", () => {
-    it("paints a ground-colored band so the phosphor outline reads as a ring on every .vhs-btn", () => {
+    it("paints a ground-colored band so the shared .vhs-focus phosphor outline reads as a ring on every .vhs-btn", () => {
+      // D3: the phosphor outline now lives on the shared `.vhs-focus` utility
+      // (asserted in its own describe). `.vhs-btn:focus-visible` keeps ONLY the
+      // synthetic ground-colored band so the outline still reads as a ring; it
+      // must NOT carry the outline itself (single source) — and crucially must
+      // still set the box-shadow band, which .vhs-focus never touches.
       const b = block(".vhs-btn:focus-visible");
-      expect(b).toContain("outline: 2px solid var(--vhs-phosphor)");
+      expect(b).not.toContain("outline:");
       expect(b).toContain("box-shadow: 0 0 0 2px var(--vhs-ground)");
     });
 

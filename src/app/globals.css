@@ -283,6 +283,20 @@ body {
     border: 1px solid var(--vhs-ground);
   }
 
+  /* Shared phosphor focus ring (issue #51). Single source for the focus-visible
+     outline previously triplicated on the button, input and select utilities.
+     Declared EARLY in @layer utilities — before the vhs-btn rule and before the
+     aria-invalid error-color override on the input — so those later,
+     equal-or-higher-specificity rules still win on the cascade (the aria-invalid
+     override resets outline-color to the error token). It touches outline +
+     outline-offset ONLY, never box-shadow, so the vhs-btn ground-band and
+     sodium-depth box-shadow stack survive untouched. Call-sites opt in by adding
+     the vhs-focus class alongside the button/input/select utility. */
+  .vhs-focus:focus-visible {
+    outline: 2px solid var(--vhs-phosphor);
+    outline-offset: 2px;
+  }
+
   .vhs-btn {
     font-family: var(--vhs-font-kicker);
     text-transform: uppercase;
@@ -313,7 +327,7 @@ body {
      ground-colored band in that gap gives every .vhs-btn a synthetic
      ring-offset (R4 parity) without a per-instance Tailwind ring — which the
      custom-layer cascade would defeat anyway. */
-  .vhs-btn:focus-visible { outline: 2px solid var(--vhs-phosphor); outline-offset: 2px; box-shadow: 0 0 0 2px var(--vhs-ground); }
+  .vhs-btn:focus-visible { box-shadow: 0 0 0 2px var(--vhs-ground); }
   /* Primary buttons carry a sodium depth shadow at rest (3px 3px 0 sodium).
      The ground-band rule above sets box-shadow outright, which would CLOBBER
      that depth on keyboard focus — and because the base transitions box-shadow
@@ -384,8 +398,6 @@ body {
   }
   .vhs-input::placeholder { color: var(--vhs-cream-dim); opacity: 0.6; }
   .vhs-input:focus-visible {
-    outline: 2px solid var(--vhs-phosphor);
-    outline-offset: 2px;
     border-color: var(--vhs-phosphor);
   }
   .vhs-input:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -423,8 +435,6 @@ body {
     transition: border-color 90ms cubic-bezier(0.3, 0, 0.7, 1);
   }
   .vhs-select:focus-visible {
-    outline: 2px solid var(--vhs-phosphor);
-    outline-offset: 2px;
     border-color: var(--vhs-phosphor);
   }
   .vhs-select:disabled { opacity: 0.5; cursor: not-allowed; }

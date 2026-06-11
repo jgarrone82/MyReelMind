@@ -57,7 +57,7 @@ export function ProgressTracker({
           max={total ?? undefined}
           disabled={disabled}
           aria-label="Progress"
-          className="vhs-input vhs-input--inline text-sm"
+          className="vhs-input vhs-focus vhs-input--inline text-sm"
         />
         <span className="vhs-mono text-sm text-[var(--vhs-cream-dim)]">
           {total !== null
