@@ -1,7 +1,7 @@
 import { eq, desc, count, sql, and, inArray, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { userMedia, mediaItems } from "@/db/schema";
-import type { UserMediaWithMedia, TypeStat, GenreStat, StatusStat, DashboardCounts } from "./types";
+import type { UserMediaWithMedia, DashboardCounts } from "./types";
 
 export async function getTotalWatched(userId: string): Promise<number> {
   const [result] = await db
@@ -23,68 +23,6 @@ export async function getTotalHours(userId: string): Promise<number> {
     .where(and(eq(userMedia.userId, userId), eq(userMedia.status, "completed")));
 
   return (result?.sum ?? 0) / 60;
-}
-
-export async function getStatsByType(
-  userId: string
-): Promise<TypeStat[]> {
-  const result = await db
-    .select({
-      type: mediaItems.type,
-      count: count(),
-    })
-    .from(userMedia)
-    .innerJoin(mediaItems, eq(userMedia.mediaItemId, mediaItems.id))
-    .where(eq(userMedia.userId, userId))
-    .groupBy(mediaItems.type)
-    .orderBy(desc(count()));
-
-  return result
-    .map((row) => ({
-      type: row.type as "movie" | "tv" | "anime",
-      count: row.count,
-    }))
-    .filter((s) => s.count > 0);
-}
-
-export async function getStatsByGenre(
-  userId: string
-): Promise<GenreStat[]> {
-  const result = await db
-    .select({
-      genre: sql<string>`jsonb_array_elements_text(${mediaItems.genres})`,
-      count: count(),
-    })
-    .from(userMedia)
-    .innerJoin(mediaItems, eq(userMedia.mediaItemId, mediaItems.id))
-    .where(eq(userMedia.userId, userId))
-    .groupBy(sql`jsonb_array_elements_text(${mediaItems.genres})`)
-    .orderBy(desc(count()))
-    .limit(5);
-
-  return result.map((row) => ({
-    genre: row.genre,
-    count: row.count,
-  }));
-}
-
-export async function getStatsByStatus(
-  userId: string
-): Promise<StatusStat[]> {
-  const result = await db
-    .select({
-      status: userMedia.status,
-      count: count(),
-    })
-    .from(userMedia)
-    .where(eq(userMedia.userId, userId))
-    .groupBy(userMedia.status)
-    .orderBy(desc(count()));
-
-  return result.map((row) => ({
-    status: row.status as "want_to_watch" | "watching" | "completed" | "paused" | "dropped",
-    count: row.count,
-  }));
 }
 
 export async function getRecentActivity(

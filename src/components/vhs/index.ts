@@ -14,9 +14,6 @@ export type { BarcodeProps } from "./Barcode";
 export { Receipt } from "./Receipt";
 export type { ReceiptProps, ReceiptRow } from "./Receipt";
 
-export { PaperPanel } from "./PaperPanel";
-export type { PaperPanelProps } from "./PaperPanel";
-
 export { PosterPlaceholder } from "./PosterPlaceholder";
 export type {
   PosterHue,

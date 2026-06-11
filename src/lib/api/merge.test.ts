@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeTmdbResults, normalizeAniListResults, mergeSearchResults } from "./merge";
+import { normalizeTmdbResults, normalizeAniListResults } from "./merge";
 
 describe("Search Normalizer", () => {
   describe("normalizeTmdbResults", () => {
@@ -222,67 +222,6 @@ describe("Search Normalizer", () => {
 
       expect(normalized[0].title).toBe("Only Romaji");
       expect(normalized[0].originalTitle).toBe("ネイティブ");
-    });
-  });
-
-  describe("mergeSearchResults", () => {
-    it("should merge TMDB and AniList results", () => {
-      const tmdbResults = {
-        results: [
-          { id: 1, media_type: "movie", title: "TMDB Movie", poster_path: "/1.jpg", backdrop_path: null, genre_ids: [] },
-        ],
-      };
-      const aniListResults = [
-        {
-          id: 2,
-          title: { romaji: "AniList Anime", english: null },
-          type: "ANIME" as const,
-          coverImage: { large: "https://anilist.com/2.jpg", medium: "https://anilist.com/2_medium.jpg" },
-          genres: [],
-          startDate: { year: 2020 },
-        },
-      ];
-
-      const merged = mergeSearchResults(tmdbResults as any, aniListResults as any);
-
-      expect(merged).toHaveLength(2);
-      expect(merged.map((i) => i.source)).toEqual(["tmdb", "anilist"]);
-    });
-
-    it("should handle TMDB failure gracefully", () => {
-      const aniListResults = [
-        {
-          id: 2,
-          title: { romaji: "Only AniList", english: null },
-          type: "ANIME" as const,
-          coverImage: { large: "https://anilist.com/2.jpg", medium: "https://anilist.com/2_medium.jpg" },
-          genres: [],
-          startDate: { year: 2020 },
-        },
-      ];
-
-      const merged = mergeSearchResults(null, aniListResults as any);
-
-      expect(merged).toHaveLength(1);
-      expect(merged[0].source).toBe("anilist");
-    });
-
-    it("should handle AniList failure gracefully", () => {
-      const tmdbResults = {
-        results: [
-          { id: 1, media_type: "movie", title: "Only TMDB", poster_path: "/1.jpg", backdrop_path: null, genre_ids: [] },
-        ],
-      };
-
-      const merged = mergeSearchResults(tmdbResults as any, null);
-
-      expect(merged).toHaveLength(1);
-      expect(merged[0].source).toBe("tmdb");
-    });
-
-    it("should return empty array when both fail", () => {
-      const merged = mergeSearchResults(null, null);
-      expect(merged).toEqual([]);
     });
   });
 });
