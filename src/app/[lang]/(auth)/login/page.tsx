@@ -37,7 +37,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
             >
               {t.headline}
             </h1>
-            <div className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+            <div className="vhs-mono mt-1.5 text-[0.72rem] text-[var(--vhs-phosphor)]">
               ▸ {t.subtitle}
             </div>
           </div>
@@ -70,7 +70,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
 
           <OAuthButtons dict={dictionary} />
 
-          <div className="vhs-mono mt-4 text-center text-[0.6rem] tracking-[0.12em] text-[var(--vhs-cream-dim)]">
+          <div className="vhs-mono mt-4 text-center text-[0.6rem] text-[var(--vhs-cream-dim)]">
             {t.terminalFooter}
           </div>
         </CRTFrame>
@@ -78,7 +78,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
         {/* Framed "new here" signup link */}
         <Link
           href={`/${lang}/signup`}
-          className="vhs-kicker mt-[18px] block border-2 border-dashed border-[var(--vhs-acid)] bg-[rgba(214,255,62,0.04)] px-4 py-3.5 text-center text-[0.95rem] tracking-[0.14em] text-[var(--vhs-acid)] no-underline transition-shadow duration-150 hover:bg-[rgba(214,255,62,0.1)] hover:shadow-[0_0_18px_rgba(214,255,62,0.25)]"
+          className="vhs-kicker mt-[18px] block border-2 border-dashed border-[var(--vhs-acid)] bg-[rgba(214,255,62,0.04)] px-4 py-3.5 text-center text-[0.95rem] text-[var(--vhs-acid)] no-underline transition-shadow duration-150 hover:bg-[rgba(214,255,62,0.1)] hover:shadow-[0_0_18px_rgba(214,255,62,0.25)]"
         >
           {t.newHere} →
         </Link>
