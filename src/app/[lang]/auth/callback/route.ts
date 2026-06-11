@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(new URL(`/${locale}/login?error=oauth_exchange_failed`, request.url));
       }
 
-      return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+      return NextResponse.redirect(new URL(`/${locale}`, request.url));
     }
 
     // Password reset or email verification callback (type=recovery or type=signup)

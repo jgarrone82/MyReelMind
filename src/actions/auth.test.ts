@@ -86,8 +86,10 @@ describe("signIn Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "password123");
 
-    // Should throw redirect but that's expected
-    await expect(signIn({}, formData)).rejects.toThrow();
+    // Successful sign in redirects to the home dashboard at "/" (middleware
+    // localizes it), NOT the phantom /dashboard route. Anchored regex so a
+    // stray "/dashboard" cannot satisfy a loose substring match.
+    await expect(signIn({}, formData)).rejects.toThrow(/^Redirect to: \/$/);
 
     expect(ensureUserProfile).toHaveBeenCalledWith(mockUser);
     expect(revalidatePath).toHaveBeenCalledWith("/");
@@ -165,7 +167,7 @@ describe("signUp Server Action", () => {
     await expect(signUp({}, formData)).rejects.toThrow("Redirect to: /verification-sent?email=test%40example.com");
   });
 
-  it("should redirect to dashboard when email is already confirmed", async () => {
+  it("should redirect to home when email is already confirmed", async () => {
     const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: "2024-01-01T00:00:00Z" };
     vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
       data: { user: mockUser, session: {} },
@@ -176,7 +178,7 @@ describe("signUp Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "password123");
 
-    await expect(signUp({}, formData)).rejects.toThrow("Redirect to: /dashboard");
+    await expect(signUp({}, formData)).rejects.toThrow(/^Redirect to: \/$/);
   });
 });
 

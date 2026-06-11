@@ -30,14 +30,15 @@ describe("VerifyEmailPage", () => {
     );
   });
 
-  it("should redirect to dashboard if email is confirmed", async () => {
+  it("should redirect to home if email is confirmed", async () => {
     vi.mocked(getAuthenticatedUser).mockResolvedValue({
       id: "1", email: "test@example.com", email_confirmed_at: "2024-01-01",
     } as any);
 
     const params = Promise.resolve({ lang: "en" });
+    // Anchored so a stray "/en/dashboard" cannot satisfy a loose substring match.
     await expect(VerifyEmailPage({ params })).rejects.toThrow(
-      "Redirect to: /en/dashboard"
+      /^Redirect to: \/en$/
     );
   });
 

@@ -14,7 +14,7 @@ test.describe("Avatar Upload", () => {
     await page.fill('input[name="password"]', "testpassword123");
     await page.click('button[type="submit"]');
 
-    // Wait for redirect to dashboard
+    // Wait for redirect to the localized home
     await page.waitForURL(/\/(en|es)\//, { timeout: 10000 });
 
     // Navigate to settings

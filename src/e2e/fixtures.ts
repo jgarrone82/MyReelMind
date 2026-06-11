@@ -32,7 +32,9 @@ export const test = base.extend<{
       await page.fill('input[type="email"]', user.email);
       await page.fill('input[type="password"]', user.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL(/\/en\/dashboard/);
+      // Sign-in redirects to "/" → middleware localizes to the default-locale
+      // home (/${defaultLocale}); match either locale's home, not /dashboard.
+      await page.waitForURL(/\/(en|es)\/?$/);
     });
   },
 });

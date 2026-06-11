@@ -40,10 +40,13 @@ describe("VerifyEmailForm", () => {
     expect(screen.getByRole("button", { name: /resend/i })).toBeInTheDocument();
   });
 
-  it("should render dashboard link", () => {
+  it("should render dashboard link pointing at the localized home", () => {
     render(<VerifyEmailForm email="test@example.com" dict={mockDict} lang="en" />);
 
-    expect(screen.getByRole("link", { name: /go to dashboard/i })).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /go to dashboard/i });
+    expect(link).toBeInTheDocument();
+    // The dashboard lives at /{lang} (the home route), NOT a phantom /dashboard.
+    expect(link).toHaveAttribute("href", "/en");
   });
 
   it("should render the verify subtitle", () => {

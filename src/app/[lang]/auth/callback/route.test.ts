@@ -32,7 +32,7 @@ describe('Auth Callback Route', () => {
   });
 
   describe('OAuth callback (type=code)', () => {
-    it('should exchange code for session and redirect to dashboard on success', async () => {
+    it('should exchange code for session and redirect to home on success', async () => {
       mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null });
 
       const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?type=code&code=abc123'));
@@ -40,7 +40,8 @@ describe('Auth Callback Route', () => {
       const response = await GET(request);
 
       expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('abc123');
-      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/en/dashboard') }));
+      // Precise localized-home matcher: ends with "/en" (NOT /en/login etc.).
+      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringMatching(/\/en$/) }));
       expect(response.type).toBe('redirect');
     });
 
@@ -155,7 +156,8 @@ describe('Auth Callback Route', () => {
       const { GET } = await import('./route');
       await GET(request);
 
-      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/es/dashboard') }));
+      // Precise localized-home matcher: ends with "/es" (NOT /es/login etc.).
+      expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringMatching(/\/es$/) }));
     });
 
     it('should default to English locale if not specified', async () => {
