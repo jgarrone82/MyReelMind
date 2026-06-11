@@ -43,7 +43,7 @@ export function ProgressTracker({
     <div className="space-y-1">
       <label
         htmlFor="progress-input"
-        className="vhs-kicker block text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+        className="vhs-kicker block text-[0.72rem] text-[var(--vhs-cream-dim)]"
       >
         {dict?.progress ?? "Progress"}
       </label>

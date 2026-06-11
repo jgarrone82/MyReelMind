@@ -122,7 +122,7 @@ export function AvatarCropper({ imageSrc, onCropComplete, onCancel, open, dict }
           <div className="flex w-full flex-col gap-1">
             <label
               htmlFor="zoom-slider"
-              className="vhs-kicker text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+              className="vhs-kicker text-[0.72rem] text-[var(--vhs-cream-dim)]"
             >
               Zoom
             </label>

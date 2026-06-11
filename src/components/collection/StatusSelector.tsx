@@ -31,7 +31,7 @@ export function StatusSelector({ status, onChange, disabled, dict }: StatusSelec
     <div className="space-y-1">
       <label
         htmlFor="watch-status"
-        className="vhs-kicker block text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+        className="vhs-kicker block text-[0.72rem] text-[var(--vhs-cream-dim)]"
       >
         {labels.label ?? "Status"}
       </label>

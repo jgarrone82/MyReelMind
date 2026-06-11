@@ -76,7 +76,7 @@ export function MemberCardReceipt({
       <div className="vhs-mono border-2 border-[var(--vhs-ground)] bg-[var(--vhs-paper)] px-[18px] pt-[22px] pb-[22px] text-[var(--vhs-ground)] shadow-[8px_8px_0_rgba(0,0,0,0.75)]">
         {/* Header */}
         <div className="mb-3 text-center">
-          <div className="vhs-kicker text-[0.92rem] tracking-[0.16em] text-[var(--vhs-ground)]">
+          <div className="vhs-kicker text-[0.92rem] text-[var(--vhs-ground)]">
             {title}
           </div>
           {storeLabel ? (
