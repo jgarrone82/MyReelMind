@@ -35,7 +35,7 @@ export function ResetPasswordForm({ dict }: ResetPasswordFormProps) {
             ⚠
           </span>
           <div>
-            <div className="vhs-kicker text-[0.78rem] tracking-[0.16em]">
+            <div className="vhs-kicker text-[0.78rem]">
               {t.errorHeadline}
             </div>
             <p className="vhs-mono mt-0.5 text-[0.78rem] leading-snug">

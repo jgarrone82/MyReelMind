@@ -279,7 +279,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
             ⚠
           </span>
           <div className="flex-1">
-            <div className="vhs-kicker text-[0.92rem] tracking-[0.16em]">
+            <div className="vhs-kicker text-[0.92rem]">
               {t.errorHead}
             </div>
             <p className="vhs-mono mt-1 text-[0.85rem] leading-relaxed">
@@ -305,7 +305,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
         <div
           role="status"
           aria-live="polite"
-          className="vhs-mono mb-5 flex items-center gap-2.5 text-[0.85rem] tracking-[0.16em] text-[var(--vhs-phosphor)]"
+          className="vhs-mono mb-5 flex items-center gap-2.5 text-[0.85rem] text-[var(--vhs-phosphor)]"
         >
           <span
             aria-hidden
@@ -334,7 +334,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
                 "repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 12px, transparent 12px 28px)",
             }}
           >
-            <span className="vhs-kicker rotate-[-90deg] text-[1rem] tracking-[0.2em] text-[var(--vhs-ground-3)]">
+            <span className="vhs-kicker rotate-[-90deg] text-[1rem] text-[var(--vhs-ground-3)]">
               NO TAPE
             </span>
           </div>
@@ -374,7 +374,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
       <div>
         <div
           aria-live="polite"
-          className="vhs-mono flex flex-wrap items-baseline gap-2 text-[0.95rem] tracking-[0.06em] text-[var(--vhs-cream)]"
+          className="vhs-mono flex flex-wrap items-baseline gap-2 text-[0.95rem] text-[var(--vhs-cream)]"
         >
           <span aria-hidden className="text-[var(--vhs-phosphor)]">
             ▸
@@ -389,7 +389,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
           </span>
         </div>
         <div className="mt-2 border-b-2 border-dashed border-[var(--vhs-cream-dim)]" />
-        <div className="vhs-mono mt-2 text-[0.7rem] tracking-[0.05em] text-[var(--vhs-cream-dim)]">
+        <div className="vhs-mono mt-2 text-[0.7rem] text-[var(--vhs-cream-dim)]">
           {t.resultsSub}
         </div>
       </div>

@@ -118,7 +118,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
         <div>
           <label
             htmlFor="displayName"
-            className="vhs-kicker block text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+            className="vhs-kicker block text-[0.72rem] text-[var(--vhs-cream-dim)]"
           >
             {s.displayName}
           </label>
@@ -138,7 +138,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
         <div>
           <label
             htmlFor="avatarUrl"
-            className="vhs-kicker block text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]"
+            className="vhs-kicker block text-[0.72rem] text-[var(--vhs-cream-dim)]"
           >
             {s.avatarUrl}
           </label>
@@ -178,7 +178,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
 
         {/* Public profile toggle */}
         <div>
-          <p className="vhs-kicker mb-2 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]">
+          <p className="vhs-kicker mb-2 text-[0.72rem] text-[var(--vhs-cream-dim)]">
             {s.privacy}
           </p>
           <div className="flex items-center gap-2">

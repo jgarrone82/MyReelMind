@@ -61,7 +61,7 @@ function StatCounter({ value, label }: { value: number; label: string }) {
   return (
     <div className="text-center">
       <p className="vhs-display text-2xl text-[var(--vhs-cream)]">{value}</p>
-      <p className="vhs-kicker text-[0.72rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]">
+      <p className="vhs-kicker text-[0.72rem] text-[var(--vhs-cream-dim)]">
         {label}
       </p>
     </div>

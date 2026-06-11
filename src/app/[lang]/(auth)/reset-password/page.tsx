@@ -45,7 +45,7 @@ export default async function ResetPasswordPage({
               >
                 {t.headline}
               </h1>
-              <p className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+              <p className="vhs-mono mt-1.5 text-[0.72rem] text-[var(--vhs-phosphor)]">
                 <span aria-hidden>▸</span> {t.subtitle}
               </p>
             </div>
@@ -59,7 +59,7 @@ export default async function ResetPasswordPage({
                   ⚠
                 </span>
                 <div>
-                  <div className="vhs-kicker text-[0.78rem] tracking-[0.16em]">
+                  <div className="vhs-kicker text-[0.78rem]">
                     {t.errorHeadline}
                   </div>
                   <p className="vhs-mono mt-0.5 text-[0.78rem] leading-snug">
@@ -107,7 +107,7 @@ export default async function ResetPasswordPage({
             >
               {t.headline}
             </h1>
-            <p className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+            <p className="vhs-mono mt-1.5 text-[0.72rem] text-[var(--vhs-phosphor)]">
               <span aria-hidden>▸</span> {t.subtitle}
             </p>
           </div>

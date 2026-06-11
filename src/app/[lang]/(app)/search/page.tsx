@@ -16,7 +16,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
       <div className="mx-auto max-w-7xl">
         {/* Store-directory kicker + display heading, mirroring login/signup. */}
         <div className="mb-2">
-          <p className="vhs-kicker text-[0.8rem] tracking-[0.16em] text-[var(--vhs-phosphor)]">
+          <p className="vhs-kicker text-[0.8rem] text-[var(--vhs-phosphor)]">
             {dict.search.kicker}
           </p>
           <h1 className="vhs-display vhs-aberrate mt-1 text-[clamp(2rem,5vw,3rem)] text-[var(--vhs-cream)]">

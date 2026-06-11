@@ -29,7 +29,7 @@ export function ForgotPasswordForm({ lang, dict }: ForgotPasswordFormProps) {
     return (
       <div role="status" className="flex flex-col gap-4">
         <div className="border-2 border-[var(--vhs-ground)] bg-[var(--vhs-acid)] px-3 py-2.5 shadow-[3px_3px_0_var(--vhs-ground)]">
-          <p className="vhs-kicker text-[0.78rem] tracking-[0.16em] text-[var(--vhs-ground)]">
+          <p className="vhs-kicker text-[0.78rem] text-[var(--vhs-ground)]">
             {t.success}
           </p>
           <p className="vhs-mono mt-0.5 text-[0.8rem] text-[var(--vhs-ground)]">
@@ -60,7 +60,7 @@ export function ForgotPasswordForm({ lang, dict }: ForgotPasswordFormProps) {
             ⚠
           </span>
           <div>
-            <div className="vhs-kicker text-[0.78rem] tracking-[0.16em]">
+            <div className="vhs-kicker text-[0.78rem]">
               {t.errorHeadline}
             </div>
             <p className="vhs-mono mt-0.5 text-[0.78rem] leading-snug">

@@ -71,7 +71,7 @@ export function ActivityReceipt({ heading, items }: ActivityReceiptProps) {
               className="flex items-baseline gap-[10px] border-b border-dashed border-[rgba(10,8,7,0.28)] py-[7px] last:border-b-0"
             >
               <span
-                className="vhs-kicker whitespace-nowrap border-[1.5px] border-[var(--vhs-ground)] px-[7px] pt-[2px] pb-[1px] text-[0.68rem] tracking-[0.1em] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]"
+                className="vhs-kicker whitespace-nowrap border-[1.5px] border-[var(--vhs-ground)] px-[7px] pt-[2px] pb-[1px] text-[0.68rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]"
                 style={{ background: STATUS_COLOR_VAR[item.statusColor] }}
               >
                 {item.statusLabel}
