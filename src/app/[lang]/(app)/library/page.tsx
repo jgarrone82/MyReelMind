@@ -143,11 +143,11 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
               <h1 className="vhs-display m-0 text-[clamp(1.7rem,5vw,2.3rem)] text-[var(--vhs-cream)]">
                 {dict.library.title}
               </h1>
-              <span className="vhs-kicker text-[0.78rem] tracking-[0.14em] text-[var(--vhs-cream-dim)]">
+              <span className="vhs-kicker text-[0.78rem] text-[var(--vhs-cream-dim)]">
                 {totalItems} {dict.library.collection}
               </span>
             </div>
-            <div className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+            <div className="vhs-mono mt-1.5 text-[0.72rem] text-[var(--vhs-phosphor)]">
               <span aria-hidden>▸</span> {dict.library.subtitle}
             </div>
           </div>
@@ -165,7 +165,7 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
                       : `/${lang}/library?status=${filter.key}`
                   }
                   aria-current={isActive ? "page" : undefined}
-                  className={`vhs-kicker inline-flex items-center gap-2 border-2 border-[var(--vhs-ground)] px-3.5 py-1.5 text-[0.78rem] tracking-[0.14em] shadow-[2px_2px_0_rgba(0,0,0,0.8)] transition-transform duration-[90ms] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)] ${
+                  className={`vhs-kicker inline-flex items-center gap-2 border-2 border-[var(--vhs-ground)] px-3.5 py-1.5 text-[0.78rem] shadow-[2px_2px_0_rgba(0,0,0,0.8)] transition-transform duration-[90ms] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)] ${
                     isActive
                       ? // WCAG AA (#48): deep-ink on neon magenta = 5.58:1; cream-on-magenta
                         // (2.98:1) failed for this small selected-chip label.

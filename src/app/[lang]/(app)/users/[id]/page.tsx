@@ -105,7 +105,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           <span className="vhs-kicker inline-block rotate-[-1deg] border-2 border-[var(--vhs-ground)] bg-[var(--vhs-sodium)] px-3 py-1 text-[0.72rem] text-[var(--vhs-ground)] shadow-[2px_2px_0_var(--vhs-ground)]">
             {dict.profile.kicker}
           </span>
-          <div className="vhs-mono mt-3 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+          <div className="vhs-mono mt-3 text-[0.72rem] text-[var(--vhs-phosphor)]">
             <span aria-hidden>▸</span> {dict.profile.subtitle}
           </div>
         </div>
@@ -128,7 +128,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           <div className="mt-6 text-center">
             <Link
               href={`/${lang}/settings`}
-              className="vhs-mono text-[0.78rem] tracking-[0.08em] text-[var(--vhs-phosphor)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
+              className="vhs-mono text-[0.78rem] text-[var(--vhs-phosphor)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vhs-phosphor)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vhs-ground)]"
             >
               {dict.profile.editSettings}
             </Link>
@@ -138,7 +138,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
         {/* Recent activity */}
         {formattedItems.length > 0 ? (
           <section className="mt-8">
-            <h3 className="vhs-kicker mb-4 text-[0.85rem] tracking-[0.14em] text-[var(--vhs-cream)]">
+            <h3 className="vhs-kicker mb-4 text-[0.85rem] text-[var(--vhs-cream)]">
               {dict.profile.recentActivity}
             </h3>
             <ul className="space-y-3">

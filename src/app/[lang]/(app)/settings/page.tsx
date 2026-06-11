@@ -49,7 +49,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           <h1 className="vhs-display m-0 mt-3 text-[clamp(1.7rem,5vw,2.3rem)] text-[var(--vhs-cream)]">
             {dict.settings.title}
           </h1>
-          <div className="vhs-mono mt-1.5 text-[0.72rem] tracking-[0.14em] text-[var(--vhs-phosphor)]">
+          <div className="vhs-mono mt-1.5 text-[0.72rem] text-[var(--vhs-phosphor)]">
             <span aria-hidden>▸</span> {dict.settings.subtitle}
           </div>
         </div>
