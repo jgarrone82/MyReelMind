@@ -3,3 +3,9 @@ allowBuilds:
   msw: true
   sharp: true
   unrs-resolver: true
+
+# Force the postcss copy that Next.js pins transitively (8.4.31, exact) up to the
+# patched 8.5.x line. Fixes GHSA-qx2v-qp2m-jg93 (XSS via unescaped </style> in CSS
+# Stringify Output, < 8.5.10). Minor bump within 8.x — Next tolerates it.
+overrides:
+  postcss: '^8.5.10'
