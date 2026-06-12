@@ -13,10 +13,11 @@ import {
   getRecentlyWatched,
   getAddedThisWeek,
 } from "@/lib/dashboard/stats";
-import type { UserMediaWithMedia, DashboardCounts } from "@/lib/dashboard/types";
+import type { UserMediaWithMedia } from "@/lib/dashboard/types";
 import { mediaToCardProps, deriveCatalog } from "@/lib/media/vhs-cosmetics";
 import { formatPublicId } from "@/lib/media/formatPublicId";
 import { MembersOnlyPanel, VHSBoxCard, ShelfRow } from "@/components/vhs";
+import { GuestWelcome } from "@/components/dashboard/GuestWelcome";
 import {
   MemberCardReceipt,
   type MemberCardStat,
@@ -74,14 +75,23 @@ function detailHref(item: UserMediaWithMedia, lang: string): string | undefined 
  * Data-fetching body of the dashboard. Lives behind a <Suspense> boundary in
  * page.tsx so its awaits stream the DashboardSkeleton fallback. The home route
  * `/[lang]` is NOT in middleware.ts protectedRoutes, so a null user is
- * expected here — it falls through to the empty state below.
+ * expected here — a logged-OUT visitor gets the honest GuestWelcome landing
+ * (returned early, before any data fetch). The members-only "STORE CLOSED"
+ * empty state below is reserved for a genuine logged-IN member with an empty
+ * library, keeping the two states distinct (#76).
  */
 export async function DashboardContent({ lang, dict }: DashboardContentProps) {
   const user = await getAuthenticatedUser();
-  const userId = user?.id;
 
-  const empty: DashboardCounts = { inProgress: 0, toWatch: 0, totalLogged: 0 };
+  // Logged-OUT visitor: honest welcome, not the members-only empty shelf.
+  // Returned BEFORE the data fetch / isEmpty check so a guest never triggers a
+  // userId-less query and is never shown a fake empty *member* state.
+  if (!user) return <GuestWelcome lang={lang} dict={dict} />;
 
+  const userId = user.id;
+
+  // Past the guest guard above, userId is always present, so the fetch is
+  // unconditional — there is no longer a userId-less fallback branch.
   const [
     totalWatched,
     totalHours,
@@ -91,39 +101,27 @@ export async function DashboardContent({ lang, dict }: DashboardContentProps) {
     recentlyWatched,
     addedThisWeek,
     userRow,
-  ] = userId
-    ? await Promise.all([
-        getTotalWatched(userId),
-        getTotalHours(userId),
-        getRecentActivity(userId, 5),
-        getDashboardCounts(userId),
-        getInProgressItems(userId),
-        getRecentlyWatched(userId),
-        getAddedThisWeek(userId),
-        db.query.users.findFirst({ where: eq(users.id, userId) }),
-      ])
-    : [
-        0,
-        0,
-        [] as UserMediaWithMedia[],
-        empty,
-        [] as UserMediaWithMedia[],
-        [] as UserMediaWithMedia[],
-        [] as UserMediaWithMedia[],
-        undefined,
-      ];
+  ] = await Promise.all([
+    getTotalWatched(userId),
+    getTotalHours(userId),
+    getRecentActivity(userId, 5),
+    getDashboardCounts(userId),
+    getInProgressItems(userId),
+    getRecentlyWatched(userId),
+    getAddedThisWeek(userId),
+    db.query.users.findFirst({ where: eq(users.id, userId) }),
+  ]);
 
   const isEmpty = counts.totalLogged === 0;
 
   // Member identity. Name/email come from the revalidated user; createdAt +
   // displayName come from the users row (the user object does not carry them).
-  const memberName =
-    userRow?.displayName ?? user?.email ?? "Member";
+  const memberName = userRow?.displayName ?? user.email ?? "Member";
   const memberSince = userRow?.createdAt
     ? formatMemberSince(new Date(userRow.createdAt), lang)
     : "—";
   // Card no. is cosmetic — derived deterministically from the user id (#853).
-  const cardNo = userId ? deriveCatalog(userId).padded : "00000";
+  const cardNo = deriveCatalog(userId).padded;
 
   const titleBlock = (
     <header className="mx-auto mb-2 w-full max-w-[1200px]">

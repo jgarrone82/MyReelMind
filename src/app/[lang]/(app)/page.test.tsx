@@ -101,6 +101,18 @@ const DICT = {
       cta: "Browse the catalog",
       ctaSecondary: "Open your library",
     },
+    guest: {
+      kicker: "WELCOME",
+      headline: "Your video shelf",
+      body: "Sign in to pick up your collection.",
+      signIn: "Sign in",
+      signUp: "Sign up",
+    },
+  },
+  brand: {
+    name: "MyReelMind",
+    sub: "RENTAL · EST 1985",
+    openLabel: "Open",
   },
   media: {
     status: {
@@ -177,21 +189,30 @@ describe("DashboardContent (data + branch logic)", () => {
     usersFindFirst.mockResolvedValue(undefined);
   });
 
-  it("renders the empty (STORE CLOSED) state on a null user", async () => {
+  it("renders the GuestWelcome (NOT the STORE CLOSED member shelf) on a null user", async () => {
     vi.mocked(getAuthenticatedUser).mockResolvedValue(null);
 
     render(await DashboardContent({ lang: "en", dict: DICT }));
 
-    expect(screen.getByText("STORE")).toBeInTheDocument();
-    expect(screen.getByText("CLOSED")).toBeInTheDocument();
-    expect(screen.getByText("Nothing logged yet")).toBeInTheDocument();
-    // No stat calls happen without a userId (preserved contract).
+    // Honest logged-OUT landing: brand/welcome + the two account CTAs.
+    expect(screen.getByText("Your video shelf")).toBeInTheDocument();
+    const signIn = screen.getByRole("link", { name: "Sign in" });
+    const signUp = screen.getByRole("link", { name: "Sign up" });
+    // EXACT hrefs — substring matchers are banned (documented locale-prefix trap).
+    expect(signIn).toHaveAttribute("href", "/en/login");
+    expect(signUp).toHaveAttribute("href", "/en/signup");
+
+    // The members-only empty shelf must NOT be shown to a logged-out visitor.
+    expect(screen.queryByText("CLOSED")).not.toBeInTheDocument();
+    expect(screen.queryByText("Nothing logged yet")).not.toBeInTheDocument();
+
+    // No data fetch happens for a guest — the early branch returns first.
     expect(getTotalWatched).not.toHaveBeenCalled();
     expect(getDashboardCounts).not.toHaveBeenCalled();
     expect(usersFindFirst).not.toHaveBeenCalled();
   });
 
-  it("renders the empty state when an authenticated user has zero logged items", async () => {
+  it("STILL renders the STORE CLOSED member shelf for a logged-IN user with an empty library", async () => {
     vi.mocked(getAuthenticatedUser).mockResolvedValue({
       id: "user-123",
       email: "test@example.com",
@@ -200,7 +221,15 @@ describe("DashboardContent (data + branch logic)", () => {
 
     render(await DashboardContent({ lang: "en", dict: DICT }));
 
+    // Regression guard for the key distinction: logged-in + empty is NOT a guest.
     expect(screen.getByText("CLOSED")).toBeInTheDocument();
+    // And the guest landing must NOT leak into the member empty state.
+    expect(
+      screen.queryByRole("link", { name: "Sign in" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Sign up" }),
+    ).not.toBeInTheDocument();
     // Preserved contract: stat fns called with the session userId.
     expect(getTotalWatched).toHaveBeenCalledWith("user-123");
     expect(getTotalHours).toHaveBeenCalledWith("user-123");
