@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 
@@ -33,14 +34,21 @@ export async function getSession() {
  * Never throws: an auth error, a network error, or no user all resolve to null,
  * mirroring getSession()'s catch-to-null contract so consumers' existing
  * null-branches stay valid.
+ *
+ * Wrapped in React `cache()`: calls are deduped within a single server request
+ * (e.g. the app layout + page + UserMenu all resolving the same user share ONE
+ * getUser() round-trip). The cache is request-scoped — it never persists across
+ * requests, so the result stays per-request-revalidated.
  */
-export async function getAuthenticatedUser(): Promise<User | null> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) return null;
-    return data.user;
-  } catch {
-    return null;
+export const getAuthenticatedUser = cache(
+  async (): Promise<User | null> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) return null;
+      return data.user;
+    } catch {
+      return null;
+    }
   }
-}
+);
