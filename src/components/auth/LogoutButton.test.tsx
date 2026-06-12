@@ -16,19 +16,23 @@ describe("LogoutButton", () => {
   });
 
   it("should render logout button", () => {
-    render(<LogoutButton dict={dictionary} />);
+    render(<LogoutButton lang="en" dict={dictionary} />);
 
     expect(screen.getByRole("button", { name: /sign out/i })).toBeInTheDocument();
   });
 
-  it("should call signOut when clicked", async () => {
-    render(<LogoutButton dict={dictionary} />);
+  it("should call signOut bound to the active locale when clicked", async () => {
+    render(<LogoutButton lang="en" dict={dictionary} />);
 
     const button = screen.getByRole("button", { name: /sign out/i });
     fireEvent.click(button);
 
+    // The form action is signOut.bind(null, lang); the bound call still invokes
+    // the underlying signOut mock with the active locale pre-applied as the
+    // first argument (a form action also appends FormData after it).
     await waitFor(() => {
       expect(signOut).toHaveBeenCalled();
     });
+    expect(vi.mocked(signOut).mock.calls[0][0]).toBe("en");
   });
 });

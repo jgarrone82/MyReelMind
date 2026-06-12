@@ -112,7 +112,7 @@ export default async function ResetPasswordPage({
             </p>
           </div>
 
-          <ResetPasswordForm dict={dictionary} />
+          <ResetPasswordForm lang={lang} dict={dictionary} />
         </CRTFrame>
 
         <p className="vhs-mono mt-3.5 text-center text-[0.62rem] leading-relaxed text-[var(--vhs-cream-dim)]">

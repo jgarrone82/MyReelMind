@@ -39,7 +39,7 @@ export async function UserMenu({ dict, lang }: UserMenuProps) {
           </svg>
         </Link>
         <span className="text-sm text-[var(--vhs-cream)]">{user.email}</span>
-        <LogoutButton dict={dict} />
+        <LogoutButton lang={lang} dict={dict} />
       </div>
     </div>
   );

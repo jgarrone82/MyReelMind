@@ -6,11 +6,15 @@ import { useFormStatus } from "react-dom";
 import type { Dictionary } from "@/i18n/types";
 
 interface ResetPasswordFormProps {
+  lang: string;
   dict: Dictionary;
 }
 
-export function ResetPasswordForm({ dict }: ResetPasswordFormProps) {
-  const [state, action] = useActionState(updatePassword, null);
+export function ResetPasswordForm({ lang, dict }: ResetPasswordFormProps) {
+  // Bind the active locale so the post-update redirect to the login page stays
+  // on the current locale; after .bind the action still satisfies
+  // useActionState's (state, formData) shape.
+  const [state, action] = useActionState(updatePassword.bind(null, lang), null);
   const t = dict.auth.passwordReset;
 
   const hasError = Boolean(state?.error);

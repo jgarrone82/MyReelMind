@@ -12,8 +12,13 @@ export type AuthState = {
 
 /**
  * Sign in with email and password.
+ *
+ * `lang` is bound by the calling form via `.bind(null, lang)` so the
+ * post-auth redirect stays on the user's active locale instead of being
+ * bounced to the default locale by the i18n middleware.
  */
 export async function signIn(
+  lang: string,
   prevState: AuthState | null,
   formData: FormData
 ): Promise<AuthState> {
@@ -44,13 +49,17 @@ export async function signIn(
   await ensureUserProfile(data.user);
 
   revalidatePath("/");
-  redirect("/");
+  redirect(`/${lang}`);
 }
 
 /**
  * Sign up with email and password.
+ *
+ * `lang` is bound by the calling form via `.bind(null, lang)` so every
+ * post-signup redirect stays on the user's active locale.
  */
 export async function signUp(
+  lang: string,
   prevState: AuthState | null,
   formData: FormData
 ): Promise<AuthState> {
@@ -87,26 +96,29 @@ export async function signUp(
   revalidatePath("/");
 
   // If email is already confirmed (OAuth or auto-confirm config), go to the
-  // home dashboard. Middleware redirects bare "/" to the default-locale root
-  // (/${defaultLocale}); it does not preserve the request's current locale.
+  // locale-prefixed home dashboard. The redirect keeps the active locale so
+  // the i18n middleware does not bounce the user to the default locale.
   if (data.user.email_confirmed_at) {
-    redirect("/");
+    redirect(`/${lang}`);
   }
 
-  // Otherwise redirect to verification-sent page
+  // Otherwise redirect to the locale-prefixed verification-sent page.
   const encodedEmail = encodeURIComponent(email);
-  redirect(`/verification-sent?email=${encodedEmail}`);
+  redirect(`/${lang}/verification-sent?email=${encodedEmail}`);
 }
 
 /**
  * Sign out the current user.
+ *
+ * `lang` is bound by the calling form via `.bind(null, lang)` so the
+ * post-logout redirect stays on the user's active locale.
  */
-export async function signOut(): Promise<void> {
+export async function signOut(lang: string): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
 
   revalidatePath("/");
-  redirect("/");
+  redirect(`/${lang}`);
 }
 
 /**
@@ -170,8 +182,12 @@ export async function forgotPassword(
 
 /**
  * Update the password for the current session (after recovery token verified).
+ *
+ * `lang` is bound by the calling form via `.bind(null, lang)` so the
+ * post-update redirect to the login page stays on the user's active locale.
  */
 export async function updatePassword(
+  lang: string,
   prevState: AuthState | null,
   formData: FormData
 ): Promise<AuthState> {
@@ -201,7 +217,7 @@ export async function updatePassword(
   }
 
   revalidatePath("/");
-  redirect("/login?password_updated=true");
+  redirect(`/${lang}/login?password_updated=true`);
 }
 
 /**

@@ -46,7 +46,7 @@ describe("signIn Server Action", () => {
     const formData = new FormData();
     formData.append("password", "password123");
 
-    const result = await signIn({}, formData);
+    const result = await signIn("en", {}, formData);
 
     expect(result.error).toBe("Email and password are required");
   });
@@ -55,7 +55,7 @@ describe("signIn Server Action", () => {
     const formData = new FormData();
     formData.append("email", "test@example.com");
 
-    const result = await signIn({}, formData);
+    const result = await signIn("en", {}, formData);
 
     expect(result.error).toBe("Email and password are required");
   });
@@ -70,7 +70,7 @@ describe("signIn Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "wrongpassword");
 
-    const result = await signIn({}, formData);
+    const result = await signIn("en", {}, formData);
 
     expect(result.error).toBe("Invalid login credentials");
   });
@@ -86,13 +86,31 @@ describe("signIn Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "password123");
 
-    // Successful sign in redirects to the home dashboard at "/" (middleware
-    // localizes it), NOT the phantom /dashboard route. Anchored regex so a
-    // stray "/dashboard" cannot satisfy a loose substring match.
-    await expect(signIn({}, formData)).rejects.toThrow(/^Redirect to: \/$/);
+    // Successful sign in redirects to the locale-prefixed home dashboard so the
+    // i18n middleware can't bounce the user to the default locale. Anchored
+    // regex so a stray bare "/" cannot satisfy a loose substring match.
+    await expect(signIn("en", {}, formData)).rejects.toThrow(
+      /^Redirect to: \/en$/
+    );
 
     expect(ensureUserProfile).toHaveBeenCalledWith(mockUser);
     expect(revalidatePath).toHaveBeenCalledWith("/");
+  });
+
+  it("should redirect to the active locale on successful sign in (es)", async () => {
+    const mockUser = { id: "user-123", email: "test@example.com" };
+    vi.mocked(mockSupabase.auth.signInWithPassword).mockResolvedValue({
+      data: { user: mockUser, session: {} },
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+    formData.append("password", "password123");
+
+    await expect(signIn("es", {}, formData)).rejects.toThrow(
+      /^Redirect to: \/es$/
+    );
   });
 });
 
@@ -106,7 +124,7 @@ describe("signUp Server Action", () => {
     const formData = new FormData();
     formData.append("password", "password123");
 
-    const result = await signUp({}, formData);
+    const result = await signUp("en", {}, formData);
 
     expect(result.error).toBe("Email and password are required");
   });
@@ -116,7 +134,7 @@ describe("signUp Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "short");
 
-    const result = await signUp({}, formData);
+    const result = await signUp("en", {}, formData);
 
     expect(result.error).toBe("Password must be at least 8 characters");
   });
@@ -131,7 +149,7 @@ describe("signUp Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "password123");
 
-    const result = await signUp({}, formData);
+    const result = await signUp("en", {}, formData);
 
     expect(result.error).toBe("Email already registered");
   });
@@ -147,13 +165,13 @@ describe("signUp Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "password123");
 
-    await expect(signUp({}, formData)).rejects.toThrow();
+    await expect(signUp("en", {}, formData)).rejects.toThrow();
 
     expect(ensureUserProfile).toHaveBeenCalledWith(mockUser);
     expect(revalidatePath).toHaveBeenCalledWith("/");
   });
 
-  it("should redirect to verification-sent when email is not confirmed", async () => {
+  it("should redirect to locale-prefixed verification-sent when email is not confirmed (en)", async () => {
     const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
     vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
       data: { user: mockUser, session: {} },
@@ -164,10 +182,30 @@ describe("signUp Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "password123");
 
-    await expect(signUp({}, formData)).rejects.toThrow("Redirect to: /verification-sent?email=test%40example.com");
+    // Anchored exact string: the locale prefix must be present, so a bare
+    // "/verification-sent?email=..." (the buggy path) cannot false-green.
+    await expect(signUp("en", {}, formData)).rejects.toThrow(
+      /^Redirect to: \/en\/verification-sent\?email=test%40example\.com$/
+    );
   });
 
-  it("should redirect to home when email is already confirmed", async () => {
+  it("should redirect to locale-prefixed verification-sent when email is not confirmed (es)", async () => {
+    const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
+    vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
+      data: { user: mockUser, session: {} },
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+    formData.append("password", "password123");
+
+    await expect(signUp("es", {}, formData)).rejects.toThrow(
+      /^Redirect to: \/es\/verification-sent\?email=test%40example\.com$/
+    );
+  });
+
+  it("should redirect to the active locale home when email is already confirmed (en)", async () => {
     const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: "2024-01-01T00:00:00Z" };
     vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
       data: { user: mockUser, session: {} },
@@ -178,7 +216,25 @@ describe("signUp Server Action", () => {
     formData.append("email", "test@example.com");
     formData.append("password", "password123");
 
-    await expect(signUp({}, formData)).rejects.toThrow(/^Redirect to: \/$/);
+    await expect(signUp("en", {}, formData)).rejects.toThrow(
+      /^Redirect to: \/en$/
+    );
+  });
+
+  it("should redirect to the active locale home when email is already confirmed (es)", async () => {
+    const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: "2024-01-01T00:00:00Z" };
+    vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
+      data: { user: mockUser, session: {} },
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("email", "test@example.com");
+    formData.append("password", "password123");
+
+    await expect(signUp("es", {}, formData)).rejects.toThrow(
+      /^Redirect to: \/es$/
+    );
   });
 });
 
@@ -188,13 +244,19 @@ describe("signOut Server Action", () => {
     vi.mocked(createClient).mockResolvedValue(mockSupabase as unknown as Awaited<ReturnType<typeof createClient>>);
   });
 
-  it("should call supabase auth signOut", async () => {
+  it("should call supabase auth signOut and redirect to the active locale home (en)", async () => {
     vi.mocked(mockSupabase.auth.signOut).mockResolvedValue({ error: null });
 
-    await expect(signOut()).rejects.toThrow();
+    await expect(signOut("en")).rejects.toThrow(/^Redirect to: \/en$/);
 
     expect(mockSupabase.auth.signOut).toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith("/");
+  });
+
+  it("should redirect to the active locale home on sign out (es)", async () => {
+    vi.mocked(mockSupabase.auth.signOut).mockResolvedValue({ error: null });
+
+    await expect(signOut("es")).rejects.toThrow(/^Redirect to: \/es$/);
   });
 });
 
@@ -323,7 +385,7 @@ describe("updatePassword Server Action", () => {
     const formData = new FormData();
     formData.append("confirmPassword", "password123");
 
-    const result = await updatePassword({}, formData);
+    const result = await updatePassword("en", {}, formData);
 
     expect(result.error).toBe("Password is required");
   });
@@ -333,7 +395,7 @@ describe("updatePassword Server Action", () => {
     formData.append("password", "short");
     formData.append("confirmPassword", "short");
 
-    const result = await updatePassword({}, formData);
+    const result = await updatePassword("en", {}, formData);
 
     expect(result.error).toBe("Password must be at least 8 characters");
   });
@@ -343,12 +405,12 @@ describe("updatePassword Server Action", () => {
     formData.append("password", "password123");
     formData.append("confirmPassword", "different123");
 
-    const result = await updatePassword({}, formData);
+    const result = await updatePassword("en", {}, formData);
 
     expect(result.error).toBe("Passwords do not match");
   });
 
-  it("should call updateUser with new password on success", async () => {
+  it("should call updateUser and redirect to locale-prefixed login on success (en)", async () => {
     vi.mocked(mockSupabase.auth.updateUser).mockResolvedValue({
       data: { user: { id: "user-123" } },
       error: null,
@@ -358,12 +420,31 @@ describe("updatePassword Server Action", () => {
     formData.append("password", "newpassword123");
     formData.append("confirmPassword", "newpassword123");
 
-    await expect(updatePassword({}, formData)).rejects.toThrow();
+    // Anchored exact string: the locale prefix must be present, so the buggy
+    // bare "/login?password_updated=true" cannot false-green.
+    await expect(updatePassword("en", {}, formData)).rejects.toThrow(
+      /^Redirect to: \/en\/login\?password_updated=true$/
+    );
 
     expect(mockSupabase.auth.updateUser).toHaveBeenCalledWith({
       password: "newpassword123",
     });
     expect(revalidatePath).toHaveBeenCalledWith("/");
+  });
+
+  it("should redirect to locale-prefixed login on success (es)", async () => {
+    vi.mocked(mockSupabase.auth.updateUser).mockResolvedValue({
+      data: { user: { id: "user-123" } },
+      error: null,
+    });
+
+    const formData = new FormData();
+    formData.append("password", "newpassword123");
+    formData.append("confirmPassword", "newpassword123");
+
+    await expect(updatePassword("es", {}, formData)).rejects.toThrow(
+      /^Redirect to: \/es\/login\?password_updated=true$/
+    );
   });
 
   it("should return error when updateUser fails", async () => {
@@ -376,7 +457,7 @@ describe("updatePassword Server Action", () => {
     formData.append("password", "newpassword123");
     formData.append("confirmPassword", "newpassword123");
 
-    const result = await updatePassword({}, formData);
+    const result = await updatePassword("en", {}, formData);
 
     expect(result.error).toBe("Session expired");
   });

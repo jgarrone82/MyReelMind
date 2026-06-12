@@ -37,7 +37,13 @@ function passCodeStrength(value: string): 0 | 1 | 2 | 3 | 4 {
 }
 
 export function SignupForm({ lang, dict }: SignupFormProps) {
-  const [state, action] = useActionState<SignUpState, FormData>(signUp, null);
+  // Bind the active locale so every post-signup redirect stays on the current
+  // locale; after .bind the action still satisfies useActionState's
+  // (state, formData) shape.
+  const [state, action] = useActionState<SignUpState, FormData>(
+    signUp.bind(null, lang),
+    null
+  );
   const t = dict.auth.signup;
 
   const [password, setPassword] = useState("");
