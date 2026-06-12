@@ -42,15 +42,18 @@ describe("LoginForm", () => {
 
     fireEvent.click(submitButton);
 
+    // The action is bound with the active locale via .bind(null, lang), so the
+    // underlying mock is invoked as signIn(lang, prevState, formData).
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith(
+        "en",
         null,
         expect.any(Object)
       );
     });
 
     const call = vi.mocked(signIn).mock.calls[0];
-    const formData = call[1] as FormData;
+    const formData = call[2] as FormData;
     expect(formData.get("email")).toBe("test@example.com");
     expect(formData.get("password")).toBe("password123");
   });

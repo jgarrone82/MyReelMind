@@ -5,14 +5,17 @@ import { useFormStatus } from "react-dom";
 import type { Dictionary } from "@/i18n/types";
 
 interface LogoutButtonProps {
+  lang: string;
   dict: Dictionary;
 }
 
-export function LogoutButton({ dict }: LogoutButtonProps) {
+export function LogoutButton({ lang, dict }: LogoutButtonProps) {
   const { pending } = useFormStatus();
 
   return (
-    <form action={signOut}>
+    // Bind the active locale so the post-logout redirect stays on the current
+    // locale instead of being bounced to the default locale by the middleware.
+    <form action={signOut.bind(null, lang)}>
       <button
         type="submit"
         disabled={pending}

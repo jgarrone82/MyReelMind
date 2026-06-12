@@ -88,12 +88,14 @@ describe("SignupForm", () => {
 
     fireEvent.click(submitButton);
 
+    // The action is bound with the active locale via .bind(null, lang), so the
+    // underlying mock is invoked as signUp(lang, prevState, formData).
     await waitFor(() => {
-      expect(signUp).toHaveBeenCalledWith(null, expect.any(Object));
+      expect(signUp).toHaveBeenCalledWith("en", null, expect.any(Object));
     });
 
     const call = vi.mocked(signUp).mock.calls[0];
-    const formData = call[1] as FormData;
+    const formData = call[2] as FormData;
     expect(formData.get("email")).toBe("newuser@example.com");
     expect(formData.get("password")).toBe("password123");
     expect(formData.get("confirmPassword")).toBe("password123");
@@ -119,10 +121,10 @@ describe("SignupForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /issue my card/i }));
 
     await waitFor(() => {
-      expect(signUp).toHaveBeenCalledWith(null, expect.any(Object));
+      expect(signUp).toHaveBeenCalledWith("en", null, expect.any(Object));
     });
 
-    const formData = vi.mocked(signUp).mock.calls[0][1] as FormData;
+    const formData = vi.mocked(signUp).mock.calls[0][2] as FormData;
     expect(formData.get("password")).toBe("password123");
     expect(formData.get("confirmPassword")).toBe("different999");
   });

@@ -21,7 +21,13 @@ function getErrorMessage(state: SignInState): string | null {
 }
 
 export function LoginForm({ lang, dict }: LoginFormProps) {
-  const [state, action] = useActionState<SignInState, FormData>(signIn, null);
+  // Bind the active locale so the post-auth redirect stays on the current
+  // locale; after .bind the action still satisfies useActionState's
+  // (state, formData) shape.
+  const [state, action] = useActionState<SignInState, FormData>(
+    signIn.bind(null, lang),
+    null
+  );
   const t = dict.auth.login;
 
   const [showPassword, setShowPassword] = useState(false);
