@@ -13,6 +13,7 @@ import type { WatchStatus } from "@/components/collection/StatusSelector";
 import { AddToLibraryButton } from "@/components/collection/AddToLibraryButton";
 import { MembersOnlyPanel } from "@/components/vhs";
 import type { SourceBadgeColor } from "@/components/vhs";
+import { deriveCatalog, deriveUpc } from "@/lib/media/vhs-cosmetics";
 import { UnfoldedVHS } from "./_components/UnfoldedVHS";
 import { BackCover } from "./_components/BackCover";
 import { Spine } from "./_components/Spine";
@@ -41,21 +42,6 @@ export async function generateMetadata({ params }: MediaDetailPageProps): Promis
 
 function sourceColor(source: "tmdb" | "anilist"): SourceBadgeColor {
   return source === "tmdb" ? "magenta" : "phosphor";
-}
-
-function deriveCatalog(id: string): { full: string; padded: string; sub: string } {
-  const numeric = id.replace(/\D/g, "");
-  const padded = numeric.padStart(5, "0");
-  return {
-    full: `MRM-${padded}-A`,
-    padded,
-    sub: padded,
-  };
-}
-
-function deriveUpc(id: string): string {
-  const numeric = id.replace(/\D/g, "").padStart(11, "0");
-  return `0 ${numeric.slice(0, 5)} ${numeric.slice(5, 10)} ${numeric.slice(10) || "0"}`;
 }
 
 export default async function MediaDetailPage({ params }: MediaDetailPageProps) {
@@ -245,7 +231,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
             primary={
               <Link
                 href={`/${lang}/login`}
-                className="vhs-btn vhs-aberrate"
+                className="vhs-btn vhs-focus vhs-aberrate"
               >
                 {dict.media.detail.signInPrimary}
               </Link>
@@ -253,7 +239,7 @@ export default async function MediaDetailPage({ params }: MediaDetailPageProps) 
             secondary={
               <Link
                 href={`/${lang}/signup`}
-                className="vhs-btn vhs-btn--secondary"
+                className="vhs-btn vhs-focus vhs-btn--secondary"
               >
                 {dict.media.detail.signInSecondary}
               </Link>

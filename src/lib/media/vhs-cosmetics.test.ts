@@ -104,6 +104,51 @@ describe("vhs-cosmetics", () => {
       expect(padded).toBe("74000");
       expect(full).toBe("MRM-74000-A");
     });
+
+    // D3 dedup (R8/S8): the media detail route consumed a LOCAL deriveCatalog
+    // that padded with `.padStart(5,"0")` but did NOT call `.slice(-5)`. This
+    // export adds `.slice(-5)`, so the two impls are output-identical ONLY while
+    // the id's digit count is ≤ 5. They DIVERGE once it exceeds 5 — and tmdb ids
+    // routinely do (e.g. tmdb-1184918), which the detail route genuinely
+    // receives. So the dedup is behavior-ALIGNING, not behavior-preserving: the
+    // detail page now matches the dashboard cards' fixed 5-digit card width.
+    // Catalog is a DECORATIVE value (never a real datum, #800/#853), so this
+    // alignment is purely cosmetic with zero functional regression.
+    it("matches the deleted page-local impl for ids with ≤5 digits", () => {
+      expect(deriveCatalog("tmdb-603")).toEqual({
+        full: "MRM-00603-A",
+        padded: "00603",
+        sub: "00603",
+      });
+      expect(deriveCatalog("anilist-21")).toEqual({
+        full: "MRM-00021-A",
+        padded: "00021",
+        sub: "00021",
+      });
+      // For ≤5-digit ids the export's extra `.slice(-5)` is identity, so it
+      // equals the deleted local `.padStart(5,"0")`-only result.
+      for (const id of ["tmdb-603", "anilist-21", "tmdb-12345", "anilist-1"]) {
+        const numeric = id.replace(/\D/g, "");
+        const localPadded = numeric.padStart(5, "0"); // the deleted local impl
+        expect(deriveCatalog(id).padded).toBe(localPadded);
+      }
+    });
+
+    it("takes the last 5 digits for tmdb ids over 5 digits, diverging from the deleted local impl", () => {
+      // TMDB ids routinely exceed 5 digits and the detail route really receives
+      // them. The deleted local impl would have rendered the long number
+      // verbatim; this export keeps the card 5-digit-shaped via `.slice(-5)`.
+      const id = "tmdb-1184918";
+      const numeric = id.replace(/\D/g, ""); // "1184918"
+      const localPadded = numeric.padStart(5, "0"); // "1184918" — deleted impl (no slice)
+      expect(deriveCatalog(id)).toEqual({
+        full: "MRM-84918-A",
+        padded: "84918",
+        sub: "84918",
+      });
+      // Pins the divergence: this is behavior-ALIGNING, not behavior-preserving.
+      expect(deriveCatalog(id).padded).not.toBe(localPadded);
+    });
   });
 
   describe("deriveUpc", () => {

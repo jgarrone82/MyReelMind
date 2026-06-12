@@ -140,10 +140,10 @@ export function AvatarCropper({ imageSrc, onCropComplete, onCancel, open, dict }
         </div>
 
         <DialogFooter className="rounded-b-[2px] border-t-2 border-[var(--vhs-ground-3)] bg-transparent">
-          <Button variant="outline" onClick={handleCancel} className="vhs-btn vhs-btn--secondary h-auto focus-visible:ring-0">
+          <Button variant="outline" onClick={handleCancel} className="vhs-btn vhs-focus vhs-btn--secondary h-auto focus-visible:ring-0">
             {dict.cancel}
           </Button>
-          <Button onClick={handleConfirm} className="vhs-btn h-auto focus-visible:ring-0">
+          <Button onClick={handleConfirm} className="vhs-btn vhs-focus h-auto focus-visible:ring-0">
             {dict.confirm}
           </Button>
         </DialogFooter>

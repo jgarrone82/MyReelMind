@@ -59,7 +59,7 @@ export function RemoveButton({ mediaId, onSuccess, dict }: RemoveButtonProps) {
         <button
           type="button"
           onClick={() => setShowConfirm(false)}
-          className="vhs-btn vhs-btn--secondary vhs-btn--compact"
+          className="vhs-btn vhs-focus vhs-btn--secondary vhs-btn--compact"
         >
           {dict.cancel ?? "Cancel"}
         </button>

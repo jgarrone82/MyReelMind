@@ -151,14 +151,14 @@ export async function DashboardContent({ lang, dict }: DashboardContentProps) {
             tertiaryNote={dict.dashboard.empty.note}
             stamp={{ line1: "STORE", line2: "CLOSED" }}
             primary={
-              <Link href={`/${lang}/search`} className="vhs-btn vhs-aberrate">
+              <Link href={`/${lang}/search`} className="vhs-btn vhs-focus vhs-aberrate">
                 {dict.dashboard.empty.cta}
               </Link>
             }
             secondary={
               <Link
                 href={`/${lang}/library`}
-                className="vhs-btn vhs-btn--secondary"
+                className="vhs-btn vhs-focus vhs-btn--secondary"
               >
                 {dict.dashboard.empty.ctaSecondary}
               </Link>

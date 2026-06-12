@@ -99,7 +99,7 @@ function ResendButton({
       type="submit"
       disabled={pending}
       aria-busy={pending}
-      className="vhs-btn vhs-aberrate w-full justify-center disabled:opacity-85"
+      className="vhs-btn vhs-focus vhs-aberrate w-full justify-center disabled:opacity-85"
     >
       {pending && (
         <span

@@ -130,7 +130,7 @@ export function SettingsForm({ userId, dict, initialValues }: SettingsFormProps)
             minLength={1}
             maxLength={50}
             defaultValue={initialValues.displayName}
-            className="vhs-input mt-1.5"
+            className="vhs-input vhs-focus mt-1.5"
           />
         </div>
 
@@ -226,7 +226,7 @@ function SubmitButton({ dict }: { dict: Dictionary }) {
     <button
       type="submit"
       disabled={pending}
-      className="vhs-btn w-full justify-center disabled:cursor-not-allowed disabled:opacity-50"
+      className="vhs-btn vhs-focus w-full justify-center disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? dict.common.loading : dict.settings.save}
     </button>

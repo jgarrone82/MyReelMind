@@ -288,7 +288,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
             <button
               type="button"
               onClick={() => refetch()}
-              className="vhs-btn vhs-btn--secondary mt-3.5 text-[0.82rem]"
+              className="vhs-btn vhs-focus vhs-btn--secondary mt-3.5 text-[0.82rem]"
             >
               ↻ {t.errorRetry}
             </button>
@@ -414,7 +414,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
           <button
             type="button"
             onClick={() => refetch()}
-            className="vhs-btn vhs-btn--secondary text-[0.82rem]"
+            className="vhs-btn vhs-focus vhs-btn--secondary text-[0.82rem]"
           >
             ↻ {t.errorRetry}
           </button>
@@ -427,7 +427,7 @@ export function SearchResults({ lang }: SearchResultsProps) {
             type="button"
             onClick={() => setPage(page + 1)}
             disabled={isLoading}
-            className="vhs-btn vhs-btn--secondary disabled:opacity-50"
+            className="vhs-btn vhs-focus vhs-btn--secondary disabled:opacity-50"
           >
             {isLoading ? t.loadingMore : t.loadMore}
           </button>
