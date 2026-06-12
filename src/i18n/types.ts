@@ -170,6 +170,17 @@ export interface Dictionary {
       ctaSecondary: string;
       note: string;
     };
+    // Logged-OUT landing on the home route. Distinct from `empty` (the
+    // members-only "STORE CLOSED" shelf shown to a logged-IN member with an
+    // empty library): a guest is not a member, so the copy must be honest and
+    // carry no "members only" framing.
+    guest: {
+      kicker: string;
+      headline: string;
+      body: string;
+      signIn: string;
+      signUp: string;
+    };
   };
   common: {
     save: string;

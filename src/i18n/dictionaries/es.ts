@@ -172,6 +172,13 @@ export const dictionary: Dictionary = {
       ctaSecondary: "Importar desde una lista",
       note: "★ ¿primera vez? arrancá con un clásico",
     },
+    guest: {
+      kicker: "Bienvenido a MyReelMind",
+      headline: "Tu videoclub personal",
+      body: "Inicia sesión para retomar tu colección, o crea una cuenta para empezar a registrar tus películas y series.",
+      signIn: "Iniciar sesión",
+      signUp: "Crear cuenta",
+    },
   },
   common: {
     save: "Guardar",

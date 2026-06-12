@@ -172,6 +172,13 @@ export const dictionary: Dictionary = {
       ctaSecondary: "Import from a list",
       note: "★ first time? start with a classic",
     },
+    guest: {
+      kicker: "Welcome to MyReelMind",
+      headline: "Your personal video shelf",
+      body: "Sign in to pick up your collection, or create an account to start logging your movies and shows.",
+      signIn: "Sign in",
+      signUp: "Sign up",
+    },
   },
   common: {
     save: "Save",
