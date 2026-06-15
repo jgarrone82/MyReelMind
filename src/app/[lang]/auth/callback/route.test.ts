@@ -62,8 +62,10 @@ describe('Auth Callback Route', () => {
       expect(response.type).toBe('redirect');
     });
 
-    it('should redirect to login with error on OAuth exchange failure', async () => {
-      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: new Error('Exchange failed') });
+    it('should redirect to login with error on OAuth exchange failure AND log the cause', async () => {
+      const exchangeError = new Error('Exchange failed');
+      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: exchangeError });
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?code=abc123'));
       const { GET } = await import('./route');
@@ -72,6 +74,8 @@ describe('Auth Callback Route', () => {
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         expect.objectContaining({ href: expect.stringContaining('/en/login?error=oauth_exchange_failed') })
       );
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
     });
   });
 
