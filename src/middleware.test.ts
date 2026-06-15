@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import { middleware } from "./middleware";
 import { createServerClient } from "@supabase/ssr";
+import { ensureUserProfile } from "@/lib/auth/profile-sync";
 
 vi.mock("@/lib/supabase/middleware", () => ({
   updateSession: vi.fn(async (req: NextRequest) => NextResponse.next({ request: req })),
@@ -169,6 +170,27 @@ describe("middleware", () => {
       const res = await middleware(req);
       expect(res.status).toBe(200);
       expect(res.headers.get("location")).toBeNull();
+    });
+  });
+
+  describe("edge runtime safety", () => {
+    it("should NOT call ensureUserProfile (no DB query) even with a session", async () => {
+      // The middleware runs in the Edge runtime; the postgres driver cannot open
+      // a TCP connection there, so any DB call crashes the request. Profile sync
+      // belongs in the Node serverless callback/actions, not here.
+      vi.mocked(createServerClient).mockReturnValue({
+        auth: {
+          getSession: vi.fn().mockResolvedValue({
+            data: { session: { user: { id: "user-123", email: "test@example.com" } } },
+            error: null,
+          }),
+        },
+      } as unknown as ReturnType<typeof createServerClient>);
+
+      const req = createRequest("/es/search");
+      await middleware(req);
+
+      expect(ensureUserProfile).not.toHaveBeenCalled();
     });
   });
 });

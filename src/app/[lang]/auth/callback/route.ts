@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { ensureUserProfile } from '@/lib/auth/profile-sync';
 import { locales } from '@/i18n';
 
 /**
@@ -39,11 +40,17 @@ export async function GET(request: NextRequest) {
     // one), so requiring type === 'code' meant the exchange never ran and every
     // OAuth login fell through to unknown_callback_type.
     if (code) {
-      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       
       if (exchangeError) {
         return NextResponse.redirect(new URL(`/${locale}/login?error=oauth_exchange_failed`, request.url));
       }
+
+      // Sync the profile here — this route handler runs in the Node serverless
+      // runtime, where the Postgres driver works. The edge middleware cannot do
+      // this (TCP DB connections are unavailable in the Edge runtime), so OAuth
+      // users (who never hit the signIn/signUp actions) get synced at callback.
+      await ensureUserProfile(data?.user ?? null);
 
       // Password-recovery and signup-verification links can also arrive via
       // PKCE (type + code instead of token_hash), so the exchange above runs

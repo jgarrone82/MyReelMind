@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { ensureUserProfile } from '@/lib/auth/profile-sync';
 
 // Mock NextResponse
 vi.mock('next/server', async () => {
@@ -18,6 +19,11 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
 
+// Mock profile sync (the route owns it now, not the edge middleware)
+vi.mock('@/lib/auth/profile-sync', () => ({
+  ensureUserProfile: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('Auth Callback Route', () => {
   const mockSupabase = {
     auth: {
@@ -32,6 +38,17 @@ describe('Auth Callback Route', () => {
   });
 
   describe('OAuth callback (code param, no type)', () => {
+    it('should sync the user profile after a successful exchange (route owns it, not middleware)', async () => {
+      const user = { id: 'user-1', email: 'oauth@example.com' };
+      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: { user }, error: null });
+
+      const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?code=abc123'));
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(ensureUserProfile).toHaveBeenCalledWith(user);
+    });
+
     it('should exchange code for session and redirect to home on success', async () => {
       mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null });
 
