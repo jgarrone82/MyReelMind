@@ -31,11 +31,11 @@ describe('Auth Callback Route', () => {
     vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
   });
 
-  describe('OAuth callback (type=code)', () => {
+  describe('OAuth callback (code param, no type)', () => {
     it('should exchange code for session and redirect to home on success', async () => {
       mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null });
 
-      const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?type=code&code=abc123'));
+      const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?code=abc123'));
       const { GET } = await import('./route');
       const response = await GET(request);
 
@@ -48,7 +48,7 @@ describe('Auth Callback Route', () => {
     it('should redirect to login with error on OAuth exchange failure', async () => {
       mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: new Error('Exchange failed') });
 
-      const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?type=code&code=abc123'));
+      const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?code=abc123'));
       const { GET } = await import('./route');
       await GET(request);
 
@@ -59,6 +59,22 @@ describe('Auth Callback Route', () => {
   });
 
   describe('Password reset callback (type=recovery)', () => {
+    it('should exchange a PKCE recovery code and redirect to reset-password (not home)', async () => {
+      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null });
+
+      // PKCE email links arrive as ?type=recovery&code=... (no token_hash).
+      const request = new NextRequest(
+        new URL('http://localhost:3000/en/auth/callback?type=recovery&code=pkce123')
+      );
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('pkce123');
+      expect(NextResponse.redirect).toHaveBeenCalledWith(
+        expect.objectContaining({ href: expect.stringContaining('/en/reset-password') })
+      );
+    });
+
     it('should verify token and redirect to reset-password page on success', async () => {
       mockSupabase.auth.verifyOtp.mockResolvedValue({ error: null });
 
@@ -91,6 +107,22 @@ describe('Auth Callback Route', () => {
   });
 
   describe('Email verification callback (type=signup)', () => {
+    it('should exchange a PKCE signup code and redirect to login with verified=true', async () => {
+      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null });
+
+      // PKCE signup-verification links arrive as ?type=signup&code=... (no token_hash).
+      const request = new NextRequest(
+        new URL('http://localhost:3000/en/auth/callback?type=signup&code=signup123')
+      );
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('signup123');
+      expect(NextResponse.redirect).toHaveBeenCalledWith(
+        expect.objectContaining({ href: expect.stringContaining('/en/login?verified=true') })
+      );
+    });
+
     it('should verify token and redirect to login with verified=true on success', async () => {
       mockSupabase.auth.verifyOtp.mockResolvedValue({ error: null });
 
@@ -138,7 +170,7 @@ describe('Auth Callback Route', () => {
         throw new Error('Internal error');
       });
 
-      const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?type=code&code=abc123'));
+      const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?code=abc123'));
       const { GET } = await import('./route');
       await GET(request);
 
@@ -152,7 +184,7 @@ describe('Auth Callback Route', () => {
     it('should preserve Spanish locale in redirects', async () => {
       mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null });
 
-      const request = new NextRequest(new URL('http://localhost:3000/es/auth/callback?type=code&code=abc123'));
+      const request = new NextRequest(new URL('http://localhost:3000/es/auth/callback?code=abc123'));
       const { GET } = await import('./route');
       await GET(request);
 
