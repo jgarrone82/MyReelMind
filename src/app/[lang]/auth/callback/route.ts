@@ -6,8 +6,8 @@ import { locales } from '@/i18n';
  * Auth Callback Route Handler
  * 
  * Handles redirects from:
- * - OAuth providers (type=code)
- * - Password reset emails (type=recovery)
+ * - OAuth providers (PKCE `code`, no type)
+ * - Password reset emails (type=recovery, via token_hash OR PKCE code)
  * - Email verification (type=signup)
  * 
  * @see https://supabase.com/docs/reference/javascript/auth-onauthstatechange
@@ -34,12 +34,28 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
 
-    // OAuth callback (type=code)
-    if (type === 'code' && code) {
+    // OAuth (PKCE) callback — identified solely by the `code` param. Supabase
+    // does NOT append a `type=code` query param (and our redirectTo never adds
+    // one), so requiring type === 'code' meant the exchange never ran and every
+    // OAuth login fell through to unknown_callback_type.
+    if (code) {
       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       
       if (exchangeError) {
         return NextResponse.redirect(new URL(`/${locale}/login?error=oauth_exchange_failed`, request.url));
+      }
+
+      // Password-recovery and signup-verification links can also arrive via
+      // PKCE (type + code instead of token_hash), so the exchange above runs
+      // for them too. Mirror the token_hash branch so the destination stays
+      // consistent regardless of which email-link mode Supabase is configured
+      // for: recovery -> reset-password form, signup -> login?verified=true.
+      // Plain OAuth has no `type` and falls through to home.
+      if (type === 'recovery') {
+        return NextResponse.redirect(new URL(`/${locale}/reset-password`, request.url));
+      }
+      if (type === 'signup') {
+        return NextResponse.redirect(new URL(`/${locale}/login?verified=true`, request.url));
       }
 
       return NextResponse.redirect(new URL(`/${locale}`, request.url));
