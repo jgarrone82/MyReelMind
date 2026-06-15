@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { locales, defaultLocale } from "@/i18n";
 import { createServerClient } from "@supabase/ssr";
-import { ensureUserProfile } from "@/lib/auth/profile-sync";
 
 const protectedRoutes = ["/library", "/verify-email", "/settings"];
 const authRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
@@ -82,10 +81,10 @@ export async function middleware(request: NextRequest) {
   // Always call updateSession() to refresh tokens for all routes
   await updateSession(request);
 
-  // Ensure profile exists for both email and OAuth logins
-  if (session) {
-    await ensureUserProfile(session.user);
-  }
+  // NOTE: profile sync (a Postgres write) must NOT run here — middleware is the
+  // Edge runtime and the postgres driver cannot open a DB connection, which
+  // crashes the request (MIDDLEWARE_INVOCATION_FAILED). It runs in the Node
+  // serverless paths instead: signIn/signUp server actions and the auth callback.
 
   // Auth gate logic
   const isProtectedRoute = protectedRoutes.some((route) =>
