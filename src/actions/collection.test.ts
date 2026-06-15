@@ -111,6 +111,26 @@ describe("Collection Server Actions", () => {
       expect(result.success).toBe(false);
       expect(result.error).toBe("Media not found");
     });
+
+    it("should log the underlying error when the write throws", async () => {
+      mockAuthenticated();
+      mockMediaItemFound();
+      vi.mocked(db.query.userMedia.findFirst).mockResolvedValue(undefined);
+      const dbError = new Error('violates foreign key constraint "user_media_user_id_users_id_fk"');
+      vi.mocked(db.insert).mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          onConflictDoUpdate: vi.fn().mockRejectedValue(dbError),
+        }),
+      } as unknown as ReturnType<typeof db.insert>);
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const result = await addToLibrary("tmdb-123", "want_to_watch");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Failed to add to library");
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
   });
 
   describe("updateStatus", () => {

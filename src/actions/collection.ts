@@ -75,7 +75,8 @@ export async function addToLibrary(
     revalidatePath("/media/[id]");
 
     return { success: true };
-  } catch {
+  } catch (error) {
+    console.error("[collection] addToLibrary failed:", error);
     return { success: false, error: "Failed to add to library" };
   }
 }
@@ -117,7 +118,8 @@ export async function updateStatus(
     revalidatePath("/media/[id]");
 
     return { success: true };
-  } catch {
+  } catch (error) {
+    console.error("[collection] updateStatus failed:", error);
     return { success: false, error: "Failed to update status" };
   }
 }
@@ -163,7 +165,8 @@ export async function updateRating(
     revalidatePath("/media/[id]");
 
     return { success: true };
-  } catch {
+  } catch (error) {
+    console.error("[collection] updateRating failed:", error);
     return { success: false, error: "Failed to update rating" };
   }
 }
@@ -198,7 +201,8 @@ export async function removeFromLibrary(
     revalidatePath("/media/[id]");
 
     return { success: true };
-  } catch {
+  } catch (error) {
+    console.error("[collection] removeFromLibrary failed:", error);
     return { success: false, error: "Failed to remove from library" };
   }
 }
@@ -249,7 +253,8 @@ export async function updateProgress(
     revalidatePath("/media/[id]");
 
     return { success: true };
-  } catch {
+  } catch (error) {
+    console.error("[collection] updateProgress failed:", error);
     return { success: false, error: "Failed to update progress" };
   }
 }
