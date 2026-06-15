@@ -29,24 +29,47 @@ describe('Auth Callback Route', () => {
     auth: {
       exchangeCodeForSession: vi.fn(),
       verifyOtp: vi.fn(),
+      getUser: vi.fn(),
     },
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
+    // Default: a resolvable user, so success-path tests don't trip the
+    // "no user after exchange" warning. Tests override as needed.
+    mockSupabase.auth.getUser.mockResolvedValue({
+      data: { user: { id: 'default-user', email: 'default@example.com' } },
+      error: null,
+    });
   });
 
   describe('OAuth callback (code param, no type)', () => {
-    it('should sync the user profile after a successful exchange (route owns it, not middleware)', async () => {
+    it('should sync the profile from getUser(), not the exchange result (which lacks a user)', async () => {
       const user = { id: 'user-1', email: 'oauth@example.com' };
-      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: { user }, error: null });
+      // exchangeCodeForSession's data does NOT reliably carry .user — the real
+      // bug was relying on it, leaving public.users empty. getUser() is authoritative.
+      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: {}, error: null });
+      mockSupabase.auth.getUser.mockResolvedValue({ data: { user }, error: null });
 
       const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?code=abc123'));
       const { GET } = await import('./route');
       await GET(request);
 
       expect(ensureUserProfile).toHaveBeenCalledWith(user);
+    });
+
+    it('should log (not swallow) when getUser resolves no user after a successful exchange', async () => {
+      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null });
+      mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const request = new NextRequest(new URL('http://localhost:3000/en/auth/callback?code=abc123'));
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
     });
 
     it('should exchange code for session and redirect to home on success', async () => {

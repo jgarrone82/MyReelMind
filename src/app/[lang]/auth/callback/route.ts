@@ -40,18 +40,31 @@ export async function GET(request: NextRequest) {
     // one), so requiring type === 'code' meant the exchange never ran and every
     // OAuth login fell through to unknown_callback_type.
     if (code) {
-      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-      
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
       if (exchangeError) {
         console.error('Auth callback: OAuth code exchange failed:', exchangeError);
         return NextResponse.redirect(new URL(`/${locale}/login?error=oauth_exchange_failed`, request.url));
       }
 
       // Sync the profile here — this route handler runs in the Node serverless
-      // runtime, where the Postgres driver works. The edge middleware cannot do
-      // this (TCP DB connections are unavailable in the Edge runtime), so OAuth
-      // users (who never hit the signIn/signUp actions) get synced at callback.
-      await ensureUserProfile(data?.user ?? null);
+      // runtime, where the Postgres driver works (the edge middleware cannot:
+      // TCP DB connections are unavailable in the Edge runtime). OAuth users
+      // never hit the signIn/signUp actions, so the callback owns their sync.
+      // Resolve the user via getUser() (the revalidated, authoritative source) —
+      // exchangeCodeForSession's `data.user` is not reliably populated, which
+      // previously left public.users empty and broke the user_media FK.
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError || !user) {
+        // Don't fail the login (the session is valid), but never swallow this:
+        // a successful exchange with no resolvable user is the silent path that
+        // previously left public.users empty and broke the user_media FK.
+        console.error('Auth callback: no user after successful exchange; profile not synced:', userError);
+      }
+      await ensureUserProfile(user);
 
       // Password-recovery and signup-verification links can also arrive via
       // PKCE (type + code instead of token_hash), so the exchange above runs
