@@ -58,6 +58,10 @@ export async function middleware(request: NextRequest) {
     const locale = defaultLocale;
     const newPath = pathname === "/" ? `/${locale}/` : `/${locale}${pathname}`;
     const newUrl = new URL(newPath, request.url);
+    // Preserve the query string: building the URL from `newPath` alone drops it,
+    // which silently loses the ?code/?token_hash on OAuth and email callbacks
+    // (they land on the locale-less /auth/callback before the prefix redirect).
+    newUrl.search = request.nextUrl.search;
     return NextResponse.redirect(newUrl, 307);
   }
 

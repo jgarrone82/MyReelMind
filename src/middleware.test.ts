@@ -49,6 +49,24 @@ describe("middleware", () => {
       expect(res.headers.get("location")).toBe("http://localhost:3000/es/search");
     });
 
+    it("should preserve the query string when adding the locale prefix", async () => {
+      // OAuth/recovery callbacks land on /auth/callback?code=...&state=... with
+      // no locale; the prefix redirect must keep the query or the code is lost.
+      const req = createRequest("/auth/callback?code=abc123&state=xyz");
+      const res = await middleware(req);
+      expect(res.status).toBe(307);
+      expect(res.headers.get("location")).toBe(
+        "http://localhost:3000/es/auth/callback?code=abc123&state=xyz"
+      );
+    });
+
+    it("should preserve the query string on a non-auth path too", async () => {
+      const req = createRequest("/search?q=foo&page=2");
+      const res = await middleware(req);
+      expect(res.status).toBe(307);
+      expect(res.headers.get("location")).toBe("http://localhost:3000/es/search?q=foo&page=2");
+    });
+
     it("should not redirect when locale is present", async () => {
       const req = createRequest("/es/search");
       const res = await middleware(req);
