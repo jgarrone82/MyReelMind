@@ -119,6 +119,20 @@ describe('Auth Callback Route', () => {
       );
     });
 
+    it('should surface token_verification_failed (not oauth_exchange_failed) when PKCE recovery exchange fails', async () => {
+      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: new Error('Exchange failed') });
+
+      const request = new NextRequest(
+        new URL('http://localhost:3000/en/auth/callback?type=recovery&code=pkce123')
+      );
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(NextResponse.redirect).toHaveBeenCalledWith(
+        expect.objectContaining({ href: expect.stringContaining('/en/login?error=token_verification_failed') })
+      );
+    });
+
     it('should verify token and redirect to reset-password page on success', async () => {
       mockSupabase.auth.verifyOtp.mockResolvedValue({ error: null });
 
@@ -195,6 +209,20 @@ describe('Auth Callback Route', () => {
       expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('signup123');
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         expect.objectContaining({ href: expect.stringContaining('/en/login?verified=true') })
+      );
+    });
+
+    it('should surface token_verification_failed (not oauth_exchange_failed) when PKCE signup exchange fails', async () => {
+      mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: new Error('Exchange failed') });
+
+      const request = new NextRequest(
+        new URL('http://localhost:3000/en/auth/callback?type=signup&code=signup123')
+      );
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(NextResponse.redirect).toHaveBeenCalledWith(
+        expect.objectContaining({ href: expect.stringContaining('/en/login?error=token_verification_failed') })
       );
     });
 
