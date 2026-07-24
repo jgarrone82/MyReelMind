@@ -44,7 +44,12 @@ export async function GET(request: NextRequest) {
 
       if (exchangeError) {
         console.error('Auth callback: OAuth code exchange failed:', exchangeError);
-        return NextResponse.redirect(new URL(`/${locale}/login?error=oauth_exchange_failed`, request.url));
+        // Recovery/signup via PKCE (type + code) should not surface as an
+        // OAuth error — the user clicked an email link, not "Sign in with Google".
+        const errorTag = type === 'recovery' || type === 'signup'
+          ? 'token_verification_failed'
+          : 'oauth_exchange_failed';
+        return NextResponse.redirect(new URL(`/${locale}/login?error=${errorTag}`, request.url));
       }
 
       // Sync the profile here — this route handler runs in the Node serverless
