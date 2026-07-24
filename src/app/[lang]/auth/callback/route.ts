@@ -93,6 +93,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(new URL(`/${locale}/login?error=token_verification_failed`, request.url));
       }
 
+      // Sync the profile — mirror the OAuth branch so that invite/admin users
+      // who verify via token_hash also get a public.users row (required for
+      // user_media FK integrity).
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError || !user) {
+        console.error('Auth callback: no user after token verification; profile not synced:', userError);
+      }
+      await ensureUserProfile(user);
+
       // For recovery, redirect to reset password page with session established
       if (type === 'recovery') {
         return NextResponse.redirect(new URL(`/${locale}/reset-password`, request.url));

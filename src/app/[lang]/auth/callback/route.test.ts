@@ -135,6 +135,37 @@ describe('Auth Callback Route', () => {
       expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/en/reset-password') }));
     });
 
+    it('should sync profile via ensureUserProfile after successful token_hash recovery', async () => {
+      const user = { id: 'recovery-user', email: 'recovery@example.com' };
+      mockSupabase.auth.verifyOtp.mockResolvedValue({ error: null });
+      mockSupabase.auth.getUser.mockResolvedValue({ data: { user }, error: null });
+
+      const request = new NextRequest(
+        new URL('http://localhost:3000/en/auth/callback?type=recovery&token_hash=xyz789')
+      );
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(mockSupabase.auth.getUser).toHaveBeenCalled();
+      expect(ensureUserProfile).toHaveBeenCalledWith(user);
+    });
+
+    it('should log (not swallow) when getUser resolves no user after token_hash verification', async () => {
+      mockSupabase.auth.verifyOtp.mockResolvedValue({ error: null });
+      mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const request = new NextRequest(
+        new URL('http://localhost:3000/en/auth/callback?type=recovery&token_hash=xyz789')
+      );
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(errorSpy).toHaveBeenCalled();
+      expect(ensureUserProfile).toHaveBeenCalledWith(null);
+      errorSpy.mockRestore();
+    });
+
     it('should redirect to login with error on token verification failure', async () => {
       mockSupabase.auth.verifyOtp.mockResolvedValue({ error: new Error('Invalid token') });
 
@@ -181,6 +212,21 @@ describe('Auth Callback Route', () => {
         token_hash: 'verify123',
       });
       expect(NextResponse.redirect).toHaveBeenCalledWith(expect.objectContaining({ href: expect.stringContaining('/en/login?verified=true') }));
+    });
+
+    it('should sync profile via ensureUserProfile after successful token_hash signup', async () => {
+      const user = { id: 'signup-user', email: 'signup@example.com' };
+      mockSupabase.auth.verifyOtp.mockResolvedValue({ error: null });
+      mockSupabase.auth.getUser.mockResolvedValue({ data: { user }, error: null });
+
+      const request = new NextRequest(
+        new URL('http://localhost:3000/en/auth/callback?type=signup&token_hash=verify123')
+      );
+      const { GET } = await import('./route');
+      await GET(request);
+
+      expect(mockSupabase.auth.getUser).toHaveBeenCalled();
+      expect(ensureUserProfile).toHaveBeenCalledWith(user);
     });
   });
 
