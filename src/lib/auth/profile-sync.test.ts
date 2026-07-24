@@ -11,7 +11,9 @@ vi.mock("@/db", () => ({
       }),
     }),
     insert: vi.fn().mockReturnValue({
-      values: vi.fn().mockResolvedValue(undefined),
+      values: vi.fn().mockReturnValue({
+        onConflictDoUpdate: vi.fn().mockResolvedValue(undefined),
+      }),
     }),
   },
 }));
@@ -61,6 +63,43 @@ describe("ensureUserProfile", () => {
       // INSERT was NOT called because profile exists
       expect(db.insert).not.toHaveBeenCalled();
     });
+
+    it("should upsert by email when same email exists but with different id", async () => {
+      // Mock: the WHERE eq(users.id, authUser.id) returns empty — no profile
+      // with this auth id exists yet, even though another profile has the same email.
+      vi.mocked(db.select).mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      } as unknown as ReturnType<typeof db.select>);
+
+      const onConflictMock = vi.fn().mockResolvedValue(undefined);
+      const valuesMock = vi.fn().mockReturnValue({ onConflictDoUpdate: onConflictMock });
+      vi.mocked(db.insert).mockReturnValue({
+        values: valuesMock,
+      } as unknown as ReturnType<typeof db.insert>);
+
+      await ensureUserProfile(mockAuthUser);
+
+      // Must INSERT with onConflictDoUpdate to handle email UNIQUE constraint
+      expect(db.insert).toHaveBeenCalled();
+      expect(valuesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "auth-user-uuid-123",
+          email: "test@example.com",
+        })
+      );
+      expect(onConflictMock).toHaveBeenCalledWith({
+        target: expect.anything(), // users.email column
+        set: expect.objectContaining({
+          id: "auth-user-uuid-123",
+          displayName: "Test User",
+          avatarUrl: "https://example.com/avatar.png",
+        }),
+      });
+    });
   });
 
   describe("when profile does not exist", () => {
@@ -74,16 +113,17 @@ describe("ensureUserProfile", () => {
         }),
       } as unknown as ReturnType<typeof db.select>);
 
-      const insertValuesMock = vi.fn().mockResolvedValue(undefined);
+      const onConflictMock = vi.fn().mockResolvedValue(undefined);
+      const valuesMock = vi.fn().mockReturnValue({ onConflictDoUpdate: onConflictMock });
       vi.mocked(db.insert).mockReturnValue({
-        values: insertValuesMock,
+        values: valuesMock,
       } as unknown as ReturnType<typeof db.insert>);
 
       await ensureUserProfile(mockAuthUser);
 
       // Verify insert was called with correct id
       expect(db.insert).toHaveBeenCalled();
-      expect(insertValuesMock).toHaveBeenCalledWith(
+      expect(valuesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           id: "auth-user-uuid-123", // CRITICAL: must be authUser.id, NOT random
           email: "test@example.com",
@@ -103,9 +143,10 @@ describe("ensureUserProfile", () => {
         }),
       } as unknown as ReturnType<typeof db.select>);
 
-      const insertValuesMock = vi.fn().mockResolvedValue(undefined);
+      const onConflictMock = vi.fn().mockResolvedValue(undefined);
+      const valuesMock = vi.fn().mockReturnValue({ onConflictDoUpdate: onConflictMock });
       vi.mocked(db.insert).mockReturnValue({
-        values: insertValuesMock,
+        values: valuesMock,
       } as unknown as ReturnType<typeof db.insert>);
 
       const userWithoutMeta = {
@@ -118,7 +159,7 @@ describe("ensureUserProfile", () => {
       await ensureUserProfile(userWithoutMeta as Parameters<typeof ensureUserProfile>[0]);
 
       // Verify insert was called with nulls for missing metadata
-      expect(insertValuesMock).toHaveBeenCalledWith(
+      expect(valuesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           id: "auth-user-uuid-456",
           displayName: null,
