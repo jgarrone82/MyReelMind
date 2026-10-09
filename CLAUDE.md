@@ -9,6 +9,7 @@ use npm.
 - Install: `pnpm install`
 - Test: `pnpm test` (vitest — **strict TDD**: write the failing test first, watch it fail, then implement)
 - Typecheck: `pnpm exec tsc --noEmit`
+- Lint: `pnpm lint` (**zero-warning gate**: `eslint . --max-warnings=0`)
 - Build: `pnpm build`
 
 ### pnpm 11 build-scripts gotcha
@@ -38,5 +39,8 @@ non-sensitive display/UX gates (it carries a JSDoc warning).
 
 Vercel auto-detects pnpm from the lockfile + `packageManager`. There is no
 `vercel.json` (dashboard defaults) and no GitHub Actions CI; the Vercel preview
-build is the deploy gate. Lint is broken at baseline (eslint-config-next vs
-ESLint 9) and is not a gate — `pnpm test` + `tsc` are.
+build is the deploy gate. Local gates: `pnpm test` + `tsc` + `pnpm lint`.
+Lint was repaired 2026-10-09 (missing `@eslint/eslintrc` restored, `next lint`
+migrated to the ESLint CLI, zero-warning baseline) and is now a real gate —
+never reintroduce `eslint-disable` / `@ts-ignore` escapes or drop
+`--max-warnings=0` from the lint script.

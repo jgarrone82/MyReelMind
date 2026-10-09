@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { mediaItems } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { createTmdbClient } from "@/lib/api/tmdb/client";
+import type { TmdbMediaDetails } from "@/lib/api/tmdb/types";
 import { createAniListClient } from "@/lib/api/anilist/client";
 import { AniListQueue } from "@/lib/api/anilist/queue";
 import type { MediaItem } from "@/lib/api/merge";
@@ -10,6 +11,21 @@ const STALE_THRESHOLD_MS = 1000 * 60 * 60; // 1 hour
 
 /** A fetched media item plus the localized overviews to cache for it. */
 type FetchResult = { item: MediaItem; overviews: Record<string, string> };
+
+/**
+ * Fields read from a TMDB detail payload that `TmdbMovieDetails`/`TmdbTvDetails`
+ * (src/lib/api/tmdb/types.ts) do not declare:
+ * - `popularity`: part of the official TMDB movie/tv details response (numeric),
+ *   but omitted from the local declarations.
+ * - `genre_ids`: only TMDB list/search results carry it — detail responses return
+ *   `genres: { id; name }[]` instead. Against real payloads this read is
+ *   `undefined`, so the `?? []` fallback applies; typed `unknown` because the
+ *   detail schema gives the field no shape.
+ */
+type TmdbDetailExtras = {
+  popularity?: number;
+  genre_ids?: unknown;
+};
 
 function getTmdbClient() {
   return createTmdbClient({
@@ -97,7 +113,7 @@ async function fetchFromTmdb(sourceId: string, locale: string): Promise<FetchRes
     if (!details) return null;
 
     const overviews: Record<string, string> = {};
-    const localizedOverview: string = (details as any).overview || "";
+    const localizedOverview: string = details.overview || "";
     // Always record the requested locale (even when empty) so a title with no
     // translation is cached as a negative — otherwise every view refetches.
     overviews[locale] = localizedOverview;
@@ -109,17 +125,27 @@ async function fetchFromTmdb(sourceId: string, locale: string): Promise<FetchRes
       const enDetails = await tmdbClient
         .getDetails(type, numericId, { language: "en-US" })
         .catch(() => null);
-      const enOverview: string = (enDetails as any)?.overview || "";
+      const enOverview: string = enDetails?.overview || "";
       if (enOverview) {
         overviews.en = enOverview;
         bestOverview = enOverview;
       }
     }
 
-    const title = type === "movie" ? (details as any).title : (details as any).name;
-    const originalTitle = type === "movie" ? (details as any).original_title : (details as any).original_name;
-    const date = type === "movie" ? (details as any).release_date : (details as any).first_air_date;
+    // Movie and TV detail payloads differ only in these field names; narrow the
+    // union on payload shape — equivalent to `type`, which tracks which endpoint
+    // answered — instead of casting every field to `any`. The check must stay
+    // inline: TypeScript does not carry `in`-narrowing through an alias for this
+    // `let` reference.
+    const title = "title" in details ? details.title : details.name;
+    const originalTitle = "original_title" in details ? details.original_title : details.original_name;
+    const date = "release_date" in details ? details.release_date : details.first_air_date;
     const year = date ? parseInt(date.split("-")[0], 10) : null;
+
+    // View the payload through the fields the shared declarations omit (why each
+    // one is typed as it is: see TmdbDetailExtras above).
+    const extras = details as TmdbMediaDetails & TmdbDetailExtras;
+    const genreIds = extras.genre_ids;
 
     const item: MediaItem = {
       id: `tmdb-${numericId}`,
@@ -129,11 +155,14 @@ async function fetchFromTmdb(sourceId: string, locale: string): Promise<FetchRes
       originalTitle: originalTitle ?? null,
       year,
       description: bestOverview || null,
-      score: (details as any).vote_average != null ? Math.round((details as any).vote_average * 10) : null,
-      popularity: (details as any).popularity ?? null,
-      coverImage: (details as any).poster_path ? `https://image.tmdb.org/t/p/w500${(details as any).poster_path}` : null,
-      bannerImage: (details as any).backdrop_path ? `https://image.tmdb.org/t/p/original${(details as any).backdrop_path}` : null,
-      genres: (details as any).genre_ids ?? [],
+      score: details.vote_average != null ? Math.round(details.vote_average * 10) : null,
+      popularity: extras.popularity ?? null,
+      coverImage: details.poster_path ? `https://image.tmdb.org/t/p/w500${details.poster_path}` : null,
+      bannerImage: details.backdrop_path ? `https://image.tmdb.org/t/p/original${details.backdrop_path}` : null,
+      // Array.isArray keeps the previous `genre_ids ?? []` read byte-identical
+      // for real payloads (array passes through, absent/null → []) without
+      // asserting an element type the detail schema does not guarantee.
+      genres: Array.isArray(genreIds) ? genreIds : [],
     };
 
     return { item, overviews };
