@@ -14,8 +14,8 @@ vi.mock("@/actions/settings", () => ({
 }));
 
 // Mock AvatarCropper - render a simple component that triggers the onCropComplete callback
-let mockOnCropComplete: ((blob: Blob) => void) | null = null;
-let mockOnCancel: (() => void) | null = null;
+let _mockOnCropComplete: ((blob: Blob) => void) | null = null;
+let _mockOnCancel: (() => void) | null = null;
 
 vi.mock("@/components/avatar/AvatarCropper", () => ({
   AvatarCropper: ({
@@ -29,8 +29,8 @@ vi.mock("@/components/avatar/AvatarCropper", () => ({
     onCancel: () => void;
     dict: { cropAvatar: string; cancel: string; confirm: string };
   }) => {
-    mockOnCropComplete = onCropComplete;
-    mockOnCancel = onCancel;
+    _mockOnCropComplete = onCropComplete;
+    _mockOnCancel = onCancel;
     if (!open) return null;
     return (
       <div data-testid="avatar-cropper">
@@ -117,8 +117,8 @@ describe("SettingsForm - Avatar Upload", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockOnCropComplete = null;
-    mockOnCancel = null;
+    _mockOnCropComplete = null;
+    _mockOnCancel = null;
   });
 
   it("should adopt VHS field/button treatment with no residual shadcn chrome", () => {

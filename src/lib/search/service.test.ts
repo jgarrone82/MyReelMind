@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { searchMedia, getTrending } from "./service";
-import { db } from "@/db";
 import { server } from "../../../tests/mocks/server";
 import { http, HttpResponse } from "msw";
 

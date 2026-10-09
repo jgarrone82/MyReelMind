@@ -10,6 +10,18 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // Build artifacts and generated files (next lint used to scope this for us)
+  {
+    ignores: [
+      ".next/**",
+      "out/**",
+      "build/**",
+      "coverage/**",
+      "next-env.d.ts",
+      "tsconfig.tsbuildinfo",
+    ],
+  },
+
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   
   // Rule overrides for main codebase

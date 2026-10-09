@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mapStatusToBadge, getLibraryStateForMediaIds } from "./library-state";
-import { db } from "@/db";
 
 // Mirror the chained-query mock pattern from stats.test.ts: db.select() returns
 // a fluent builder, and the terminal .where() yields a thenable resolving to rows.
